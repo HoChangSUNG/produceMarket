@@ -15,8 +15,8 @@ public class Buyer extends User {
     private Address address;
 
     @Builder
-    public Buyer(String name, String loginId, String password, int age, String email, String phoneNumber, Address address) {
-        super(name, loginId, password, age, email, phoneNumber);
+    public Buyer(String name, String loginId, String password, String birth, String email, String phoneNumber, Address address) {
+        super(name, loginId, password, birth, email, phoneNumber);
         this.address = address;
     }
 }

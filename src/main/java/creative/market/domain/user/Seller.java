@@ -22,8 +22,8 @@ public class Seller extends User {
     private LocalDateTime changeDate;
 
     @Builder
-    public Seller(String name, String loginId, String password, int age, String email, String phoneNumber, Address address, String businessNumber, String businessName, LocalDateTime changeDate) {
-        super(name, loginId, password, age, email, phoneNumber);
+    public Seller(String name, String loginId, String password, String birth, String email, String phoneNumber, Address address, String businessNumber, String businessName, LocalDateTime changeDate) {
+        super(name, loginId, password, birth, email, phoneNumber);
         this.address = address;
         this.businessNumber = businessNumber;
         this.businessName = businessName;

@@ -13,7 +13,7 @@ import javax.persistence.Entity;
 public class Admin extends User{
 
     @Builder
-    public Admin(String name, String loginId, String password, int age, String email, String phoneNumber) {
-        super(name, loginId, password, age, email, phoneNumber);
+    public Admin(String name, String loginId, String password, String birth, String email, String phoneNumber) {
+        super(name, loginId, password, birth, email, phoneNumber);
     }
 }
