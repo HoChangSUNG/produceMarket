@@ -17,7 +17,7 @@ import static javax.persistence.FetchType.*;
 public class Cart {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "card_id")
+    @Column(name = "cart_id")
     private long id;
 
     private int count;
