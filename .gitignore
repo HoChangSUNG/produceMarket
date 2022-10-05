@@ -40,3 +40,4 @@ out/
 **/src/main/resources/application-db.yml
 **/src/test/resources/application-testDb.yml
 
+/src/main/resources/application-image_dir.yml
