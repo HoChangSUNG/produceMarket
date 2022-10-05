@@ -12,8 +12,9 @@ spring:
   profiles:
     include:
       - db
-
+      - image_dir
 
 logging:
   level:
     org.hibernate.SQL: debug
+
