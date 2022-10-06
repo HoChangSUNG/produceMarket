@@ -12,7 +12,6 @@ spring:
   profiles:
     include:
       - db
-      - image_dir
 
 logging:
   level:
