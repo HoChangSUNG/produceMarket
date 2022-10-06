@@ -14,15 +14,15 @@ import javax.persistence.Id;
 public class Grade {
 
     @Id
-    private int gradeId;
+    private int productId;
 
     private int gradeRank;
 
     private String gradeName;
 
     @Builder
-    public Grade(int gradeId, int gradeRank, String gradeName) {
-        this.gradeId = gradeId;
+    public Grade(int productId, int gradeRank, String gradeName) {
+        this.productId = productId;
         this.gradeRank = gradeRank;
         this.gradeName = gradeName;
     }
