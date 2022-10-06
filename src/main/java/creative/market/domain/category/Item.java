@@ -23,10 +23,15 @@ public class Item {
     @JoinColumn(name = "item_category_code")
     private ItemCategory itemCategory;
 
+    @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "grade_criteria_id")
+    private GradeCriteria gradeCriteria;
+
     @Builder
-    public Item(int itemCode, String name, ItemCategory itemCategory) {
+    public Item(int itemCode, String name, ItemCategory itemCategory, GradeCriteria gradeCriteria) {
         this.itemCode = itemCode;
         this.name = name;
         this.itemCategory = itemCategory;
+        this.gradeCriteria = gradeCriteria;
     }
 }
