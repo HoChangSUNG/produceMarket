@@ -13,15 +13,11 @@ import java.util.List;
 import static creative.market.domain.category.QItemCategory.*;
 
 @Repository
+@RequiredArgsConstructor
 public class ItemCategoryRepository {
 
     private final EntityManager em;
     private final JPAQueryFactory queryFactory;
-
-    public ItemCategoryRepository(EntityManager em) {
-        this.em = em;
-        queryFactory = new JPAQueryFactory(em);
-    }
 
     public List<ItemCategory> findAll() {
         return queryFactory.selectFrom(itemCategory)

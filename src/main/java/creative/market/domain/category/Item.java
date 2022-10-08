@@ -41,6 +41,10 @@ public class Item {
         this.gradeCriteria = gradeCriteria;
     }
 
+    public void addGradeCriteria(GradeCriteria gradeCriteria) {
+        this.gradeCriteria = gradeCriteria;
+    }
+
     //==연관관계 메서드==//
     public void changeItemCategory(ItemCategory itemCategory) {
         if (itemCategory != null) {

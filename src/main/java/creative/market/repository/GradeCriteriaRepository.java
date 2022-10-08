@@ -14,15 +14,11 @@ import java.util.Optional;
 import static creative.market.domain.category.QGradeCriteria.*;
 
 @Repository
+@RequiredArgsConstructor
 public class GradeCriteriaRepository {
 
     private final EntityManager em;
     private final JPAQueryFactory queryFactory;
-
-    public GradeCriteriaRepository(EntityManager em) {
-        this.em = em;
-        queryFactory = new JPAQueryFactory(em);
-    }
 
     public Long save(String name, String path) {
         GradeCriteria criteria = GradeCriteria.builder()
