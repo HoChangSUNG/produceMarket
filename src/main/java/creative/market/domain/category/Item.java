@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static javax.persistence.FetchType.*;
 
 @Entity
@@ -27,11 +30,23 @@ public class Item {
     @JoinColumn(name = "grade_criteria_id")
     private GradeCriteria gradeCriteria;
 
+    @OneToMany(mappedBy = "item")
+    private List<Kind> kinds = new ArrayList<>();
+
     @Builder
     public Item(int itemCode, String name, ItemCategory itemCategory, GradeCriteria gradeCriteria) {
         this.itemCode = itemCode;
         this.name = name;
-        this.itemCategory = itemCategory;
+        changeItemCategory(itemCategory);
         this.gradeCriteria = gradeCriteria;
     }
+
+    //==연관관계 메서드==//
+    public void changeItemCategory(ItemCategory itemCategory) {
+        if (itemCategory != null) {
+            this.itemCategory = itemCategory;
+            itemCategory.getItems().add(this);
+        }
+    }
+
 }

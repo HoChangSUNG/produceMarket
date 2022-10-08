@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static javax.persistence.FetchType.*;
 
 @Entity
@@ -34,19 +37,26 @@ public class Kind {
     @JoinColumn(name = "item_code")
     private Item item;
 
-    @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "grade_id")
-    private Grade grade;
+    @OneToMany(mappedBy = "kind")
+    private List<KindGrade> kindGrades = new ArrayList<>();
 
     @Builder
-    public Kind(int code, String name, String wholesaleUnit, int wholesaleSize, String retailsaleUnit, int retailsaleSize, Item item, Grade grade) {
+    public Kind(int code, String name, String wholesaleUnit, int wholesaleSize, String retailsaleUnit, int retailsaleSize, Item item) {
         this.code = code;
         this.name = name;
         this.wholesaleUnit = wholesaleUnit;
         this.wholesaleSize = wholesaleSize;
         this.retailsaleUnit = retailsaleUnit;
         this.retailsaleSize = retailsaleSize;
-        this.item = item;
-        this.grade = grade;
+        this.kindGrades = new ArrayList<>();
+        changeItem(item);
+    }
+
+    //==연관관계 메서드==//
+    public void changeItem(Item item) {
+        if (item != null) {
+            this.item = item;
+            item.getKinds().add(this);
+        }
     }
 }
