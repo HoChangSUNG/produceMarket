@@ -2,6 +2,7 @@ package creative.market.domain.product;
 
 import creative.market.domain.CreatedDate;
 import creative.market.domain.category.Kind;
+import creative.market.domain.category.KindGrade;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,14 +30,14 @@ public class Product extends CreatedDate {
 
 
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "kind_id")
-    private Kind kind;
+    @JoinColumn(name = "kind_grade_id")
+    private KindGrade kindGrade;
 
     @Builder
-    public Product(String name, int price, String info, Kind kind) {
+    public Product(String name, int price, String info, KindGrade kindGrade) {
         this.name = name;
         this.price = price;
         this.info = info;
-        this.kind = kind;
+        this.kindGrade = kindGrade;
     }
 }
