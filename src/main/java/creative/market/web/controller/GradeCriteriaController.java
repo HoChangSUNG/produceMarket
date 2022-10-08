@@ -1,9 +1,5 @@
 package creative.market.web.controller;
 
-import creative.market.InitDb;
-import creative.market.domain.category.GradeCriteria;
-import creative.market.repository.GradeCriteriaRepository;
-import creative.market.service.GradeCriteriaService;
 import creative.market.util.FileStoreUtils;
 import creative.market.util.FileSubPath;
 import lombok.RequiredArgsConstructor;
@@ -23,18 +19,10 @@ import java.net.MalformedURLException;
 public class GradeCriteriaController {
     @Value("${images}")
     private String rootPath;
-    private final GradeCriteriaService gradeCriteriaService;
-    private final GradeCriteriaRepository gradeCriteriaRepository;
-    private final InitDb initDb;
 
     @GetMapping("/{imageName}")
     public Resource downloadCriteriaImg(@PathVariable String imageName) throws MalformedURLException { // 상품 등급 기준표 사진 보내기
         return new UrlResource("file:"+ FileStoreUtils.getFullPath(rootPath, FileSubPath.GRADE_CRITERIA_PATH +imageName));
-    }
-
-    @GetMapping
-    public GradeCriteria getGradeCriteriaTest() { //프론트와 api 테스트 할 때 사용할 예정
-        return gradeCriteriaRepository.findByName("찹쌀").orElse(null);
     }
 
 }
