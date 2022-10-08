@@ -1,6 +1,7 @@
 package creative.market.domain.order;
 
 import creative.market.domain.Address;
+import creative.market.domain.CreatedDate;
 import creative.market.domain.user.User;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -16,7 +17,7 @@ import static javax.persistence.FetchType.*;
 @Getter
 @Table(name = "orders")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Order {
+public class Order extends CreatedDate {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
@@ -32,9 +33,8 @@ public class Order {
     private User user;
 
     @Builder
-    public Order(Address address, LocalDateTime createdDate, User user) {
+    public Order(Address address, User user) {
         this.address = address;
-        this.createdDate = createdDate;
         this.user = user;
     }
 }

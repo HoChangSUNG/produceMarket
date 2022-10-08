@@ -73,8 +73,7 @@ public class InitGradeCriteria {
         gradeCriteriaService.registerGradeCriteria("깐마늘(국산)", GRADE_CRITERIA_PATH +"깐마늘.png");
         gradeCriteriaService.registerGradeCriteria("깐마늘(수입)", GRADE_CRITERIA_PATH +"깐마늘.png");
         gradeCriteriaService.registerGradeCriteria("양파", GRADE_CRITERIA_PATH +"양파.png");
-        gradeCriteriaService.registerGradeCriteria("대파", GRADE_CRITERIA_PATH +"대파.png");
-        gradeCriteriaService.registerGradeCriteria("쪽파", GRADE_CRITERIA_PATH +"쪽파.png");
+        gradeCriteriaService.registerGradeCriteria("파", GRADE_CRITERIA_PATH +"파.png");
         gradeCriteriaService.registerGradeCriteria("생강", GRADE_CRITERIA_PATH +"생강.png");
         gradeCriteriaService.registerGradeCriteria("미나리", GRADE_CRITERIA_PATH +"미나리.png");
         gradeCriteriaService.registerGradeCriteria("깻잎", GRADE_CRITERIA_PATH +"깻잎.png");
