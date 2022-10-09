@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/itemCategory")
+@RequestMapping("/api/item-category")
 public class ItemCategoryController {
 
     private final ItemCategoryService itemCategoryService;
