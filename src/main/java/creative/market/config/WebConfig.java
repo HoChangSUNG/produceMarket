@@ -1,9 +1,10 @@
-package creative.market;
+package creative.market.config;
 
 import creative.market.argumentresolver.LoginUserArgumentResolver;
 import creative.market.domain.user.Seller;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
@@ -16,4 +17,8 @@ public class WebConfig implements WebMvcConfigurer {
        resolvers.add(new LoginUserArgumentResolver());
     }
 
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+       registry.addMapping("/**").allowedOrigins("http://localhost:3000");
+    }
 }
