@@ -1,6 +1,7 @@
 package creative.market.web.controller;
 
 import creative.market.service.ItemCategoryService;
+import creative.market.web.dto.ResultRes;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -16,13 +17,8 @@ public class ItemCategoryController {
     private final ItemCategoryService itemCategoryService;
 
     @GetMapping
-    public ItemCategoryMenuResult itemCategoryMenu() { // 부류,품목,품종,등급 선택 메뉴
-        return new ItemCategoryMenuResult(itemCategoryService.findItemCategoryMenu());
+    public ResultRes itemCategoryMenu() { // 부류,품목,품종,등급 선택 메뉴
+        return new ResultRes(itemCategoryService.findItemCategoryMenu());
     }
 
-    @Data
-    @AllArgsConstructor
-    static class ItemCategoryMenuResult<T> {
-        private T result;
-    }
 }
