@@ -19,7 +19,7 @@ public class Kind {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "kind_id")
-    private long id;
+    private Long id;
 
     private int code;
 
