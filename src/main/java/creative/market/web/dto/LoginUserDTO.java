@@ -1,4 +1,4 @@
-package creative.market.web;
+package creative.market.web.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

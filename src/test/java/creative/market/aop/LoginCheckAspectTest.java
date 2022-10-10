@@ -2,7 +2,7 @@ package creative.market.aop;
 
 import creative.market.exception.LoginAuthenticationException;
 import creative.market.util.SessionUtils;
-import creative.market.web.LoginUserDTO;
+import creative.market.web.dto.LoginUserDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

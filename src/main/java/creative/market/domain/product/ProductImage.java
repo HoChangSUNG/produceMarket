@@ -1,5 +1,6 @@
 package creative.market.domain.product;
 
+import creative.market.domain.category.ItemCategory;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -35,5 +36,12 @@ public class ProductImage {
         this.path = path;
         this.type = type;
         this.product = product;
+    }
+
+    public void changeProduct(Product product) {
+        if (product != null) {
+            this.product = product;
+            product.getProductImages().add(this);
+        }
     }
 }
