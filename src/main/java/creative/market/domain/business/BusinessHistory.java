@@ -17,7 +17,7 @@ public class BusinessHistory extends ChangeDate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "business_id")
-    private long id;
+    private Long id;
 
     private String businessNumber;
 
