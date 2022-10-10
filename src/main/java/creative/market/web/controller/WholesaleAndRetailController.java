@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
@@ -22,38 +23,38 @@ import java.util.NoSuchElementException;
 public class WholesaleAndRetailController {
 
     private final KindGradeRepository kindGradeRepository;
-
+    private final WholesaleAndRetailUtils apiUtils;
     @GetMapping("/yearly")
-    public String yearlyWholesaleAndRetail(@RequestParam Long kindGradeId) {
+    public String yearlyWholesaleAndRetail(@RequestParam Long kindGradeId){
         WholesaleAndRetailApiParam params = getMonthAndYearApiParams(kindGradeId);
         log.info("[최근 5년 연도별 도소매 api] itemCategoryCode ={} itemCode={} kindCode={} gradeRank={}", params.itemCategoryCode, params.itemCode, params.kindCode, params.gradeRank);
 
-        return WholesaleAndRetailUtils.getYearData(params.itemCategoryCode, params.itemCode, params.kindCode, params.gradeRank);
+        return apiUtils.getYearData(params.itemCategoryCode, params.itemCode, params.kindCode, params.gradeRank);
     }
 
 
     @GetMapping("/monthly")
-    public String monthlyWholesaleAndRetail(@RequestParam int year, @RequestParam Long kindGradeId) {
+    public String monthlyWholesaleAndRetail(@RequestParam int year, @RequestParam Long kindGradeId){
         WholesaleAndRetailApiParam params = getMonthAndYearApiParams(kindGradeId);
         log.info("[월별 도소매 api]itemCategoryCode ={} itemCode={} kindCode={} gradeRank={}", params.itemCategoryCode, params.itemCode, params.kindCode, params.gradeRank);
 
-        return WholesaleAndRetailUtils.getMonthlyWholeSalesAndRetailData(year, params.itemCategoryCode, params.itemCode, params.kindCode, params.gradeRank);
+        return apiUtils.getMonthlyWholeSalesAndRetailData(year, params.itemCategoryCode, params.itemCode, params.kindCode, params.gradeRank);
     }
 
     @GetMapping("/day/wholesale")
-    public String dayWholesale(@RequestParam LocalDateTime start, @RequestParam LocalDateTime end, @RequestParam Long kindGradeId) {
+    public String dayWholesale(@RequestParam LocalDateTime start, @RequestParam LocalDateTime end, @RequestParam Long kindGradeId){
         DayWholesaleAndRetailApiParam params = getDayApiParams(kindGradeId);
         log.info("[일별 도매 api]itemCategoryCode ={} itemCode={} kindCode={} gradeRank={}", params.itemCategoryCode, params.itemCode, params.kindCode, params.gradeId);
 
-        return WholesaleAndRetailUtils.getDayWholeSalesData(start, end, params.itemCategoryCode, params.itemCode, params.kindCode, params.gradeId);
+        return apiUtils.getDayWholeSalesData(start, end, params.itemCategoryCode, params.itemCode, params.kindCode, params.gradeId);
     }
 
     @GetMapping("/day/retail")
-    public String dayRetail(@RequestParam LocalDateTime start, @RequestParam LocalDateTime end, @RequestParam Long kindGradeId) {
+    public String dayRetail(@RequestParam LocalDateTime start, @RequestParam LocalDateTime end, @RequestParam Long kindGradeId){
         DayWholesaleAndRetailApiParam params = getDayApiParams(kindGradeId);
         log.info("[일별 소매 api]itemCategoryCode ={} itemCode={} kindCode={} gradeRank={}", params.itemCategoryCode, params.itemCode, params.kindCode, params.gradeId);
 
-        return WholesaleAndRetailUtils.getDayRetailData(start, end, params.itemCategoryCode, params.itemCode, params.kindCode, params.gradeId);
+        return apiUtils.getDayRetailData(start, end, params.itemCategoryCode, params.itemCode, params.kindCode, params.gradeId);
 
     }
 
@@ -67,7 +68,7 @@ public class WholesaleAndRetailController {
 
     private KindGrade getKindGradeById(Long kindGradeId) {
         return kindGradeRepository.findById(kindGradeId)
-                .orElseThrow(() -> new NoSuchElementException("다시 시도해주세요"));
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 품목입니다."));
     }
 
     @Getter

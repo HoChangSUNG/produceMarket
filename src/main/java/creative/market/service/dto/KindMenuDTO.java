@@ -12,13 +12,13 @@ import java.util.stream.Collectors;
 public class KindMenuDTO {
 
     private Long kindId;
-    private int code;
     private String name;
+    private String retailUnit;
     private List<KindGradeMenuDTO> grades;
     public KindMenuDTO(Kind kind) {
         this.kindId = kind.getId();
-        this.code = kind.getCode();
         this.name = kind.getName();
+        this.retailUnit = kind.getRetailsaleUnit();
         this.grades = kind.getKindGrades().stream()
                 .map(kindGrade -> new KindGradeMenuDTO(kindGrade))
                 .collect(Collectors.toList());
