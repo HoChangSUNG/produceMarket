@@ -21,7 +21,7 @@ public class Order extends CreatedDate {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
-    private long id;
+    private Long id;
 
     @Embedded
     private Address address;
