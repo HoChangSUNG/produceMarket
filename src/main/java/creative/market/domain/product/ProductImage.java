@@ -16,7 +16,7 @@ public class ProductImage {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_image_id")
-    private long id;
+    private Long id;
 
     private String name;
 
