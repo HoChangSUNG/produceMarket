@@ -1,9 +1,6 @@
 package creative.market.domain;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.Embeddable;
 
@@ -20,4 +17,12 @@ public class Address {
     private int zipcode;
 
     private String detailAddress;
+
+    @Builder
+    public Address(String jibun, String road, int zipcode, String detailAddress) {
+        this.jibun = jibun;
+        this.road = road;
+        this.zipcode = zipcode;
+        this.detailAddress = detailAddress;
+    }
 }
