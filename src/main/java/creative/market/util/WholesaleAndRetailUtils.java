@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -41,29 +42,29 @@ public class WholesaleAndRetailUtils {
     }
 
     //일별 도매 시세 조회
-    public String getDayWholeSalesData(LocalDateTime startDate, LocalDateTime endDate, int itemCategoryCode, int itemCode, int kindCode, int gradeId) {
+    public String getDayWholeSalesData(LocalDate startDate, LocalDate endDate, int itemCategoryCode, int itemCode, int kindCode, int gradeId) {
         return getApiData(getDayDataUrl(WHOLE_SALES_CODE, startDate, endDate, itemCategoryCode, itemCode, kindCode, gradeId));
     }
 
     //일별 소매 시세 조회
-    public String getDayRetailData(LocalDateTime startDate, LocalDateTime endDate, int itemCategoryCode, int itemCode, int kindCode, int gradeId) {
+    public String getDayRetailData(LocalDate startDate, LocalDate endDate, int itemCategoryCode, int itemCode, int kindCode, int gradeId) {
         return getApiData(getDayDataUrl(RETAIL_CODE, startDate, endDate, itemCategoryCode, itemCode, kindCode, gradeId));
     }
 
     //최근 도매가 조회
     public LatestConvertPriceDTO latestWholeSalesPrice(int itemCategoryCode, int itemCode, int kindCode, int gradeId) {
-        JSONObject wholeSaleObject = priceJsonObject(WHOLE_SALES_CODE, LocalDateTime.now().minusDays(20), LocalDateTime.now(), itemCategoryCode, itemCode, kindCode, gradeId);
+        JSONObject wholeSaleObject = priceJsonObject(WHOLE_SALES_CODE, LocalDate.now().minusDays(20), LocalDate.now(), itemCategoryCode, itemCode, kindCode, gradeId);
         return convertToLatestPriceDTO(wholeSaleObject);
     }
 
     //최근 소매가 조회
     public LatestConvertPriceDTO latestRetailPrice(int itemCategoryCode, int itemCode, int kindCode, int gradeId) {
-        JSONObject retailObject = priceJsonObject(RETAIL_CODE, LocalDateTime.now().minusDays(20), LocalDateTime.now(), itemCategoryCode, itemCode, kindCode, gradeId);
+        JSONObject retailObject = priceJsonObject(RETAIL_CODE, LocalDate.now().minusDays(20), LocalDate.now(), itemCategoryCode, itemCode, kindCode, gradeId);
         return convertToLatestPriceDTO(retailObject);
     }
 
     //일간 도소매 조회 url
-    private String getDayDataUrl(int type, LocalDateTime startDate, LocalDateTime endDate, int itemCategoryCode, int itemCode, int kindCode, int gradeId) {
+    private String getDayDataUrl(int type, LocalDate startDate, LocalDate endDate, int itemCategoryCode, int itemCode, int kindCode, int gradeId) {
         String convertStartDay = startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")); // 시작 날짜
         String convertEndDay = endDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));  // 종료 날짜
 
@@ -107,7 +108,7 @@ public class WholesaleAndRetailUtils {
     }
 
     //최근 가격 저장된 JSON 얻기
-    private JSONObject priceJsonObject(int type, LocalDateTime startDate, LocalDateTime endDate, int itemCategoryCode, int itemCode, int kindCode, int gradeId) {
+    private JSONObject priceJsonObject(int type, LocalDate startDate, LocalDate endDate, int itemCategoryCode, int itemCode, int kindCode, int gradeId) {
         JSONObject recentlyResult = null;
         try {
             String dayRetailDataUrl = getDayDataUrl(type, startDate, endDate, itemCategoryCode, itemCode, kindCode, gradeId);
