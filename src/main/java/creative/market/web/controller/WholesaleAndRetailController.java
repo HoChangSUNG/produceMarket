@@ -7,12 +7,14 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
@@ -42,7 +44,9 @@ public class WholesaleAndRetailController {
     }
 
     @GetMapping("/day/wholesale")
-    public String dayWholesale(@RequestParam LocalDateTime start, @RequestParam LocalDateTime end, @RequestParam Long kindGradeId){
+    public String dayWholesale(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+                               @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
+                               @RequestParam Long kindGradeId){
         DayWholesaleAndRetailApiParam params = getDayApiParams(kindGradeId);
         log.info("[일별 도매 api]itemCategoryCode ={} itemCode={} kindCode={} gradeRank={}", params.itemCategoryCode, params.itemCode, params.kindCode, params.gradeId);
 
@@ -50,7 +54,9 @@ public class WholesaleAndRetailController {
     }
 
     @GetMapping("/day/retail")
-    public String dayRetail(@RequestParam LocalDateTime start, @RequestParam LocalDateTime end, @RequestParam Long kindGradeId){
+    public String dayRetail(@RequestParam(value = "start")@DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+                            @RequestParam(value = "end") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end,
+                            @RequestParam Long kindGradeId){
         DayWholesaleAndRetailApiParam params = getDayApiParams(kindGradeId);
         log.info("[일별 소매 api]itemCategoryCode ={} itemCode={} kindCode={} gradeRank={}", params.itemCategoryCode, params.itemCode, params.kindCode, params.gradeId);
 
@@ -68,7 +74,7 @@ public class WholesaleAndRetailController {
 
     private KindGrade getKindGradeById(Long kindGradeId) {
         return kindGradeRepository.findById(kindGradeId)
-                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 품목입니다."));
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 품목입니다."));
     }
 
     @Getter
