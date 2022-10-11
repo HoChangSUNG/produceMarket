@@ -2,7 +2,7 @@ package creative.market.argumentresolver;
 
 import creative.market.aop.UserType;
 import creative.market.util.SessionUtils;
-import creative.market.web.dto.LoginUserDTO;
+import creative.market.service.dto.LoginUserDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
