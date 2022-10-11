@@ -10,18 +10,14 @@ import java.util.stream.Collectors;
 @Getter
 @Setter
 public class ItemMenuDTO {
-    private int itemCode;
+    private int id;
     private String name;
-    private String gradeCriteriaSrc;
-    private List<KindMenuDTO> kinds;
+    private List<KindMenuDTO> category;
 
     public ItemMenuDTO(Item item) {
-        this.itemCode =item.getItemCode();
+        this.id =item.getItemCode();
         this.name = item.getName();
-        if (item.getGradeCriteria() != null) {
-            gradeCriteriaSrc = item.getGradeCriteria().getPath();
-        }
-        this.kinds = item.getKinds().stream()
+        this.category = item.getKinds().stream()
                 .map(kind -> new KindMenuDTO(kind))
                 .collect(Collectors.toList());
     }
