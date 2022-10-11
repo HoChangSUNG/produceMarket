@@ -39,7 +39,9 @@ public class UserService {
         Buyer buyer = createBuyer(registerReq);
 
         buyerRepository.findByLoginId(buyer.getLoginId())
-                .orElseThrow(() -> new DuplicateException("회원가입 실패(아이디 중복)"));
+                .ifPresent((b) -> {
+                    throw new DuplicateException("회원가입 실패(아이디 중복)");
+                });
 
         return buyerRepository.register(buyer);
     }
