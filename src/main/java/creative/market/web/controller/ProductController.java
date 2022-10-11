@@ -7,11 +7,11 @@ import creative.market.service.dto.UploadFileDTO;
 import creative.market.util.FileStoreUtils;
 import creative.market.util.FileSubPath;
 import creative.market.web.dto.CreateProductFormReq;
-import creative.market.web.dto.LoginUserDTO;
+import creative.market.service.dto.LoginUserDTO;
+import creative.market.web.dto.MessageRes;
 import creative.market.web.dto.ResultRes;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,14 +43,4 @@ public class ProductController {
         productService.register(regProductDTO);
         return new ResultRes(new MessageRes("상품 등록 성공"));
     }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    static class MessageRes {
-        private String message;
-    }
-
-
 }

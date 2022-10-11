@@ -21,11 +21,8 @@ public class UserRepository {
     private final JPAQueryFactory queryFactory;
 
     public Optional<User> findById(Long id) {
-        return Optional.ofNullable(
-                queryFactory
-                        .selectFrom(user)
-                        .where(user.id.eq(id))
-                        .fetchOne());
+        User user = em.find(User.class, id);
+        return Optional.ofNullable(user);
     }
 
     public void delete(Long id) {
