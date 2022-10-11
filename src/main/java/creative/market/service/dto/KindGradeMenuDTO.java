@@ -1,6 +1,5 @@
 package creative.market.service.dto;
 
-import creative.market.domain.category.Kind;
 import creative.market.domain.category.KindGrade;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,12 +8,10 @@ import lombok.Setter;
 @Setter
 public class KindGradeMenuDTO {
 
-    private Long kindGradeId;
-    private int gradeId;
+    private Long id;
     private String name;
     public KindGradeMenuDTO(KindGrade kindGrade) {
-        this.kindGradeId = kindGrade.getId();
-        this.gradeId = kindGrade.getGrade().getGradeId();
+        this.id = kindGrade.getId();
         this.name = kindGrade.getGrade().getGradeName();
     }
 }

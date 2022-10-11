@@ -11,13 +11,13 @@ import java.util.stream.Collectors;
 @Setter
 public class ItemCategoryMenuDTO {
 
-    private int itemCategoryCode;
+    private int id;
     private String name;
-    private List<ItemMenuDTO> items;
+    private List<ItemMenuDTO> category;
     public ItemCategoryMenuDTO(ItemCategory itemCategory) {
-        this.itemCategoryCode = itemCategory.getItemCategoryCode();
+        this.id = itemCategory.getItemCategoryCode();
         this.name = itemCategory.getName();
-        this.items = itemCategory.getItems().stream()
+        this.category = itemCategory.getItems().stream()
                 .map(item -> new ItemMenuDTO(item))
                 .collect(Collectors.toList());
     }

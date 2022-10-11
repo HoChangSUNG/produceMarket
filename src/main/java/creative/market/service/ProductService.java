@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -64,6 +63,35 @@ public class ProductService {
         return product.getId();
     }
 
+    @Transactional
+    public Long registerTest(RegisterProductDTO registerProductDTO) {
+
+        // 카테고리가 존재하는지 체크
+        KindGrade kindGrade = kindGradeRepository.findById(registerProductDTO.getKindGradeId())
+                .orElseThrow(() -> new IllegalArgumentException("올바른 카테고리가 아닙니다"));
+
+        // 일반 사진 생성
+        List<UploadFileDTO> ordinalImages = registerProductDTO.getOrdinalImg();
+        List<ProductImage> ordinalProductImages = ordinalImages.stream()
+                .map(ordinalImage -> createProductImage(ordinalImage,ProductImageType.ORDINAL))
+                .collect(Collectors.toList());
+
+        // 대표 사진 생성
+        ProductImage sigProductImage = createProductImage(registerProductDTO.getSigImg(),ProductImageType.SIGNATURE);
+        //상품 저장
+        Product product = Product.builder()
+                .name(registerProductDTO.getName())
+                .price(registerProductDTO.getPrice())
+                .info(registerProductDTO.getInfo())
+                .kindGrade(kindGrade)
+                .user(null)
+                .ordinalProductImages(ordinalProductImages)
+                .signatureProductImage(sigProductImage)
+                .build();
+
+        productRepository.save(product);
+        return product.getId();
+    }
 
     private ProductImage createProductImage(UploadFileDTO ordinalImage,ProductImageType type) {
         return ProductImage.builder().name(ordinalImage.getUploadFileName())
