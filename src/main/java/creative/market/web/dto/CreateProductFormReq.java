@@ -16,16 +16,16 @@ import java.util.List;
 @AllArgsConstructor
 public class CreateProductFormReq {
 
-    @NotNull
+    @NotNull(message = "카테고리를 선택해주세요")
     private Long kindGradeId;
-    @NotEmpty
+    @NotEmpty(message = "상품 이름을 입력해주세요")
     private String name;
-    @NotNull
+    @NotNull(message = "가격을 입력해주세요")
     private Integer price;
-    @NotEmpty
+
+    @NotEmpty(message = "내용을 입력해주세요")
     private String info;
-    @NotNull
+
     private List<MultipartFile> img;
-    @NotNull
     private MultipartFile sigImg;
 }
