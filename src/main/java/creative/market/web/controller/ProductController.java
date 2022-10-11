@@ -2,16 +2,16 @@ package creative.market.web.controller;
 
 import creative.market.argumentresolver.Login;
 import creative.market.service.ProductService;
+import creative.market.service.dto.LoginUserDTO;
 import creative.market.service.dto.RegisterProductDTO;
 import creative.market.service.dto.UploadFileDTO;
 import creative.market.util.FileStoreUtils;
 import creative.market.util.FileSubPath;
 import creative.market.web.dto.CreateProductFormReq;
-import creative.market.web.dto.LoginUserDTO;
+import creative.market.web.dto.MessageRes;
 import creative.market.web.dto.ResultRes;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,13 +49,6 @@ public class ProductController {
                 productReq.getInfo(), loginUserDTO.getId(), sigImage, ordinalImages);
     }
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    static class MessageRes {
-        private String message;
-    }
 
 
 }
