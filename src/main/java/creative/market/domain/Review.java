@@ -1,5 +1,6 @@
 package creative.market.domain;
 
+import creative.market.domain.category.Item;
 import creative.market.domain.product.Product;
 import creative.market.domain.user.User;
 import lombok.AccessLevel;
@@ -41,6 +42,13 @@ public class Review {
         this.content = content;
         this.createdDate = createdDate;
         this.user = user;
-        this.product = product;
+        changeProduct(product);
+    }
+
+    public void changeProduct(Product product) {
+        if (product != null) {
+            this.product = product;
+            product.getReviews().add(this);
+        }
     }
 }

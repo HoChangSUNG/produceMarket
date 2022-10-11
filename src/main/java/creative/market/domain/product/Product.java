@@ -48,7 +48,6 @@ public class Product extends CreatedDate {
     @OneToMany(mappedBy = "product")
     private List<Review> reviews = new ArrayList<>();
 
-
     @Builder
     public Product(String name, int price, String info, KindGrade kindGrade, User user, List<ProductImage> ordinalProductImages , ProductImage signatureProductImage) {
         this.name = name;
