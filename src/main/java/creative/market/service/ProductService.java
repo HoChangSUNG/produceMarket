@@ -4,8 +4,11 @@ import creative.market.domain.category.KindGrade;
 import creative.market.domain.product.Product;
 import creative.market.domain.product.ProductImage;
 import creative.market.domain.product.ProductImageType;
+import creative.market.domain.user.User;
+import creative.market.exception.LoginAuthenticationException;
 import creative.market.repository.KindGradeRepository;
 import creative.market.repository.ProductRepository;
+import creative.market.repository.user.UserRepository;
 import creative.market.service.dto.RegisterProductDTO;
 import creative.market.service.dto.UploadFileDTO;
 import creative.market.util.FileSubPath;
@@ -24,13 +27,17 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final KindGradeRepository kindGradeRepository;
+    private final UserRepository userRepository;
 
+    // 상품 등록
     @Transactional
-    public Long register(RegisterProductDTO registerProductDTO) {// 상품 등록
+    public Long register(RegisterProductDTO registerProductDTO) {
+        //판매자 존재 체크
+        Long userId = registerProductDTO.getSellerId();
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new LoginAuthenticationException("사용자가 존재하지 않습니다"));
 
-        Long sellerId = registerProductDTO.getSellerId();
-        // seller find 해서 연결해줘야 한다 꼭!!!!!!
-
+        // 카테고리가 존재하는지 체크
         KindGrade kindGrade = kindGradeRepository.findById(registerProductDTO.getKindGradeId())
                 .orElseThrow(() -> new IllegalArgumentException("올바른 카테고리가 아닙니다"));
 
@@ -42,16 +49,13 @@ public class ProductService {
 
         // 대표 사진 생성
         ProductImage sigProductImage = createProductImage(registerProductDTO.getSigImg(),ProductImageType.SIGNATURE);
-
-
-        // 상품 생성한 Seller 찾아서 연결해줘야 함!!!!
         //상품 저장
         Product product = Product.builder()
                 .name(registerProductDTO.getName())
                 .price(registerProductDTO.getPrice())
                 .info(registerProductDTO.getInfo())
                 .kindGrade(kindGrade)
-                .seller(null)  // 연결해주기!!!!!!!
+                .user(user)
                 .ordinalProductImages(ordinalProductImages)
                 .signatureProductImage(sigProductImage)
                 .build();
