@@ -1,7 +1,10 @@
 package creative.market.service;
 
+import creative.market.domain.Address;
 import creative.market.domain.product.Product;
 import creative.market.domain.product.ProductImage;
+import creative.market.domain.user.Seller;
+import creative.market.exception.LoginAuthenticationException;
 import creative.market.repository.ProductRepository;
 import creative.market.service.dto.RegisterProductDTO;
 import creative.market.service.dto.UploadFileDTO;
@@ -16,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,13 +30,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 class ProductServiceTest {
 
-    @Autowired ProductService productService;
+    @Autowired
+    ProductService productService;
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    EntityManager em;
 
     @Test
     @DisplayName("상품 등록시 상품 저장과 상품 이미지 저장이 되는지 확인")
-    void createProduct() throws Exception{
+    void createProduct() throws Exception {
         //given
         UploadFileDTO sigImg = new UploadFileDTO("sig.png", "sigStore.png");
         UploadFileDTO ordImg1 = new UploadFileDTO("ord1.png", "ordStore1.png");
@@ -40,7 +47,10 @@ class ProductServiceTest {
         List<UploadFileDTO> ordinalImg = new ArrayList<>();
         ordinalImg.add(ordImg1);
         ordinalImg.add(ordImg2);
-        RegisterProductDTO registerProductDTO = new RegisterProductDTO(432L, "쌀팔기", 10000, "맛있어요", null,sigImg, ordinalImg);
+        Seller seller = createSeller("강병관", new Address("10", "20", 1, "천안"));
+        em.persist(seller);
+
+        RegisterProductDTO registerProductDTO = new RegisterProductDTO(432L, "쌀팔기", 10000, "맛있어요", seller.getId(), sigImg, ordinalImg);
 
         //when
         Long productId = productService.register(registerProductDTO);
@@ -57,15 +67,40 @@ class ProductServiceTest {
 
     @Test
     @DisplayName("잘못된 kindGradeId가 넘어온 경우")
-    void createProductFail() throws Exception{
+    void createProductFail() throws Exception {
         //given
-        RegisterProductDTO registerProductDTO = new RegisterProductDTO(2L, "쌀팔기", 10000, "맛있어요", null,null, null);
+        Seller seller = createSeller("강병관", new Address("10", "20", 1, "천안"));
+        em.persist(seller);
+        RegisterProductDTO registerProductDTO = new RegisterProductDTO(2L, "쌀팔기", 10000, "맛있어요", seller.getId(), null, null);
 
         //when
 
         //then
-        Assertions.assertThatThrownBy(()->productService.register(registerProductDTO))
+        Assertions.assertThatThrownBy(() -> productService.register(registerProductDTO))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("올바른 카테고리가 아닙니다");
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 sellerId가 넘어온 경우")
+    void createProductFail2() throws Exception {
+        //given
+        Seller seller = createSeller("강병관", new Address("10", "20", 1, "천안"));
+        em.persist(seller);
+        RegisterProductDTO registerProductDTO = new RegisterProductDTO(2L, "쌀팔기", 10000, "맛있어요", seller.getId() + 1, null, null);
+
+        //when
+
+        //then
+        Assertions.assertThatThrownBy(() -> productService.register(registerProductDTO))
+                .isInstanceOf(LoginAuthenticationException.class)
+                .hasMessage("사용자가 존재하지 않습니다");
+    }
+
+    private Seller createSeller(String name, Address address) {
+        Seller seller = Seller.builder()
+                .name(name)
+                .address(address).build();
+        return seller;
     }
 }
