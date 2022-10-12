@@ -2,9 +2,7 @@ package creative.market.domain.product;
 
 import creative.market.domain.CreatedDate;
 import creative.market.domain.Review;
-import creative.market.domain.category.Kind;
 import creative.market.domain.category.KindGrade;
-import creative.market.domain.user.Seller;
 import creative.market.domain.user.User;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -12,9 +10,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static javax.persistence.FetchType.*;
 
@@ -59,6 +58,22 @@ public class Product extends CreatedDate {
         ordinalProductImages.forEach(productImage -> productImage.changeProduct(this));
         signatureProductImage.changeProduct(this);
 
+    }
+
+    public ProductImage getSignatureProductImage() { // 대표사진 가져오기
+        Optional<ProductImage> signatureImage = productImages.stream()
+                .filter(productImage -> productImage.getType() == ProductImageType.SIGNATURE)
+                .findFirst();
+        if (signatureImage.isPresent()) {
+            return signatureImage.get();
+        }
+        return null;
+    }
+
+    public List<ProductImage> getOrdinalProductImage() { // 일반사진 가져오기
+       return productImages.stream()
+                .filter(productImage -> productImage.getType() == ProductImageType.ORDINAL)
+                .collect(Collectors.toList());
     }
 
 }
