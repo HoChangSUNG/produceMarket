@@ -16,7 +16,7 @@ public class KindGradeService {
 
     private final KindGradeRepository kindGradeRepository;
 
-    public CriteriaSrcAndRetailUnitDTO findSrcAndRetailById(Long kindGradeId) { // 나중에 query서비스로 빼기
+    public CriteriaSrcAndRetailUnitDTO findSrcAndRetailById(Long kindGradeId) {
         KindGrade findKindGrade = kindGradeRepository.findById(kindGradeId)
                 .orElseThrow(() -> new IllegalArgumentException("올바른 카테고리가 아닙니다"));
         // 소매 단위
@@ -25,7 +25,7 @@ public class KindGradeService {
         // 등급 사진
         String criteriaSrc = null;
         Item item = findKindGrade.getKind().getItem();
-        if (item.getGradeCriteria() != null) {
+        if (item.getGradeCriteria() != null) {// 등급 기준 사진이 없는 경우
             criteriaSrc = item.getGradeCriteria().getPath();
         }
 
