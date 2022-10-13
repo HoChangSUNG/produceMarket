@@ -13,7 +13,14 @@ spring:
     include:
       - db
 
+
+  servlet:
+    multipart:  # 파일 용량 제한
+      max-file-size: 50MB
+      max-request-size: 50MB
 logging:
   level:
     org.hibernate.SQL: debug
+
+
 

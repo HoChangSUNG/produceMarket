@@ -1,5 +1,8 @@
 package creative.market.util;
 
+import creative.market.domain.category.Kind;
+import creative.market.domain.category.KindGrade;
+import creative.market.web.dto.LatestPriceRes;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -14,14 +17,15 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-@Slf4j
 @Component
+@Slf4j
 public class WholesaleAndRetailUtils {
 
     @Value("${api.id}")
     private static String id;
     @Value("${api.key}")
     private static String key;
+    private final String DEFAULT_RETAIL_UNIT = "kg";
     private static int WHOLE_SALES_CODE = 2; // 도매 시세 코드
     private static int RETAIL_CODE = 1; // 소매 시세 코드
 
@@ -59,8 +63,54 @@ public class WholesaleAndRetailUtils {
 
     //최근 소매가 조회
     public LatestConvertPriceDTO latestRetailPrice(int itemCategoryCode, int itemCode, int kindCode, int gradeId) {
-        JSONObject retailObject = priceJsonObject(RETAIL_CODE, LocalDate.now().minusDays(20), LocalDate.now(), itemCategoryCode, itemCode, kindCode, gradeId);
+        JSONObject retailObject = priceJsonObject(RETAIL_CODE, LocalDate.now().minusDays(10), LocalDate.now(), itemCategoryCode, itemCode, kindCode, gradeId);
         return convertToLatestPriceDTO(retailObject);
+    }
+
+
+    // 최근 일자 도소매 정보 조회(단위 변환 + 도소매 단위 다른 경우 처리)
+    public LatestPriceRes getLatestPriceInfo(KindGrade kindGrade) {
+        int itemCategoryCode = kindGrade.getKind().getItem().getItemCategory().getItemCategoryCode();
+        int itemCode = kindGrade.getKind().getItem().getItemCode();
+        int kindCode = kindGrade.getKind().getCode();
+        int gradeId = kindGrade.getGrade().getGradeId();
+
+        LatestConvertPriceDTO retail = latestRetailPrice(itemCategoryCode, itemCode, kindCode, gradeId);
+        LatestConvertPriceDTO wholesale = latestWholeSalesPrice(itemCategoryCode, itemCode, kindCode, gradeId);
+
+        LatestPriceDTO retailResult = getValidRetail(retail, kindGrade.getKind());
+        LatestPriceDTO wholesaleResult = getValidWholesale(wholesale, kindGrade.getKind());
+
+        return new LatestPriceRes(retailResult,wholesaleResult);
+    }
+
+    private LatestPriceDTO getValidWholesale(LatestConvertPriceDTO wholesale, Kind kind) {
+        Integer price = null;
+        LocalDate latestDate = null;
+        boolean isSameUnit = kind.getRetailsaleUnit().equals(kind.getWholesaleUnit());// 도매 단위가 소매 단위가 동일한지
+
+        if ((wholesale != null) &&isSameUnit) { // 존재 여부 && 도매 단위가 소매 단위가 동일한지
+            price = wholesale.getPrice();
+            latestDate = wholesale.getLatestDay();
+            if (!kind.getWholesaleUnit().equals(DEFAULT_RETAIL_UNIT)) { // 단위가 kg이 아닐 경우 단위를 1개로 맞춤
+                price /= kind.getWholesaleSize();
+            }
+        }
+        return new LatestPriceDTO(price,latestDate);
+    }
+
+    private LatestPriceDTO getValidRetail(LatestConvertPriceDTO retail, Kind kind) {
+        Integer price = null;
+        LocalDate latestDate = null;
+
+        if (retail != null) { // 존재 여부
+            price = retail.getPrice();
+            latestDate = retail.getLatestDay();
+            if (!kind.getRetailsaleUnit().equals(DEFAULT_RETAIL_UNIT)) { // 단위가 kg이 아닐 경우 단위를 1개로 맞춤
+                price /= kind.getRetailsaleSize();
+            }
+        }
+        return new LatestPriceDTO(price,latestDate);
     }
 
     //일간 도소매 조회 url
@@ -87,7 +137,7 @@ public class WholesaleAndRetailUtils {
 
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("API 호출 에러 발생 message = {}",e.getMessage());
         }
         return sb.toString();
     }
@@ -95,7 +145,7 @@ public class WholesaleAndRetailUtils {
     //최근 가격 저장된 JSON 객체를 DTO로 변환
     private LatestConvertPriceDTO convertToLatestPriceDTO(JSONObject priceJsonObject) {
         if (priceJsonObject == null) {
-            return new LatestConvertPriceDTO();
+            return null;
         }
 
         String[] regday = priceJsonObject.get("regday").toString().split("/");
@@ -131,4 +181,7 @@ public class WholesaleAndRetailUtils {
         return recentlyResult;
 
     }
+
+
+
 }
