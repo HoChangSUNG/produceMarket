@@ -17,7 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 @Slf4j
 public class LoginCheckAspect {
 
-    @Before("@annotation(loginCheck)")
+    @Before("@annotation(loginCheck) && execution(* creative.market.web.controller..*(..))")
     public void doBefore(JoinPoint joinPoint, LoginCheck loginCheck) {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
         UserType[] userTypes = loginCheck.type();

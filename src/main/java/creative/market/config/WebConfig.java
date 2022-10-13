@@ -1,7 +1,6 @@
 package creative.market.config;
 
 import creative.market.argumentresolver.LoginUserArgumentResolver;
-import creative.market.domain.user.Seller;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
