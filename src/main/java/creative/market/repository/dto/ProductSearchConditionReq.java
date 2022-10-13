@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @Getter
 @Setter
@@ -12,7 +13,7 @@ import lombok.Setter;
 public class ProductSearchConditionReq {
 
     private String productName;
-    private String orderBy;
+    private String orderBy="latest";
     private Integer itemCategoryCode;
     private Integer itemCode;
     private Long kindId;
