@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,7 +39,7 @@ public class ProductService {
 
         // 카테고리가 존재하는지 체크
         KindGrade kindGrade = kindGradeRepository.findById(registerProductDTO.getKindGradeId())
-                .orElseThrow(() -> new IllegalArgumentException("올바른 카테고리가 아닙니다"));
+                .orElseThrow(() -> new NoSuchElementException("올바른 카테고리가 아닙니다"));
 
         // 일반 사진 생성
         List<UploadFileDTO> ordinalImages = registerProductDTO.getOrdinalImg();

@@ -3,12 +3,15 @@ package creative.market.service.query;
 import creative.market.domain.product.Product;
 import creative.market.repository.ProductRepository;
 import creative.market.repository.dto.ProductSearchConditionReq;
+import creative.market.service.dto.ProductDetailDTO;
 import creative.market.service.dto.ProductShortInfoDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,5 +29,15 @@ public class ProductQueryService {
         return findProducts.stream()
                 .map(product -> new ProductShortInfoDTO(product, "미완성등급", 0)) // 신뢰등급, 백분위 찾아오는 함수 넣어야 함.
                 .collect(Collectors.toList());
+    }
+
+    public ProductDetailDTO productDetailInfo(Long productId) {
+        Product product = productRepository.findByIdWithSellerAndKindGrade(productId)
+                .orElseThrow(() -> new NoSuchElementException("상품이 존재하지 않습니다."));
+
+        //신뢰등급, 백분위 찾아오는 함수 넣어야 함
+        String sellerRank = "미완성 등급";
+        int sellerPercent = 0;
+        return new ProductDetailDTO(product,sellerRank,sellerPercent);
     }
 }

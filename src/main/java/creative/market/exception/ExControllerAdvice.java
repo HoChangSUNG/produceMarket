@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.NoSuchElementException;
+
 @Slf4j
 @RestControllerAdvice
 public class ExControllerAdvice {
@@ -31,8 +33,8 @@ public class ExControllerAdvice {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ErrorRes illegalExHandle(IllegalArgumentException ex) {
+    @ExceptionHandler(NoSuchElementException.class)
+    public ErrorRes noSuchExHandle(NoSuchElementException ex) {
         return new ErrorRes(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 

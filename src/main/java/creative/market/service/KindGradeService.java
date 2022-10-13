@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.NoSuchElementException;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -18,7 +20,7 @@ public class KindGradeService {
 
     public CriteriaSrcAndRetailUnitDTO findSrcAndRetailById(Long kindGradeId) {
         KindGrade findKindGrade = kindGradeRepository.findById(kindGradeId)
-                .orElseThrow(() -> new IllegalArgumentException("올바른 카테고리가 아닙니다"));
+                .orElseThrow(() -> new NoSuchElementException("올바른 카테고리가 아닙니다"));
         // 소매 단위
         String retailUnit = findKindGrade.getKind().getRetailsaleUnit();
 
