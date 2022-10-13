@@ -23,6 +23,7 @@ import static creative.market.domain.category.QItemCategory.*;
 import static creative.market.domain.category.QKind.*;
 import static creative.market.domain.category.QKindGrade.*;
 import static creative.market.domain.product.QProduct.*;
+import static creative.market.domain.user.QUser.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -36,8 +37,8 @@ public class ProductRepository {
         return product.getId();
     }
 
-    public Product findById(Long id) {
-        return em.find(Product.class, id);
+    public Optional<Product> findById(Long id) {
+        return Optional.ofNullable(em.find(Product.class, id));
     }
 
     public List<Product> findProductByCondition(ProductSearchConditionReq condition) { // 조건에 따라 상품 리스트 조회
@@ -60,7 +61,7 @@ public class ProductRepository {
         return Optional.ofNullable(
                 queryFactory.selectFrom(product)
                         .join(product.kindGrade,kindGrade).fetchJoin()
-                        .join(product.user, QUser.user).fetchJoin()
+                        .join(product.user, user).fetchJoin()
                         .fetchOne());
     }
     private OrderSpecifier<?> orderCondition(String orderBy) {

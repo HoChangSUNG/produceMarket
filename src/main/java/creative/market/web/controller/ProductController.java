@@ -35,7 +35,6 @@ public class ProductController {
     private String rootPath;
     private final ProductService productService;
     private final ProductQueryService productQueryService;
-    private final ProductRepository productRepository;
 
     @GetMapping
     public ResultRes getProductList(ProductSearchConditionReq searchCondition) {// 상품 리스트 조회

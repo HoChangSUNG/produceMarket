@@ -55,7 +55,8 @@ class ProductServiceTest {
 
         //when
         Long productId = productService.register(registerProductDTO);
-        Product findProduct = productRepository.findById(productId);
+        Product findProduct = productRepository.findById(productId)
+                .orElseThrow(()->new NoSuchElementException("카테고리가 존재하지 않습니다"));
         List<ProductImage> findProductImages = findProduct.getProductImages();
 
         //then

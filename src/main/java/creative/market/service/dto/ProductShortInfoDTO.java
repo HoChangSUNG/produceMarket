@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.format.DateTimeFormatter;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -12,7 +14,8 @@ public class ProductShortInfoDTO {
     private Long productId;
     private String productName;
     private int price;
-    private Long sellerId;
+
+    private String createdDate;
     private String sellerName;
     private String sellerRank;
     private int sellerPercent;
@@ -22,7 +25,7 @@ public class ProductShortInfoDTO {
         productId = product.getId();
         productName = product.getName();
         price = product.getPrice();
-        sellerId =product.getUser().getId();
+        createdDate = product.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         sellerName = product.getUser().getName();
         sellerRank = rank;
         sellerPercent = percent;
