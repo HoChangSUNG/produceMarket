@@ -3,10 +3,13 @@ package creative.market.aop;
 import creative.market.exception.LoginAuthenticationException;
 import creative.market.util.SessionUtils;
 import creative.market.service.dto.LoginUserDTO;
+import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
@@ -15,13 +18,15 @@ import javax.servlet.http.HttpServletRequest;
 import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
-@Import(LoginCheckAspectTest.LoginCheckTest.class)
+@Import(LoginCheckTest.class)
+@Slf4j
 class LoginCheckAspectTest {
 
     @Autowired
     LoginCheckTest loginCheckTest;
     @Autowired
     HttpServletRequest request;
+    @Autowired ApplicationContext ac;
 
     @Test
     @DisplayName("SELLER 로그인 인증 성공(SELLER로 로그인한 경우)")
@@ -37,6 +42,7 @@ class LoginCheckAspectTest {
     @DisplayName("SELLER 로그인 인증 실패(BUYER로 로그인한 경우)")
     void sellerLoginCheckFail1() throws Exception {
         //given
+        loginCheckTest.logout();
         createSession(UserType.BUYER);
 
         //then
@@ -91,7 +97,6 @@ class LoginCheckAspectTest {
     void sellerAndAdminLoginFail2() throws Exception{
         //given
         createSession(UserType.BUYER);
-
         //then
         assertThatThrownBy(() -> loginCheckTest.sellerOrAdminLoginCheck())
                 .isInstanceOf(LoginAuthenticationException.class)
@@ -118,24 +123,25 @@ class LoginCheckAspectTest {
         SessionUtils.createSession(request, userType.name(), loginUser);
     }
 
-    @Component
-    static class LoginCheckTest {
-
-        @Autowired HttpServletRequest request;
-
-        @LoginCheck(type = UserType.SELLER)
-        public String sellerLoginCheck() {
-            return "ok";
-        }
-
-        @LoginCheck(type = {UserType.SELLER,UserType.ADMIN})
-        public String sellerOrAdminLoginCheck() {
-            return "ok";
-        }
-
-        public void logout(){
-            SessionUtils.expire(request);
-        }
-
-    }
+//    @Component
+//    @Slf4j
+//    static class LoginCheckTest {
+//
+//        @Autowired HttpServletRequest request;
+//
+//        @LoginCheck(type = UserType.SELLER)
+//        public String sellerLoginCheck() {
+//            return "ok";
+//        }
+//
+//        @LoginCheck(type = {UserType.SELLER,UserType.ADMIN})
+//        public String sellerOrAdminLoginCheck() {
+//            return "ok";
+//        }
+//
+//        public void logout(){
+//            SessionUtils.expire(request);
+//        }
+//
+//    }
 }

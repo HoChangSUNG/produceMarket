@@ -1,9 +1,12 @@
 package creative.market.repository;
 
+import com.querydsl.core.QueryFactory;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import creative.market.domain.product.Product;
+import creative.market.domain.product.QProduct;
+import creative.market.domain.user.QUser;
 import creative.market.repository.dto.ProductSearchConditionReq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -12,6 +15,7 @@ import org.springframework.util.StringUtils;
 import javax.persistence.EntityManager;
 
 import java.util.List;
+import java.util.Optional;
 
 import static creative.market.domain.category.QGradeCriteria.*;
 import static creative.market.domain.category.QItem.*;
@@ -52,6 +56,13 @@ public class ProductRepository {
                 .fetch();
     }
 
+    public Optional<Product> findByIdWithSellerAndKindGrade(Long id) {
+        return Optional.ofNullable(
+                queryFactory.selectFrom(product)
+                        .join(product.kindGrade,kindGrade).fetchJoin()
+                        .join(product.user, QUser.user).fetchJoin()
+                        .fetchOne());
+    }
     private OrderSpecifier<?> orderCondition(String orderBy) {
         if (orderBy.equals("latest")) { // 최신순
             return product.createdDate.desc();
