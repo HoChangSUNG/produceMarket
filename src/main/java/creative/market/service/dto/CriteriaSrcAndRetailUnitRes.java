@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CriteriaSrcAndRetailUnitDTO {
+public class CriteriaSrcAndRetailUnitRes {
 
     private String criteriaSrc;
     private String retailUnit;

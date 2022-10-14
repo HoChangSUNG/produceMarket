@@ -2,11 +2,9 @@ package creative.market.web.controller;
 
 import creative.market.service.ItemCategoryService;
 import creative.market.service.KindGradeService;
-import creative.market.service.dto.CriteriaSrcAndRetailUnitDTO;
+import creative.market.service.dto.CriteriaSrcAndRetailUnitRes;
 import creative.market.web.dto.CategoryRes;
 import creative.market.web.dto.ResultRes;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,7 +26,7 @@ public class ItemCategoryController {
 
     @GetMapping("/{kindGradeId}")
     public ResultRes itemCriteriaSrcAndUnit(@PathVariable Long kindGradeId) {// 등급 src, 단위 조회
-        CriteriaSrcAndRetailUnitDTO criteriaAndUnit = kindGradeService.findSrcAndRetailById(kindGradeId);
+        CriteriaSrcAndRetailUnitRes criteriaAndUnit = kindGradeService.findSrcAndRetailById(kindGradeId);
         return new ResultRes(criteriaAndUnit);
     }
 

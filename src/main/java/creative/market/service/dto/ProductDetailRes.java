@@ -2,18 +2,16 @@ package creative.market.service.dto;
 
 import creative.market.domain.product.Product;
 import creative.market.domain.product.ProductImage;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
 @Setter
-public class ProductDetailDTO {
+public class ProductDetailRes {
 
     private Long productId;
     private Long kindGradeId;
@@ -26,7 +24,7 @@ public class ProductDetailDTO {
     private int sellerPercent;
     private List<String> ordinalImgSrc;
 
-    public ProductDetailDTO(Product product,String sellerRank,int sellerPercent) {
+    public ProductDetailRes(Product product, String sellerRank, int sellerPercent) {
         this.productId = product.getId();
         this.kindGradeId = product.getKindGrade().getId();
         this.productName = product.getName();
