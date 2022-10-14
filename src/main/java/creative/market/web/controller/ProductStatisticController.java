@@ -26,8 +26,8 @@ public class ProductStatisticController {
         KindGrade findKindGrade = kindGradeRepository.findById(kindGradeId)
                 .orElseThrow(() -> new NoSuchElementException("카테고리가 존재하지 않습니다."));
 
-        LatestPriceRes priceRes = wholesaleAndRetailUtils.getLatestPriceInfo(findKindGrade);// 단위 변환 + 도소매 단위 다른 경우 처리 결과
-        return new ResultRes(priceRes);
+        LatestPriceRes priceResult = wholesaleAndRetailUtils.getLatestPriceInfo(findKindGrade);// 단위 변환 + 도소매 단위 다른 경우 처리 결과
+        return new ResultRes(priceResult);
 
     }
 

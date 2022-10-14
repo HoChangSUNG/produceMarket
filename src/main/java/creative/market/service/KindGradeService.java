@@ -4,7 +4,7 @@ package creative.market.service;
 import creative.market.domain.category.Item;
 import creative.market.domain.category.KindGrade;
 import creative.market.repository.KindGradeRepository;
-import creative.market.service.dto.CriteriaSrcAndRetailUnitDTO;
+import creative.market.service.dto.CriteriaSrcAndRetailUnitRes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,7 +18,7 @@ public class KindGradeService {
 
     private final KindGradeRepository kindGradeRepository;
 
-    public CriteriaSrcAndRetailUnitDTO findSrcAndRetailById(Long kindGradeId) {
+    public CriteriaSrcAndRetailUnitRes findSrcAndRetailById(Long kindGradeId) {
         KindGrade findKindGrade = kindGradeRepository.findById(kindGradeId)
                 .orElseThrow(() -> new NoSuchElementException("올바른 카테고리가 아닙니다"));
         // 소매 단위
@@ -31,6 +31,6 @@ public class KindGradeService {
             criteriaSrc = item.getGradeCriteria().getPath();
         }
 
-        return new CriteriaSrcAndRetailUnitDTO(criteriaSrc, retailUnit);
+        return new CriteriaSrcAndRetailUnitRes(criteriaSrc, retailUnit);
     }
 }

@@ -9,12 +9,12 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
-public class ItemCategoryMenuDTO {
+public class ItemCategoryMenuRes {
 
     private int id;
     private String name;
     private List<ItemMenuDTO> category;
-    public ItemCategoryMenuDTO(ItemCategory itemCategory) {
+    public ItemCategoryMenuRes(ItemCategory itemCategory) {
         this.id = itemCategory.getItemCategoryCode();
         this.name = itemCategory.getName();
         this.category = itemCategory.getItems().stream()
