@@ -62,6 +62,7 @@ public class ProductRepository {
                 queryFactory.selectFrom(product)
                         .join(product.kindGrade,kindGrade).fetchJoin()
                         .join(product.user, user).fetchJoin()
+                        .where(product.id.eq(id))
                         .fetchOne());
     }
     private OrderSpecifier<?> orderCondition(String orderBy) {
