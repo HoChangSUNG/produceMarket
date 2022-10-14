@@ -74,7 +74,7 @@ public class WholesaleAndRetailController {
 
     private KindGrade getKindGradeById(Long kindGradeId) {
         return kindGradeRepository.findById(kindGradeId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 품목입니다."));
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 품목입니다."));
     }
 
     @Getter

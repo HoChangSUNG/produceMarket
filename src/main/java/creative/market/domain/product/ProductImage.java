@@ -44,4 +44,9 @@ public class ProductImage {
             product.getProductImages().add(this);
         }
     }
+
+    public String getStoreImgName() {
+        int position = path.lastIndexOf("/");
+        return path.substring(position + 1);
+    }
 }
