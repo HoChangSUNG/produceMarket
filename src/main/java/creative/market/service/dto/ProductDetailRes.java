@@ -20,6 +20,7 @@ public class ProductDetailRes {
     private int price;
     private String info;
     private String createdDate;
+    private String retailUnit;
     private String sellerName;
     private String sellerRank;
     private int sellerPercent;
@@ -35,6 +36,7 @@ public class ProductDetailRes {
         this.price = product.getPrice();
         this.info = product.getInfo();
         this.createdDate = product.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        this.retailUnit = product.getKindGrade().getKind().getRetailsaleUnit();
         this.sellerName = product.getUser().getName();
         this.sellerRank = sellerRank;
         this.sellerPercent = sellerPercent;
