@@ -35,7 +35,7 @@ public class ProductQueryService {
     }
 
     public ProductDetailRes productDetailInfo(Long productId) {
-        Product product = productRepository.findByIdWithSellerAndKindGrade(productId)
+        Product product = productRepository.findByIdFetchJoinSellerAndKind(productId)
                 .orElseThrow(() -> new NoSuchElementException("상품이 존재하지 않습니다."));
         KindGrade kindGrade = product.getKindGrade();
 
@@ -43,7 +43,7 @@ public class ProductQueryService {
         //신뢰등급, 백분위 찾아오는 함수 넣어야 함
         String sellerRank = "미완성 등급";
         int sellerPercent = 0;
-        int productAvgPrice = productRepository.findProductAvgPrice(kindGrade.getId()).intValue();
+        int productAvgPrice = productRepository.findProductAvgPrice(kindGrade.getId()).intValue();// 상품 평균 가격
 
         return new ProductDetailRes(product,sellerRank,sellerPercent,productAvgPrice,retailAndWholesalePriceResult);
     }
