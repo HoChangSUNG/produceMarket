@@ -1,6 +1,8 @@
 package creative.market.service;
 
+import creative.market.aop.LoginCheck;
 import creative.market.aop.UserType;
+import creative.market.argumentresolver.Login;
 import creative.market.domain.Address;
 import creative.market.domain.user.Admin;
 import creative.market.domain.user.Buyer;
@@ -14,6 +16,7 @@ import creative.market.repository.user.SellerRepository;
 import creative.market.repository.user.UserRepository;
 import creative.market.service.dto.LoginRes;
 import creative.market.service.dto.LoginUserDTO;
+import creative.market.service.dto.UserInfoRes;
 import creative.market.util.SessionUtils;
 import creative.market.web.dto.RegisterReq;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +31,17 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class UserService {
 
+    // lazy로딩으로 조회할때만 queryrepository 만들어서 쓰고 다른 repository,service는 엔티티만 반환하기
+    // 수정해야함
+
     private final UserRepository userRepository;
     private final BuyerRepository buyerRepository;
     private final SellerRepository sellerRepository;
     private final AdminRepository adminRepository;
+
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
+    }
 
     @Transactional
     public Long register(RegisterReq registerReq) {
@@ -54,13 +64,13 @@ public class UserService {
         User user = null;
         UserType userType = null;
 
-        if(buyer.isPresent()) {
+        if (buyer.isPresent()) {
             user = buyer.get();
             userType = UserType.BUYER;
-        } else if(seller.isPresent()) {
+        } else if (seller.isPresent()) {
             user = seller.get();
             userType = UserType.SELLER;
-        } else if(admin.isPresent()) {
+        } else if (admin.isPresent()) {
             user = admin.get();
             userType = UserType.ADMIN;
         }
@@ -79,6 +89,21 @@ public class UserService {
     @Transactional
     public void delete(Long id) {
         userRepository.delete(id);
+    }
+
+    public UserInfoRes getInfo(LoginUserDTO loginUserDTO) {
+        Optional<Seller> sellerCheck = sellerRepository.findById(loginUserDTO.getId());
+        Optional<Buyer> buyerCheck = buyerRepository.findById(loginUserDTO.getId());
+
+        if(sellerCheck.isPresent()) {
+            Seller seller = sellerCheck.get();
+            return new UserInfoRes(seller.getName(), seller.getLoginId(), seller.getPassword(), seller.getBirth(), seller.getEmail(), seller.getPhoneNumber(), seller.getAddress().getJibun(), seller.getAddress().getRoad(), seller.getAddress().getZipcode(), seller.getAddress().getDetailAddress());
+        } else if(buyerCheck.isPresent()) {
+            Buyer buyer = buyerCheck.get();
+            return new UserInfoRes(buyer.getName(), buyer.getLoginId(), buyer.getPassword(), buyer.getBirth(), buyer.getEmail(), buyer.getPhoneNumber(), buyer.getAddress().getJibun(), buyer.getAddress().getRoad(), buyer.getAddress().getZipcode(), buyer.getAddress().getDetailAddress());
+        } else {
+            throw new LoginAuthenticationException("권한이 없습니다");
+        }
     }
 
     private void createSession(UserType userType, HttpServletRequest request, Long id, String name) {

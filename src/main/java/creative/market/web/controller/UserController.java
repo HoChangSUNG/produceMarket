@@ -1,7 +1,12 @@
 package creative.market.web.controller;
 
+import creative.market.aop.LoginCheck;
+import creative.market.aop.UserType;
+import creative.market.argumentresolver.Login;
 import creative.market.service.UserService;
 import creative.market.service.dto.LoginRes;
+import creative.market.service.dto.LoginUserDTO;
+import creative.market.service.dto.UserInfoRes;
 import creative.market.web.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -38,4 +43,11 @@ public class UserController {
         return new ResultRes(new MessageRes("로그아웃 성공"));
     }
 
+    @GetMapping
+    @LoginCheck(type = {UserType.SELLER,UserType.BUYER})
+    public ResultRes getInfo(@Login LoginUserDTO loginUserDTO) {
+        UserInfoRes userInfoRes = userService.getInfo(loginUserDTO);
+
+        return new ResultRes(userInfoRes);
+    }
 }

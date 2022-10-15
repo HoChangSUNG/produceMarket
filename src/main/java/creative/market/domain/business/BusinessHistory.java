@@ -7,6 +7,7 @@ import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+import static javax.persistence.CascadeType.*;
 import static javax.persistence.FetchType.*;
 
 @Entity
@@ -31,7 +32,7 @@ public class BusinessHistory extends ChangeDate {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(fetch = LAZY)
+    @ManyToOne(fetch = LAZY, cascade = ALL)
     @JoinColumn(name = "image_id")
     private BusinessImage businessImage;
 
@@ -42,5 +43,9 @@ public class BusinessHistory extends ChangeDate {
         this.status = status;
         this.user = user;
         this.businessImage = businessImage;
+    }
+
+    public void changeStatus(BusinessStatus status) {
+        this.status = status;
     }
 }
