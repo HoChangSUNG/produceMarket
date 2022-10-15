@@ -2,6 +2,7 @@ package creative.market.service.dto;
 
 import creative.market.domain.product.Product;
 import creative.market.domain.product.ProductImage;
+import creative.market.repository.dto.LatestRetailAndWholesaleDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,8 +24,11 @@ public class ProductDetailRes {
     private String sellerRank;
     private int sellerPercent;
     private List<String> ordinalImgSrc;
+    private String signatureImgSrc;
+    private int productAvgPrice;
+    private LatestRetailAndWholesaleDTO latestMarketPrice;
 
-    public ProductDetailRes(Product product, String sellerRank, int sellerPercent) {
+    public ProductDetailRes(Product product, String sellerRank, int sellerPercent,int productAvgPrice, LatestRetailAndWholesaleDTO latestMarketPrice) {
         this.productId = product.getId();
         this.kindGradeId = product.getKindGrade().getId();
         this.productName = product.getName();
@@ -37,5 +41,8 @@ public class ProductDetailRes {
         this.ordinalImgSrc = product.getOrdinalProductImage().stream()
                 .map(ProductImage::getPath)
                 .collect(Collectors.toList());
+        this.signatureImgSrc = product.getSignatureProductImage().getPath();
+        this.productAvgPrice = productAvgPrice;
+        this.latestMarketPrice = latestMarketPrice;
     }
 }

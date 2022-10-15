@@ -43,7 +43,7 @@ public class ProductController {
     }
 
     @GetMapping("/{productId}")
-    public ResultRes GetProductDetail(@PathVariable Long productId) {
+    public ResultRes GetProductDetail(@PathVariable Long productId) { // 상품 상세 조회
         return new ResultRes(productQueryService.productDetailInfo(productId));
     }
 

@@ -2,7 +2,9 @@ package creative.market.util;
 
 import creative.market.domain.category.Kind;
 import creative.market.domain.category.KindGrade;
-import creative.market.web.dto.LatestPriceRes;
+import creative.market.repository.dto.LatestRetailAndWholesaleDTO;
+import creative.market.util.dto.LatestConvertPriceDTO;
+import creative.market.util.dto.LatestPriceDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -69,7 +71,7 @@ public class WholesaleAndRetailUtils {
 
 
     // 최근 일자 도소매 정보 조회(단위 변환 + 도소매 단위 다른 경우 처리)
-    public LatestPriceRes getLatestPriceInfo(KindGrade kindGrade) {
+    public LatestRetailAndWholesaleDTO getLatestPriceInfo(KindGrade kindGrade) {
         int itemCategoryCode = kindGrade.getKind().getItem().getItemCategory().getItemCategoryCode();
         int itemCode = kindGrade.getKind().getItem().getItemCode();
         int kindCode = kindGrade.getKind().getCode();
@@ -81,7 +83,7 @@ public class WholesaleAndRetailUtils {
         LatestPriceDTO retailResult = getValidRetail(retail, kindGrade.getKind());
         LatestPriceDTO wholesaleResult = getValidWholesale(wholesale, kindGrade.getKind());
 
-        return new LatestPriceRes(retailResult,wholesaleResult);
+        return new LatestRetailAndWholesaleDTO(retailResult,wholesaleResult);
     }
 
     private LatestPriceDTO getValidWholesale(LatestConvertPriceDTO wholesale, Kind kind) {

@@ -1,6 +1,6 @@
-package creative.market.web.dto;
+package creative.market.repository.dto;
 
-import creative.market.util.LatestPriceDTO;
+import creative.market.util.dto.LatestPriceDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +8,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class LatestPriceRes {
+public class LatestRetailAndWholesaleDTO {
 
     private LatestPriceDTO retail;
     private LatestPriceDTO wholesale;
