@@ -3,7 +3,9 @@ package creative.market.repository;
 import com.querydsl.core.QueryFactory;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.MathExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import creative.market.domain.category.QKindGrade;
 import creative.market.domain.product.Product;
 import creative.market.domain.product.QProduct;
 import creative.market.domain.user.QUser;
@@ -61,10 +63,20 @@ public class ProductRepository {
         return Optional.ofNullable(
                 queryFactory.selectFrom(product)
                         .join(product.kindGrade,kindGrade).fetchJoin()
+                        .join(kindGrade.kind).fetchJoin()
                         .join(product.user, user).fetchJoin()
                         .where(product.id.eq(id))
                         .fetchOne());
     }
+
+    public Double findProductAvgPrice(Long kindGradeId) { // 상품 평균 가격
+        return queryFactory.select(product.price.avg())
+                .from(product)
+                .join(product.kindGrade, kindGrade)
+                .where(kindGrade.id.eq(kindGradeId))
+                .fetchOne();
+    }
+
     private OrderSpecifier<?> orderCondition(String orderBy) {
         if (orderBy.equals("latest")) { // 최신순
             return product.createdDate.desc();

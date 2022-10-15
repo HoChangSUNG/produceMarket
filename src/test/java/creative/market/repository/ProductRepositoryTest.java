@@ -8,6 +8,9 @@ import creative.market.domain.product.ProductImageType;
 import creative.market.domain.user.Seller;
 import creative.market.repository.dto.ProductSearchConditionReq;
 import creative.market.repository.user.SellerRepository;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @SpringBootTest
 @Transactional
@@ -31,39 +36,77 @@ class ProductRepositoryTest {
 
     @BeforeEach
     void before () throws Exception{
-        Address address = Address.builder().jibun("1").road("1").zipcode(12).detailAddress("234").build();
-        Seller seller = getSeller("김현민","loginId1","pw1",address);
+        Address address = createAddress("1","1",12,"234");
+        Seller seller = createSeller("김현민","loginId1","pw1",address);
+        em.persist(seller);
 
         KindGrade kindGrade1 = createKindGrade(432L);
-        createProduct("대표사진.jpg", "/sef.jpg", "쌀-일반계-상품", 10000, "쌀 맛있어요1", seller, kindGrade1);
+        ProductImage sigImg1 = createSigImg("sigP1.jpg", "/ssf/sigP1.jpg");
+        List<ProductImage> ordinalImgList1 = createOrdinalImgList(Arrays.asList(new ImageDTO("ordinal1", "/ordinal1.jpg")));
+        Product product1 = createProduct("쌀-일반계-상품", 10000, "쌀 맛있어요1", seller, kindGrade1,sigImg1,ordinalImgList1);
+        em.persist(product1);
 
         KindGrade kindGrade2 = createKindGrade(433L);
-        createProduct("대표사진2.jpg", "/sef.jpg", "쌀-일반계-중품", 20000, "쌀 맛있어요2", seller, kindGrade2);
+        ProductImage sigImg2 = createSigImg("sigP2.jpg", "/ssf/sigP2.jpg");
+        List<ProductImage> ordinalImgList2 = createOrdinalImgList(Arrays.asList(new ImageDTO("ordinal2", "/ordinal2.jpg")));
+        Product product2 =createProduct( "쌀-일반계-중품", 20000, "쌀 맛있어요2", seller, kindGrade2,sigImg2,ordinalImgList2);
+        em.persist(product2);
 
         KindGrade kindGrade3 = createKindGrade(404L);
-        createProduct("대표사진3.jpg", "/seㄴ3f.jpg", "쌀-백미-등급없음", 13000, "백미 맛있어요3", seller, kindGrade3);
+        ProductImage sigImg3 = createSigImg("sigP2.jpg", "/ssf/sigP2.jpg");
+        List<ProductImage> ordinalImgList3 = createOrdinalImgList(Arrays.asList(new ImageDTO("ordinal2", "/ordinal2.jpg")));
+        Product product3 =createProduct( "쌀-백미-등급없음", 13000, "백미 맛있어요3", seller, kindGrade3,sigImg3,ordinalImgList3);
+        em.persist(product3);
 
         KindGrade kindGrade4 = createKindGrade(474L);
-        createProduct("대표사진4.jpg", "/seㄴ4f.jpg", "배추-봄-상품", 50000, "배추 맛있어요3", seller, kindGrade4);
+        ProductImage sigImg4 = createSigImg("sigP2.jpg", "/ssf/sigP2.jpg");
+        List<ProductImage> ordinalImgList4 = createOrdinalImgList(Arrays.asList(new ImageDTO("ordinal2", "/ordinal2.jpg")));
+        Product product4 =createProduct( "배추-봄-상품", 50000, "배추 맛있어요3", seller, kindGrade4,sigImg4,ordinalImgList4);
+        em.persist(product4);
+
     }
 
-    private Seller getSeller(String name,String loginId, String pw,Address address) {
+    private Address createAddress(String jibun, String raod, int zipcode, String detailAddress) {
+        return Address.builder().jibun(jibun).road(raod).zipcode(zipcode).detailAddress(detailAddress).build();
+    }
+
+    private Seller createSeller(String name, String loginId, String pw, Address address) {
         Seller seller = Seller.builder().name(name).loginId(loginId).password(pw).address(address).build();
-        em.persist(seller);
         return seller;
     }
 
-    private Product createProduct(String sigImgName, String sigImgPath, String productName, int price, String productInfo, Seller seller, KindGrade kindGrade) {
-        ProductImage sigImg = ProductImage.builder().name(sigImgName).path(sigImgPath).type(ProductImageType.SIGNATURE).build();
+    private Product createProduct( String productName, int price, String productInfo, Seller seller, KindGrade kindGrade,ProductImage sigImg,List<ProductImage> ordinalImgList) {
         Product product = Product.builder().name(productName).price(price).info(productInfo).user(seller)
                 .kindGrade(kindGrade)
                 .ordinalProductImages(new ArrayList<ProductImage>())
                 .signatureProductImage(sigImg)
+                .ordinalProductImages(ordinalImgList)
                 .build();
         em.persist(product);
         return product;
     }
 
+    private ProductImage createProductImage(String imgName,String imgPath,ProductImageType imageType) {
+        return ProductImage.builder().name(imgName).path(imgPath).type(imageType).build();
+    }
+
+    private ProductImage createSigImg(String imgName,String imgPath) {
+        return createProductImage(imgName,imgPath,ProductImageType.SIGNATURE);
+    }
+
+    private List<ProductImage> createOrdinalImgList(List<ImageDTO> imageDTOList) {
+        return imageDTOList.stream()
+                .map(imageDTO -> createProductImage(imageDTO.getName(),imageDTO.getPath(),ProductImageType.ORDINAL))
+                .collect(Collectors.toList());
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    static class ImageDTO {
+        private String name;
+        private String path;
+    }
     @Test
     @DisplayName("kindGradeId로 조회")
     void findByKindGradeId() throws Exception{
@@ -180,6 +223,39 @@ class ProductRepositoryTest {
         //then
         Assertions.assertThat(result1.size()).isEqualTo(3);
         Assertions.assertThat(result1).extracting("name").contains("쌀-일반계-중품","쌀-백미-등급없음","쌀-일반계-상품");// 모든 상품 가격순
+
+    }
+
+    @Test
+    @DisplayName("카테고리별 상품 평균 가격")
+    void priceAvg() throws Exception{
+        //given
+        Address address = createAddress("12","21",212,"2342222");
+        Seller seller = createSeller("성호창","loginId2","pw2",address);
+        em.persist(seller);
+
+        KindGrade kindGrade1 = createKindGrade(432L);
+        ProductImage sigImg1 = createSigImg("sigP1222.jpg", "/ssf/sigP1222.jpg");
+        List<ProductImage> ordinalImgList1 = createOrdinalImgList(Arrays.asList(new ImageDTO("ordinal11", "/ordinal11.jpg")));
+        Product product1 = createProduct("쌀-일반계-상품2", 15000, "쌀 맛있어요2", seller, kindGrade1,sigImg1,ordinalImgList1);
+        em.persist(product1);
+
+        KindGrade kindGrade2 = createKindGrade(433L);
+        ProductImage sigImg2 = createSigImg("sigP2ㄴㄴ.jpg", "/ss23fㄴ/sig22P2.jpg");
+        List<ProductImage> ordinalImgList2 = createOrdinalImgList(Arrays.asList(new ImageDTO("ordinal2", "/ordinal2.jpg")));
+        Product product2 =createProduct( "쌀-일반계-중품", 33333, "쌀 맛있어요22", seller, kindGrade2,sigImg2,ordinalImgList2);
+        em.persist(product2);
+        //when
+
+        Double avg1 = productRepository.findProductAvgPrice(kindGrade1.getId());
+        Double avg2 = productRepository.findProductAvgPrice(499L);
+        Double avg3 = productRepository.findProductAvgPrice(kindGrade2.getId());
+
+
+        //then
+        Assertions.assertThat(avg1.intValue()).isEqualTo(12500);
+        Assertions.assertThat(avg2).isNull(); // 존재하지 않는 kindGradeId 사용
+        Assertions.assertThat(avg3.intValue()).isEqualTo(26666);
 
     }
 
