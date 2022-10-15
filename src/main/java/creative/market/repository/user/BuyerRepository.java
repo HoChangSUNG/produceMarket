@@ -40,4 +40,17 @@ public class BuyerRepository {
                         .where(buyer.loginId.eq(loginId))
                         .fetchOne());
     }
+
+    public Optional<Buyer> findById(Long id) {
+        return Optional.ofNullable(em.find(Buyer.class, id));
+    }
+
+    public void updateType(Long id) {
+        em.createNativeQuery("update User b set b.dtype = 'Seller' where b.user_id = :id")
+                .setParameter("id", id)
+                .executeUpdate();
+
+        em.flush();
+        em.clear();
+    }
 }
