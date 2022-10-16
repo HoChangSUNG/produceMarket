@@ -3,6 +3,7 @@ package creative.market.repository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import creative.market.domain.category.QGrade;
 import creative.market.domain.product.Product;
 import creative.market.repository.dto.ProductSearchConditionReq;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import javax.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 
+import static creative.market.domain.category.QGrade.*;
 import static creative.market.domain.category.QGradeCriteria.*;
 import static creative.market.domain.category.QItem.*;
 import static creative.market.domain.category.QItemCategory.*;
@@ -54,15 +56,28 @@ public class ProductRepository {
                 .fetch();
     }
 
-    public Optional<Product> findByIdFetchJoinSellerAndKind(Long id) {
+    public Optional<Product> findByIdFetchJoinSellerAndKind(Long productId) {
         return Optional.ofNullable(
                 queryFactory.selectFrom(product)
                         .join(product.kindGrade,kindGrade).fetchJoin()
                         .join(kindGrade.kind, kind).fetchJoin()
                         .join(kindGrade.kind).fetchJoin()
                         .join(product.user, user).fetchJoin()
-                        .where(product.id.eq(id))
+                        .where(product.id.eq(productId))
                         .fetchOne());
+    }
+
+    public Optional<Product> findByIdFetchJoinItemCategory(Long productId) {
+        return Optional.ofNullable(
+                queryFactory.selectFrom(product)
+                        .join(product.kindGrade,kindGrade).fetchJoin()
+                        .join(kindGrade.grade, grade)
+                        .join(kindGrade.kind, kind).fetchJoin()
+                        .join(kind.item,item).fetchJoin()
+                        .join(item.itemCategory,itemCategory)
+                        .where(product.id.eq(productId))
+                        .fetchOne()
+        );
     }
 
     public Double findProductAvgPrice(Long kindGradeId) { // 상품 평균 가격

@@ -26,6 +26,12 @@ public class ExControllerAdvice {
         return new ErrorRes(HttpStatus.BAD_REQUEST.value(), ex.getBindingResult().getAllErrors().get(0).getDefaultMessage());
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(FileSaveException.class)
+    public ErrorRes FileSaveException(FileSaveException ex) { // 파일 저장 오류
+        return new ErrorRes(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+    }
+
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(LoginAuthenticationException.class)
     public ErrorRes loginAuthExHandle(LoginAuthenticationException ex) {

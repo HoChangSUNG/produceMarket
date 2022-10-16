@@ -4,6 +4,7 @@ import creative.market.domain.category.KindGrade;
 import creative.market.domain.product.Product;
 import creative.market.repository.ProductRepository;
 import creative.market.repository.dto.ProductSearchConditionReq;
+import creative.market.repository.dto.ProductUpdateFormRes;
 import creative.market.service.dto.ProductDetailRes;
 import creative.market.service.dto.ProductShortInfoRes;
 import creative.market.util.WholesaleAndRetailUtils;
@@ -46,5 +47,11 @@ public class ProductQueryService {
         int productAvgPrice = productRepository.findProductAvgPrice(kindGrade.getId()).intValue();// 상품 평균 가격
 
         return new ProductDetailRes(product,sellerRank,sellerPercent,productAvgPrice,retailAndWholesalePriceResult);
+    }
+
+    public ProductUpdateFormRes productUpdateForm(Long productId) {
+        Product product = productRepository.findByIdFetchJoinItemCategory(productId)
+                .orElseThrow(() -> new NoSuchElementException("상품이 존재하지 않습니다."));
+        return new ProductUpdateFormRes(product);
     }
 }
