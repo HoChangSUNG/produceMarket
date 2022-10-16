@@ -65,7 +65,9 @@ public class ProductController {
     }
 
     @GetMapping("/update/{productId}")
-    public ResultRes getUpdateForm(@PathVariable Long productId) { // 상품 수정 정보 전달
+    @LoginCheck(type = {UserType.SELLER})
+    public ResultRes getUpdateForm(@PathVariable Long productId, @Login LoginUserDTO loginUserDTO) { // 상품 수정 전 기존 정보 전달
+        productService.sellerAccessCheck(productId, loginUserDTO.getId());
         return new ResultRes(productQueryService.productUpdateForm(productId));
     }
 

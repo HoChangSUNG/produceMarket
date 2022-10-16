@@ -18,7 +18,7 @@ public class UpdateProductFormReq {
     @NotNull(message = "카테고리를 선택해주세요")
     private Long kindGradeId;
     @NotBlank(message = "상품 이름을 입력해주세요")
-    private String name;
+    private String productName;
     @NotNull(message = "가격을 입력해주세요")
     private Integer price;
 

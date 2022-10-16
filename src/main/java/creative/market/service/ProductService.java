@@ -86,21 +86,17 @@ public class ProductService {
     }
 
     public Long update(Long productId, UpdateProductFormReq updateFormReq, Long userId) { // 상품 수정
-        // product 있는지 확인
+
         Product findProduct = productRepository.findByIdFetchJoinSellerAndKind(productId)
                 .orElseThrow(() -> new NoSuchElementException("상품이 존재하지 않습니다."));
 
-        // kindGrade 있는지 확인
         KindGrade findKindGrade = kindGradeRepository.findById(updateFormReq.getKindGradeId())
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 카테고리입니다."));
 
-        // 상품을 등록한 사람인지
-        if (!findProduct.getUser().getId().equals(userId)) {
-            throw new LoginAuthenticationException("변경 권한이 없습니다.");
-        }
+        sellerAccessCheck(productId, userId); // 상품을 등록한 사람인지 체크
 
         //상푸 수정
-        findProduct.changeProduct(findKindGrade, updateFormReq.getName(), updateFormReq.getPrice(), updateFormReq.getInfo());
+        findProduct.changeProduct(findKindGrade, updateFormReq.getProductName(), updateFormReq.getPrice(), updateFormReq.getInfo());
 
         //사진 수정
         changeSignatureImage(findProduct, updateFormReq.getSigImg());
@@ -109,6 +105,11 @@ public class ProductService {
 
         return findProduct.getId();
     }
+
+    public void sellerAccessCheck(Long productId, Long userId) {
+        productRepository.findByIdAndSeller(productId, userId).orElseThrow(() -> new LoginAuthenticationException("접근 권한이 없습니다."));
+    }
+
 
     private void changeSignatureImage(Product product, MultipartFile sigImg) {
         try {
