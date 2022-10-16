@@ -3,8 +3,7 @@ package creative.market.web.controller;
 import creative.market.aop.LoginCheck;
 import creative.market.aop.UserType;
 import creative.market.argumentresolver.Login;
-import creative.market.domain.product.Product;
-import creative.market.repository.ProductRepository;
+import creative.market.exception.FileSaveException;
 import creative.market.repository.dto.ProductSearchConditionReq;
 import creative.market.service.ProductService;
 import creative.market.service.dto.LoginUserDTO;
@@ -16,15 +15,14 @@ import creative.market.util.FileSubPath;
 import creative.market.web.dto.CreateProductFormReq;
 import creative.market.web.dto.MessageRes;
 import creative.market.web.dto.ResultRes;
+import creative.market.service.dto.UpdateProductFormReq;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequiredArgsConstructor
@@ -49,19 +47,36 @@ public class ProductController {
 
     @PostMapping
     @LoginCheck(type = {UserType.SELLER})
-    public ResultRes createProduct(@Valid CreateProductFormReq productReq, @Login LoginUserDTO loginUserDTO) throws IOException { // 상품 생성
+    public ResultRes createProduct(@Valid CreateProductFormReq productReq, @Login LoginUserDTO loginUserDTO) { // 상품 생성
 
-        // 사진 저장
-        UploadFileDTO sigImage = FileStoreUtils.storeFile(productReq.getSigImg(), rootPath, FileSubPath.PRODUCT_PATH);
-        List<UploadFileDTO> ordinalImages = FileStoreUtils.storeFiles(productReq.getImg(), rootPath, FileSubPath.PRODUCT_PATH);
+        try {
+            // 사진 저장
+            UploadFileDTO sigImage = FileStoreUtils.storeFile(productReq.getSigImg(), rootPath, FileSubPath.PRODUCT_PATH);
+            List<UploadFileDTO> ordinalImages = FileStoreUtils.storeFiles(productReq.getImg(), rootPath, FileSubPath.PRODUCT_PATH);
 
-        RegisterProductDTO registerProductDTO = createRegisterProductDTO(productReq,loginUserDTO,sigImage,ordinalImages);
+            RegisterProductDTO registerProductDTO = createRegisterProductDTO(productReq, loginUserDTO, sigImage, ordinalImages);
 
-        productService.register(registerProductDTO);
-        return new ResultRes(new MessageRes("상품 등록 성공"));
+            productService.register(registerProductDTO);
+            return new ResultRes(new MessageRes("상품 등록 성공"));
+        } catch (IOException e) {
+            throw new FileSaveException("파일 저장에 실패했습니다. 다시 시도해주세요");
+        }
+
     }
 
-    private RegisterProductDTO createRegisterProductDTO(CreateProductFormReq productReq,LoginUserDTO loginUserDTO, UploadFileDTO sigImage, List<UploadFileDTO> ordinalImages) {
+    @GetMapping("/update/{productId}")
+    public ResultRes getUpdateForm(@PathVariable Long productId) { // 상품 수정 정보 전달
+        return new ResultRes(productQueryService.productUpdateForm(productId));
+    }
+
+    @PostMapping("/update/{productId}")
+    @LoginCheck(type = {UserType.SELLER})
+    public ResultRes updateProduct(@Valid UpdateProductFormReq updateFormReq, @Login LoginUserDTO loginUserDTO, @PathVariable Long productId) { // 상품 수정
+        productService.update(productId, updateFormReq, loginUserDTO.getId());
+        return new ResultRes(new MessageRes("상품 수정 성공"));
+    }
+
+    private RegisterProductDTO createRegisterProductDTO(CreateProductFormReq productReq, LoginUserDTO loginUserDTO, UploadFileDTO sigImage, List<UploadFileDTO> ordinalImages) {
         return new RegisterProductDTO(productReq.getKindGradeId(), productReq.getName(), productReq.getPrice(),
                 productReq.getInfo(), loginUserDTO.getId(), sigImage, ordinalImages);
     }

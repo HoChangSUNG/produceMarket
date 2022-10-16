@@ -76,4 +76,24 @@ public class Product extends CreatedDate {
                 .collect(Collectors.toList());
     }
 
+    public void changeProduct(KindGrade kindGrade, String productName,int price, String info) {
+        this.kindGrade = kindGrade;
+        this.name = productName;
+        this.price = price;
+        this.info = info;
+    }
+
+    public void deleteProductImage(ProductImage productImage) {
+        productImages.remove(productImage);
+    }
+
+
+    public void addProductOrdinalImage(ProductImage productOrdinalImage){
+        productOrdinalImage.changeProduct(this);
+    }
+
+    public void addProductSignatureImage(ProductImage productSignatureImage) {
+        productSignatureImage.changeProduct(this);
+    }
+
 }
