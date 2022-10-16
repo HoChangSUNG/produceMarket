@@ -20,7 +20,7 @@ public class FileStoreUtils {
         List<UploadFileDTO> storeResult = new ArrayList<>();
         for (MultipartFile multipartFile : multipartFiles) {
             if (!multipartFiles.isEmpty()) {
-                storeResult.add(storeFile(multipartFile,rootPath,subPath));
+                storeResult.add(storeFile(multipartFile, rootPath, subPath));
             }
         }
         return storeResult;
@@ -31,13 +31,20 @@ public class FileStoreUtils {
         if (multipartFile.isEmpty()) {
             return null;
         }
-        String originalFilename = multipartFile.getOriginalFilename();// image.png
+        String originalFilename = getOriginalFileName(multipartFile);// image.png
         // 서버에 저장하는 파일명
         String storeFileName = createStoreFileName(originalFilename);
 
         //파일 저장
-        multipartFile.transferTo(new File(getFullPath(rootPath,subPath + storeFileName)));
-        return new UploadFileDTO(originalFilename,storeFileName);
+        multipartFile.transferTo(new File(getFullPath(rootPath, subPath + storeFileName)));
+        return new UploadFileDTO(originalFilename, storeFileName);
+    }
+
+    public static String getOriginalFileName(MultipartFile multipartFile) {
+        if (multipartFile.isEmpty() || multipartFile == null){
+            return null;
+        }
+        return multipartFile.getOriginalFilename();
     }
 
     private static String createStoreFileName(String originalFilename) {
@@ -47,7 +54,7 @@ public class FileStoreUtils {
 
     private static String extractExt(String originalFilename) { // 확장자 추출
         int position = originalFilename.lastIndexOf(".");
-       return originalFilename.substring(position + 1);
+        return originalFilename.substring(position + 1);
     }
 
 
