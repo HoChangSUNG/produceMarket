@@ -16,6 +16,7 @@ import creative.market.service.dto.UploadFileDTO;
 import creative.market.util.FileStoreUtils;
 import creative.market.util.FileSubPath;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class ProductService {
 
     private final ProductRepository productRepository;
@@ -67,8 +70,9 @@ public class ProductService {
                 .ordinalProductImages(ordinalProductImages)
                 .signatureProductImage(sigProductImage)
                 .build();
-
         productRepository.save(product);
+        log.info("등록된 productId={}",product.getId());
+
         return product.getId();
     }
 
@@ -115,11 +119,12 @@ public class ProductService {
         try {
             ProductImage signatureProductImage = product.getSignatureProductImage();
             String existingName = signatureProductImage.getName();// 기존 대표 이미지 이름
-
+            log.info("기존 signature image={}",existingName);
             if (!FileStoreUtils.getOriginalFileName(sigImg).equals(existingName)) { //기존 사진과 이름이 동일하지 않은 경우
                 deleteImage(product, signatureProductImage); // 사진 제거
                 UploadFileDTO uploadFileDTO = FileStoreUtils.storeFile(sigImg, rootPath, FileSubPath.PRODUCT_PATH);
                 product.addProductSignatureImage(createProductImage(uploadFileDTO, ProductImageType.SIGNATURE)); // 사진 추가
+                log.info("update 된 signature image={}",uploadFileDTO.getUploadFileName());
             }
         } catch (IOException e) {
             throw new FileSaveException("대표 이미지 변경에 실패했습니다. 다시 시도해주세요");
@@ -141,13 +146,15 @@ public class ProductService {
 
             // 들어온 사진 측 -> 들어온 파일 이름과 기존 파일 이름 같은 것 없으면 추가
             String[] ordinalImgNames = productOrdinalImages.stream().map(ProductImage::getName).toArray(String[]::new);
+            log.info("기존 ordinal images={}",Arrays.toString(ordinalImgNames));
+
             List<MultipartFile> uploadFiles = ordinalImgList.stream()
                     .filter(ordinalImg -> !StringUtils.containsAny(ordinalImg.getOriginalFilename(), ordinalImgNames)).collect(Collectors.toList());
-
             List<UploadFileDTO> uploadFileDTOS = FileStoreUtils.storeFiles(uploadFiles, rootPath, FileSubPath.PRODUCT_PATH);// 이미지 저장
             List<ProductImage> ordinalProductImages = createProductOrdinalImages(uploadFileDTOS);
 
-            ordinalProductImages.stream().forEach(product::addProductOrdinalImage);
+            ordinalProductImages.forEach(product::addProductOrdinalImage);
+            log.info("update 된 ordinal images={}", Arrays.toString(inputName));
 
         } catch (IOException e) {
             throw new FileSaveException("일반 이미지 변경에 실패했습니다. 다시 시도해주세요");
