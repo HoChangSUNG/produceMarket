@@ -16,6 +16,7 @@ import creative.market.service.dto.UploadFileDTO;
 import creative.market.util.FileStoreUtils;
 import creative.market.util.FileSubPath;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -31,6 +33,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class ProductService {
 
     private final ProductRepository productRepository;
@@ -67,8 +70,9 @@ public class ProductService {
                 .ordinalProductImages(ordinalProductImages)
                 .signatureProductImage(sigProductImage)
                 .build();
-
         productRepository.save(product);
+        log.info("등록된 productId={}",product.getId());
+
         return product.getId();
     }
 
@@ -86,21 +90,17 @@ public class ProductService {
     }
 
     public Long update(Long productId, UpdateProductFormReq updateFormReq, Long userId) { // 상품 수정
-        // product 있는지 확인
+
         Product findProduct = productRepository.findByIdFetchJoinSellerAndKind(productId)
                 .orElseThrow(() -> new NoSuchElementException("상품이 존재하지 않습니다."));
 
-        // kindGrade 있는지 확인
         KindGrade findKindGrade = kindGradeRepository.findById(updateFormReq.getKindGradeId())
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 카테고리입니다."));
 
-        // 상품을 등록한 사람인지
-        if (!findProduct.getUser().getId().equals(userId)) {
-            throw new LoginAuthenticationException("변경 권한이 없습니다.");
-        }
+        sellerAccessCheck(productId, userId); // 상품을 등록한 사람인지 체크
 
         //상푸 수정
-        findProduct.changeProduct(findKindGrade, updateFormReq.getName(), updateFormReq.getPrice(), updateFormReq.getInfo());
+        findProduct.changeProduct(findKindGrade, updateFormReq.getProductName(), updateFormReq.getPrice(), updateFormReq.getInfo());
 
         //사진 수정
         changeSignatureImage(findProduct, updateFormReq.getSigImg());
@@ -110,15 +110,21 @@ public class ProductService {
         return findProduct.getId();
     }
 
+    public void sellerAccessCheck(Long productId, Long userId) {
+        productRepository.findByIdAndSeller(productId, userId).orElseThrow(() -> new LoginAuthenticationException("접근 권한이 없습니다."));
+    }
+
+
     private void changeSignatureImage(Product product, MultipartFile sigImg) {
         try {
             ProductImage signatureProductImage = product.getSignatureProductImage();
             String existingName = signatureProductImage.getName();// 기존 대표 이미지 이름
-
+            log.info("기존 signature image={}",existingName);
             if (!FileStoreUtils.getOriginalFileName(sigImg).equals(existingName)) { //기존 사진과 이름이 동일하지 않은 경우
                 deleteImage(product, signatureProductImage); // 사진 제거
                 UploadFileDTO uploadFileDTO = FileStoreUtils.storeFile(sigImg, rootPath, FileSubPath.PRODUCT_PATH);
                 product.addProductSignatureImage(createProductImage(uploadFileDTO, ProductImageType.SIGNATURE)); // 사진 추가
+                log.info("update 된 signature image={}",uploadFileDTO.getUploadFileName());
             }
         } catch (IOException e) {
             throw new FileSaveException("대표 이미지 변경에 실패했습니다. 다시 시도해주세요");
@@ -140,13 +146,15 @@ public class ProductService {
 
             // 들어온 사진 측 -> 들어온 파일 이름과 기존 파일 이름 같은 것 없으면 추가
             String[] ordinalImgNames = productOrdinalImages.stream().map(ProductImage::getName).toArray(String[]::new);
+            log.info("기존 ordinal images={}",Arrays.toString(ordinalImgNames));
+
             List<MultipartFile> uploadFiles = ordinalImgList.stream()
                     .filter(ordinalImg -> !StringUtils.containsAny(ordinalImg.getOriginalFilename(), ordinalImgNames)).collect(Collectors.toList());
-
             List<UploadFileDTO> uploadFileDTOS = FileStoreUtils.storeFiles(uploadFiles, rootPath, FileSubPath.PRODUCT_PATH);// 이미지 저장
             List<ProductImage> ordinalProductImages = createProductOrdinalImages(uploadFileDTOS);
 
-            ordinalProductImages.stream().forEach(product::addProductOrdinalImage);
+            ordinalProductImages.forEach(product::addProductOrdinalImage);
+            log.info("update 된 ordinal images={}", Arrays.toString(inputName));
 
         } catch (IOException e) {
             throw new FileSaveException("일반 이미지 변경에 실패했습니다. 다시 시도해주세요");
