@@ -41,7 +41,7 @@ public class ProductController {
     }
 
     @GetMapping("/{productId}")
-    public ResultRes GetProductDetail(@PathVariable Long productId) { // 상품 상세 조회
+    public ResultRes getProductDetail(@PathVariable Long productId) { // 상품 상세 조회
         return new ResultRes(productQueryService.productDetailInfo(productId));
     }
 
@@ -67,7 +67,7 @@ public class ProductController {
     @GetMapping("/update/{productId}")
     @LoginCheck(type = {UserType.SELLER})
     public ResultRes getUpdateForm(@PathVariable Long productId, @Login LoginUserDTO loginUserDTO) { // 상품 수정 전 기존 정보 전달
-        productService.sellerAccessCheck(productId, loginUserDTO.getId());
+        productService.sellerAccessCheck(productId, loginUserDTO.getId()); // 상품 수정 권환 확인
         return new ResultRes(productQueryService.productUpdateForm(productId));
     }
 

@@ -17,19 +17,5 @@ import java.util.NoSuchElementException;
 @RestController
 @RequestMapping("/api/products-statistics")
 public class ProductStatisticController {
-    private final KindGradeRepository kindGradeRepository;
-    private final WholesaleAndRetailUtils wholesaleAndRetailUtils;
-
-
-    @GetMapping("/whole-and-retail/{kindGradeId}")
-    public ResultRes getLatestWholesaleAndRetail(@PathVariable Long kindGradeId) {
-        KindGrade findKindGrade = kindGradeRepository.findById(kindGradeId)
-                .orElseThrow(() -> new NoSuchElementException("카테고리가 존재하지 않습니다."));
-
-        LatestRetailAndWholesaleDTO priceResult = wholesaleAndRetailUtils.getLatestPriceInfo(findKindGrade);// 단위 변환 + 도소매 단위 다른 경우 처리 결과
-        return new ResultRes(priceResult);
-
-    }
-
 
 }
