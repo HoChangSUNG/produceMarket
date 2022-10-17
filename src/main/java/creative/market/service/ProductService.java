@@ -89,6 +89,7 @@ public class ProductService {
                 .build();
     }
 
+    @Transactional
     public Long update(Long productId, UpdateProductFormReq updateFormReq, Long userId) { // 상품 수정
 
         Product findProduct = productRepository.findByIdFetchJoinSellerAndKind(productId)
