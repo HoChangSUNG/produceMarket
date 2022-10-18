@@ -119,7 +119,7 @@ class LoginCheckAspectTest {
     }
 
     private void createSession(UserType userType) {
-        LoginUserDTO loginUser = new LoginUserDTO(1L, "김현민");
+        LoginUserDTO loginUser = new LoginUserDTO(1L, "김현민",userType);
         SessionUtils.createSession(request, userType.name(), loginUser);
     }
 

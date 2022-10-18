@@ -12,7 +12,7 @@ import creative.market.service.dto.UploadFileDTO;
 import creative.market.service.query.ProductQueryService;
 import creative.market.util.FileStoreUtils;
 import creative.market.util.FileSubPath;
-import creative.market.web.dto.CreateProductFormReq;
+import creative.market.web.dto.CreateProductReq;
 import creative.market.web.dto.MessageRes;
 import creative.market.web.dto.ResultRes;
 import creative.market.service.dto.UpdateProductFormReq;
@@ -47,7 +47,7 @@ public class ProductController {
 
     @PostMapping
     @LoginCheck(type = {UserType.SELLER})
-    public ResultRes createProduct(@Valid CreateProductFormReq productReq, @Login LoginUserDTO loginUserDTO) { // 상품 생성
+    public ResultRes createProduct(@Valid CreateProductReq productReq, @Login LoginUserDTO loginUserDTO) { // 상품 생성
 
         try {
             // 사진 저장
@@ -78,7 +78,7 @@ public class ProductController {
         return new ResultRes(new MessageRes("상품 수정 성공"));
     }
 
-    private RegisterProductDTO createRegisterProductDTO(CreateProductFormReq productReq, LoginUserDTO loginUserDTO, UploadFileDTO sigImage, List<UploadFileDTO> ordinalImages) {
+    private RegisterProductDTO createRegisterProductDTO(CreateProductReq productReq, LoginUserDTO loginUserDTO, UploadFileDTO sigImage, List<UploadFileDTO> ordinalImages) {
         return new RegisterProductDTO(productReq.getKindGradeId(), productReq.getName(), productReq.getPrice(),
                 productReq.getInfo(), loginUserDTO.getId(), sigImage, ordinalImages);
     }

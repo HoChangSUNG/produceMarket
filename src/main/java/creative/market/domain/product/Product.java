@@ -54,9 +54,12 @@ public class Product extends CreatedDate {
         this.info = info;
         this.kindGrade = kindGrade;
         this.user = user;
-
-        ordinalProductImages.forEach(productImage -> productImage.changeProduct(this));
-        signatureProductImage.changeProduct(this);
+        if (ordinalProductImages != null) {
+            ordinalProductImages.forEach(productImage -> productImage.changeProduct(this));
+        }
+        if (signatureProductImage != null) {
+            signatureProductImage.changeProduct(this);
+        }
 
     }
 

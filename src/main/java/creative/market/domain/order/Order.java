@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import static javax.persistence.FetchType.*;
 
@@ -32,9 +34,19 @@ public class Order extends CreatedDate {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @OneToMany(mappedBy = "order",cascade = CascadeType.ALL,orphanRemoval = true)
+    private List<OrderProduct> orderProducts = new ArrayList<>();
     @Builder
-    public Order(Address address, User user) {
+    public Order(Address address, User user,List<OrderProduct> orderProducts) {
         this.address = address;
         this.user = user;
+        orderProducts.forEach(orderProduct -> orderProduct.changeOrder(this));
     }
+
+    public int getTotalPrice() {
+        return orderProducts.stream()
+                .mapToInt(OrderProduct::getTotalPrice)
+                .sum();
+    }
+
 }
