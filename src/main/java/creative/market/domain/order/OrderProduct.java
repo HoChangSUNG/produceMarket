@@ -15,7 +15,8 @@ import static javax.persistence.FetchType.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderProduct {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_product_id")
     private Long id;
 
@@ -35,11 +36,23 @@ public class OrderProduct {
     private OrderStatus status;
 
     @Builder
-    public OrderProduct(int count, int price, Order order, Product product, OrderStatus status) {
+    public OrderProduct(int count, int price, Product product, OrderStatus status) {
         this.count = count;
         this.price = price;
-        this.order = order;
         this.product = product;
         this.status = status;
     }
+
+    //== 연관관계 편의 메서드==//
+    public void changeOrder(Order order) {
+        if (order != null) {
+            this.order = order;
+            order.getOrderProducts().add(this);
+        }
+    }
+
+    public int getTotalPrice() {
+        return count * price;
+    }
+
 }

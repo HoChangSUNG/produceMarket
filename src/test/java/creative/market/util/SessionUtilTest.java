@@ -27,10 +27,10 @@ class SessionUtilTest {
     @DisplayName("세션 생성 테스트")
     void sessionCreateTest() throws Exception {
         //given
-        LoginUserDTO loginUser = new LoginUserDTO(1L, "성호창");
+        LoginUserDTO loginUser = new LoginUserDTO(1L, "성호창",UserType.BUYER);
 
         //when
-        SessionUtils.createSession(request, UserType.BUYER.name(), loginUser);
+        SessionUtils.createSession(request, loginUser.getUserType().name(), loginUser);
 
         //then
         LoginUserDTO result = (LoginUserDTO) request.getSession().getAttribute(UserType.BUYER.name());
@@ -43,10 +43,10 @@ class SessionUtilTest {
     @DisplayName("세션 조회시 값이 있는 경우")
     void sessionGetTest() throws Exception {
         //given
-        LoginUserDTO loginUser = new LoginUserDTO(1L, "성호창");
+        LoginUserDTO loginUser = new LoginUserDTO(1L, "성호창",UserType.BUYER);
 
         //when
-        SessionUtils.createSession(request, UserType.BUYER.name(), loginUser);
+        SessionUtils.createSession(request, loginUser.getUserType().name(), loginUser);
         LoginUserDTO result = (LoginUserDTO) SessionUtils.getSession(request, UserType.BUYER.name());
 
         //then
@@ -75,10 +75,10 @@ class SessionUtilTest {
     @DisplayName("세션 조회시 값이 없는 경우2")
     void sessionGetFailTest2() throws Exception {
         //given
-        LoginUserDTO loginUser = new LoginUserDTO(1L, "성호창");
+        LoginUserDTO loginUser = new LoginUserDTO(1L, "성호창",UserType.BUYER);
 
         //when
-        SessionUtils.createSession(request,UserType.BUYER.name(), loginUser);
+        SessionUtils.createSession(request,loginUser.getUserType().name(), loginUser);
         LoginUserDTO result = (LoginUserDTO) SessionUtils.getSession(request, UserType.SELLER.name());
 
 
@@ -91,10 +91,10 @@ class SessionUtilTest {
     @DisplayName("세션 만료")
     void sessionInvalidate() throws Exception {
         //given
-        LoginUserDTO loginUser = new LoginUserDTO(1L, "성호창");
+        LoginUserDTO loginUser = new LoginUserDTO(1L, "성호창",UserType.BUYER);
 
         //when
-        SessionUtils.createSession(request, UserType.BUYER.name(), loginUser);
+        SessionUtils.createSession(request, loginUser.getUserType().name(), loginUser);
         LoginUserDTO beforeExpireResult = (LoginUserDTO) SessionUtils.getSession(request, UserType.BUYER.name());
 
         //then

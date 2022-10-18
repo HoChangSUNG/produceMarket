@@ -15,7 +15,8 @@ import static javax.persistence.FetchType.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProductImage {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_image_id")
     private Long id;
 
@@ -31,11 +32,10 @@ public class ProductImage {
     private Product product;
 
     @Builder
-    public ProductImage(String name, String path, ProductImageType type, Product product) {
+    public ProductImage(String name, String path, ProductImageType type) {
         this.name = name;
         this.path = path;
         this.type = type;
-        this.product = product;
     }
 
     public void changeProduct(Product product) {

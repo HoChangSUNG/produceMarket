@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateProductFormReq {
+public class CreateProductReq {
 
     @NotNull(message = "카테고리를 선택해주세요")
     private Long kindGradeId;
