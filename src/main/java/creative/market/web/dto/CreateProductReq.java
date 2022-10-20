@@ -27,5 +27,7 @@ public class CreateProductReq {
     private String info;
 
     private List<MultipartFile> img;
+
+    @NotNull
     private MultipartFile sigImg;
 }

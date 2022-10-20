@@ -32,16 +32,16 @@ public class OrderController {
         }
 
         Address address = createAddress(orderReq.getJibun(), orderReq.getRoad(), orderReq.getZipcode(), orderReq.getDetailAddress());
-        Long orderId = orderService.order(loginUserDTO.getId(), orderReq.getOrderProducts(), address);
+        orderService.order(loginUserDTO.getId(), orderReq.getOrderProducts(), address);
 
         return new ResultRes(new MessageRes("상품 주문 성공"));
     }
 
     @DeleteMapping("/{orderProductId}")
     @LoginCheck(type = {UserType.BUYER, UserType.SELLER})
-    public ResultRes orderCancel(@PathVariable Long orderProductId,@Login LoginUserDTO loginUserDTO) { // 주문 취소
+    public ResultRes orderCancel(@PathVariable Long orderProductId,@Login LoginUserDTO loginUserDTO) {
 
-        //로직 작성
+        orderService.orderCancel(orderProductId,loginUserDTO.getId());
 
         return new ResultRes(new MessageRes("주문 취소 성공"));
     }

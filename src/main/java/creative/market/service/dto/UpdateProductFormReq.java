@@ -26,5 +26,7 @@ public class UpdateProductFormReq {
     private String info;
 
     private List<MultipartFile> img;
+
+    @NotNull
     private MultipartFile sigImg;
 }

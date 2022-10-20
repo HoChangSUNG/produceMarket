@@ -55,4 +55,7 @@ public class OrderProduct {
         return count * price;
     }
 
+    public void cancel() {
+        this.status = OrderStatus.CANCEL;
+    }
 }
