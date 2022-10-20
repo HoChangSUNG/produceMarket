@@ -6,9 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,8 +22,9 @@ public class OrderReq {
     private String jibun;
     @NotBlank
     private String road;
-    @NotNull
-    @Size(min = 5, max = 5)
+
+    @Max(99999)
+    @Min(1)
     private Integer zipcode;
     @NotBlank
     private String detailAddress;

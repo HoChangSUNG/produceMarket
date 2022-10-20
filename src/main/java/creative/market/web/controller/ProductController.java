@@ -18,7 +18,9 @@ import creative.market.web.dto.ResultRes;
 import creative.market.service.dto.UpdateProductFormReq;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -47,7 +49,9 @@ public class ProductController {
 
     @PostMapping
     @LoginCheck(type = {UserType.SELLER})
-    public ResultRes createProduct(@Valid CreateProductReq productReq, @Login LoginUserDTO loginUserDTO) { // 상품 생성
+    public ResultRes registerProduct(@Valid CreateProductReq productReq, @Login LoginUserDTO loginUserDTO) { // 상품 생성
+
+        fileEmptyCheck(productReq.getImg()); // 저장할 파일이 하나도 없는 경우
 
         try {
             // 사진 저장
@@ -74,8 +78,17 @@ public class ProductController {
     @PostMapping("/update/{productId}")
     @LoginCheck(type = {UserType.SELLER})
     public ResultRes updateProduct(@Valid UpdateProductFormReq updateFormReq, @Login LoginUserDTO loginUserDTO, @PathVariable Long productId) { // 상품 수정
+
+        fileEmptyCheck(updateFormReq.getImg()); // 저장할 파일이 하나도 없는 경우
+
         productService.update(productId, updateFormReq, loginUserDTO.getId());
         return new ResultRes(new MessageRes("상품 수정 성공"));
+    }
+
+    private void fileEmptyCheck(List<MultipartFile> multipartFiles) {
+        if (CollectionUtils.isEmpty(multipartFiles)) {
+            throw  new FileSaveException("파일은 반드시 1개 이상 추가되어야 합니다.");
+        }
     }
 
     private RegisterProductDTO createRegisterProductDTO(CreateProductReq productReq, LoginUserDTO loginUserDTO, UploadFileDTO sigImage, List<UploadFileDTO> ordinalImages) {

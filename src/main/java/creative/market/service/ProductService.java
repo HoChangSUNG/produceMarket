@@ -121,10 +121,12 @@ public class ProductService {
             ProductImage signatureProductImage = product.getSignatureProductImage();
             String existingName = signatureProductImage.getName();// 기존 대표 이미지 이름
             log.info("기존 signature image={}",existingName);
+
             if (!FileStoreUtils.getOriginalFileName(sigImg).equals(existingName)) { //기존 사진과 이름이 동일하지 않은 경우
                 deleteImage(product, signatureProductImage); // 사진 제거
                 UploadFileDTO uploadFileDTO = FileStoreUtils.storeFile(sigImg, rootPath, FileSubPath.PRODUCT_PATH);
                 product.addProductSignatureImage(createProductImage(uploadFileDTO, ProductImageType.SIGNATURE)); // 사진 추가
+
                 log.info("update 된 signature image={}",uploadFileDTO.getUploadFileName());
             }
         } catch (IOException e) {

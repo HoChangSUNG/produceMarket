@@ -6,6 +6,8 @@ import creative.market.domain.order.OrderProduct;
 import creative.market.domain.order.OrderStatus;
 import creative.market.domain.product.Product;
 import creative.market.domain.user.User;
+import creative.market.exception.LoginAuthenticationException;
+import creative.market.repository.OrderProductRepository;
 import creative.market.repository.OrderRepository;
 import creative.market.repository.ProductRepository;
 import creative.market.repository.user.UserRepository;
@@ -28,7 +30,8 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
-
+    private final OrderProductRepository orderProductRepository;
+    @Transactional
     public Long order(Long userId, List<OrderProductParamDTO> orderProductParams,Address address) { // 상품 주문
 
         // 구매하는 user 정보 가져오기
@@ -47,8 +50,19 @@ public class OrderService {
         return order.getId();
     }
 
-    public void orderCancel() {
+    @Transactional
+    public void orderCancel(Long orderProductId,Long userId) { // 주문 취소
 
+        OrderProduct orderProduct = orderProductRepository.findByIdWithOrder(orderProductId)
+                .orElseThrow(() -> new NoSuchElementException("주문 내역이 존재하지 않습니다."));
+        buyerAccessCheck(orderProduct,userId); // 상품 취소 권한 확인
+        orderProduct.cancel();
+    }
+
+    private void buyerAccessCheck(OrderProduct orderProduct, Long userId) {
+        if (!orderProduct.getOrder().getUser().getId().equals(userId)) {
+            throw new LoginAuthenticationException("주문 취소 권한이 없습니다.");
+        }
     }
 
     private Order createOrder(List<OrderProduct> orderProducts,User user,Address address) {

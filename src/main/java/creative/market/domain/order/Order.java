@@ -28,8 +28,6 @@ public class Order extends CreatedDate {
     @Embedded
     private Address address;
 
-    private LocalDateTime createdDate;
-
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
     private User user;
