@@ -1,4 +1,4 @@
-package creative.market.web.controller;
+package creative.market.web.controller.category;
 
 import creative.market.util.FileStoreUtils;
 import creative.market.util.FileSubPath;
