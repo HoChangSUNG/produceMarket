@@ -1,4 +1,4 @@
-package creative.market.repository;
+package creative.market.repository.order;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import creative.market.domain.order.OrderProduct;

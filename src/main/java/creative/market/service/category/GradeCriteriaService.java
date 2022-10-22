@@ -1,6 +1,6 @@
-package creative.market.service;
+package creative.market.service.category;
 
-import creative.market.repository.GradeCriteriaRepository;
+import creative.market.repository.category.GradeCriteriaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

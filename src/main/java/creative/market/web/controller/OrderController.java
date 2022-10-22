@@ -4,6 +4,10 @@ import creative.market.aop.LoginCheck;
 import creative.market.aop.UserType;
 import creative.market.argumentresolver.Login;
 import creative.market.domain.Address;
+import creative.market.domain.user.Buyer;
+import creative.market.domain.user.Seller;
+import creative.market.repository.user.BuyerRepository;
+import creative.market.repository.user.SellerRepository;
 import creative.market.service.OrderService;
 import creative.market.service.dto.LoginUserDTO;
 import creative.market.web.dto.MessageRes;
@@ -22,6 +26,8 @@ import java.util.NoSuchElementException;
 public class OrderController {
 
     private final OrderService orderService;
+    private final SellerRepository sellerRepository;
+    private final BuyerRepository buyerRepository;
 
     @PostMapping
     @LoginCheck(type = {UserType.BUYER, UserType.SELLER})
@@ -39,12 +45,27 @@ public class OrderController {
 
     @DeleteMapping("/{orderProductId}")
     @LoginCheck(type = {UserType.BUYER, UserType.SELLER})
-    public ResultRes orderCancel(@PathVariable Long orderProductId,@Login LoginUserDTO loginUserDTO) {
+    public ResultRes orderCancel(@PathVariable Long orderProductId, @Login LoginUserDTO loginUserDTO) {
 
-        orderService.orderCancel(orderProductId,loginUserDTO.getId());
+        orderService.orderCancel(orderProductId, loginUserDTO.getId());
 
         return new ResultRes(new MessageRes("주문 취소 성공"));
     }
+
+    @GetMapping("/address")
+    @LoginCheck(type = {UserType.BUYER, UserType.SELLER})
+    public ResultRes getDefaultAddress(@Login LoginUserDTO loginUserDTO) {
+        Address address;
+        if (loginUserDTO.getUserType() == UserType.BUYER) {
+            Buyer buyer = buyerRepository.findById(loginUserDTO.getId()).orElseThrow(() -> new NoSuchElementException("존재하지 않는 구매자입니다."));
+            address = buyer.getAddress();
+        } else {
+            Seller seller = sellerRepository.findById(loginUserDTO.getId()).orElseThrow(() -> new NoSuchElementException("존재하지 않는 판매자입니다."));
+            address = seller.getAddress();
+        }
+        return new ResultRes(address);
+    }
+
     private Address createAddress(String jibun, String road, int zipcode, String detailAddress) {
         return Address.builder()
                 .jibun(jibun)
@@ -52,4 +73,5 @@ public class OrderController {
                 .zipcode(zipcode)
                 .detailAddress(detailAddress).build();
     }
+
 }

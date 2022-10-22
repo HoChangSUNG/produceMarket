@@ -37,6 +37,10 @@ public class ProductRepository {
         return product.getId();
     }
 
+    public List<Product> findAll() {
+        return queryFactory.selectFrom(product).fetch();
+    }
+
     public Optional<Product> findById(Long id) {
         return Optional.ofNullable(em.find(Product.class, id));
     }

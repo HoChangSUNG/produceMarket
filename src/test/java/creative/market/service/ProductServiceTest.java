@@ -5,7 +5,7 @@ import creative.market.domain.product.Product;
 import creative.market.domain.product.ProductImage;
 import creative.market.domain.user.Seller;
 import creative.market.exception.LoginAuthenticationException;
-import creative.market.repository.KindGradeRepository;
+import creative.market.repository.category.KindGradeRepository;
 import creative.market.repository.ProductRepository;
 import creative.market.service.dto.RegisterProductDTO;
 import creative.market.service.dto.UpdateProductFormReq;
