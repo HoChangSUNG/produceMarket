@@ -4,6 +4,7 @@ import creative.market.domain.Address;
 import creative.market.domain.Cart;
 import creative.market.domain.product.Product;
 import creative.market.domain.user.Seller;
+import creative.market.exception.DuplicateException;
 import creative.market.repository.CartRepository;
 import creative.market.repository.ProductRepository;
 import creative.market.service.dto.RegisterProductDTO;
@@ -12,6 +13,7 @@ import creative.market.util.FileStoreUtils;
 import creative.market.util.FileSubPath;
 import lombok.extern.slf4j.Slf4j;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -81,6 +84,14 @@ class CartServiceTest {
         Long productId2 = productService.register(registerProduct2);
     }
 
+    @AfterEach
+    private void afterEach() {
+        // 저장된 사진 제거
+        List<Product> findProducts = productRepository.findAll();
+        findProducts.forEach(product -> product.getProductImages()
+                .forEach(productImage -> deleteFile(productImage.getPath())));
+    }
+
     @Test
     @DisplayName("장바구니 등록 성공")
     void registerSuccess() throws Exception {
@@ -131,7 +142,23 @@ class CartServiceTest {
 
     }
 
+    @Test
+    @DisplayName("장바구니 등록 실패, 이미 등록된 상품을 장바구니에 등록하는 경우")
+    void registerFail3() throws Exception {
+        //given
+        Product product = productRepository.findAll().get(0);
+        Seller seller = createSeller("성호창222", createAddress("122", "122", 12222, "2311114"));
+        em.persist(seller);
+        int count = 4;
 
+        //when
+        Long findCartId = cartService.register(product.getId(), count, seller.getId());
+
+        //then
+        assertThatThrownBy(() ->cartService.register(product.getId(), count, seller.getId()))
+                .isInstanceOf(DuplicateException.class)
+                .hasMessage("이미 장바구니에 해당 상품이 존재합니다.");
+    }
 
     private Seller createSeller(String name, Address address) {
         Seller seller = Seller.builder()
@@ -146,6 +173,16 @@ class CartServiceTest {
 
     private MockMultipartFile createMultipart(String name, String originalFileName, String contentType, String rootPath, String subPath) throws IOException {
         return new MockMultipartFile(name, originalFileName, contentType, new FileInputStream(FileStoreUtils.getFullPath(rootPath, subPath)));
+    }
+
+    private Product getProduct(Long productId) {
+        return productRepository.findById(productId).orElseThrow(() -> new NoSuchElementException("존재하지 않는 상품입니다"));
+    }
+
+    private void deleteFile(String path) {
+        String storeFilePath = FileStoreUtils.getFullPath(rootPath, path);
+        File file = new File(storeFilePath);
+        file.delete();
     }
 
 }
