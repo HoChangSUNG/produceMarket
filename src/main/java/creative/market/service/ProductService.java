@@ -7,7 +7,7 @@ import creative.market.domain.product.ProductImageType;
 import creative.market.domain.user.User;
 import creative.market.exception.FileSaveException;
 import creative.market.exception.LoginAuthenticationException;
-import creative.market.repository.KindGradeRepository;
+import creative.market.repository.category.KindGradeRepository;
 import creative.market.repository.ProductRepository;
 import creative.market.repository.user.UserRepository;
 import creative.market.service.dto.RegisterProductDTO;

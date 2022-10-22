@@ -1,6 +1,5 @@
 package creative.market;
 
-import creative.market.service.ItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

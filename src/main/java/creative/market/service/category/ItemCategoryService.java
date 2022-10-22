@@ -1,6 +1,6 @@
-package creative.market.service;
+package creative.market.service.category;
 
-import creative.market.repository.ItemCategoryRepository;
+import creative.market.repository.category.ItemCategoryRepository;
 import creative.market.service.dto.ItemCategoryMenuRes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

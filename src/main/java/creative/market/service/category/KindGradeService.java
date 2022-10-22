@@ -1,9 +1,9 @@
-package creative.market.service;
+package creative.market.service.category;
 
 
 import creative.market.domain.category.Item;
 import creative.market.domain.category.KindGrade;
-import creative.market.repository.KindGradeRepository;
+import creative.market.repository.category.KindGradeRepository;
 import creative.market.service.dto.CriteriaSrcAndRetailUnitRes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

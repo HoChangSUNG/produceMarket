@@ -6,6 +6,7 @@ import creative.market.domain.product.Product;
 import creative.market.domain.product.ProductImage;
 import creative.market.domain.product.ProductImageType;
 import creative.market.domain.user.Seller;
+import creative.market.repository.category.KindGradeRepository;
 import creative.market.repository.dto.ProductSearchConditionReq;
 import creative.market.repository.user.SellerRepository;
 import lombok.AllArgsConstructor;
@@ -32,7 +33,8 @@ class ProductRepositoryTest {
     @Autowired EntityManager em;
     @Autowired ProductRepository productRepository;
     @Autowired SellerRepository sellerRepository;
-    @Autowired KindGradeRepository kindGradeRepository;
+    @Autowired
+    KindGradeRepository kindGradeRepository;
 
     @BeforeEach
     void before () throws Exception{
