@@ -38,4 +38,8 @@ public class CartRepository {
                 .where(cart.user.id.eq(userId))
                 .fetch();
     }
+
+    public void delete(Cart cart) {
+        em.remove(cart);
+    }
 }

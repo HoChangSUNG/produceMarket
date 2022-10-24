@@ -39,4 +39,12 @@ public class CartController {
 
         return new ResultRes(cartQueryService.getCartList(loginUserDTO.getId()));
     }
+
+    @DeleteMapping("/{cartId}")
+    @LoginCheck(type = {UserType.BUYER, UserType.SELLER})
+    public ResultRes deleteCart(@PathVariable Long cartId, @Login LoginUserDTO loginUserDTO) {
+
+        cartService.delete(cartId,loginUserDTO.getId());
+        return new ResultRes(new MessageRes("장바구니 삭제 성공"));
+    }
 }

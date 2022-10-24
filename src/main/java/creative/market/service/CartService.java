@@ -43,8 +43,29 @@ public class CartService {
         return cart.getId();
     }
 
+    @Transactional
+    public void delete(Long cartId, Long userId) {
+        Cart cart = cartRepository.findById(cartId)
+                .orElseThrow(() -> new NoSuchElementException("장바구니에 상품이 존재하지 않습니다."));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 유저입니다."));
+
+        userAccessCheck(cart, user);
+
+        cartRepository.delete(cart);
+    }
+
+    private void userAccessCheck(Cart cart, User user) {
+        if (!cart.getUser().getId().equals(user.getId())) {
+            throw new LoginAuthenticationException("삭제 권한이 없습니다.");
+        }
+    }
+
     private void duplicateCart(Long userId, Long productId) {
-        long count = cartRepository.findByUserIdWithProduct(userId).stream().filter(cart -> cart.getProduct().getId().equals(productId)).count();
+        long count = cartRepository.findByUserIdWithProduct(userId).stream()
+                .filter(cart -> cart.getProduct().getId().equals(productId))
+                .count();
         if (count > 0) {
             throw new DuplicateException("이미 장바구니에 해당 상품이 존재합니다.");
         }
