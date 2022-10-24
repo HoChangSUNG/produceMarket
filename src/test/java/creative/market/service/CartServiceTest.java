@@ -5,6 +5,7 @@ import creative.market.domain.Cart;
 import creative.market.domain.product.Product;
 import creative.market.domain.user.Seller;
 import creative.market.exception.DuplicateException;
+import creative.market.exception.LoginAuthenticationException;
 import creative.market.repository.CartRepository;
 import creative.market.repository.ProductRepository;
 import creative.market.service.dto.RegisterProductDTO;
@@ -120,7 +121,7 @@ class CartServiceTest {
         int count = 4;
 
         //then
-        assertThatThrownBy(() ->cartService.register(-1L, count, seller.getId()))
+        assertThatThrownBy(() -> cartService.register(-1L, count, seller.getId()))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("상품이 존재하지 않습니다.");
 
@@ -136,7 +137,7 @@ class CartServiceTest {
         int count = 4;
 
         //then
-        assertThatThrownBy(() ->cartService.register(product.getId(), count, seller.getId()+1))
+        assertThatThrownBy(() -> cartService.register(product.getId(), count, seller.getId() + 1))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("회원이 존재하지 않습니다.");
 
@@ -155,9 +156,105 @@ class CartServiceTest {
         Long findCartId = cartService.register(product.getId(), count, seller.getId());
 
         //then
-        assertThatThrownBy(() ->cartService.register(product.getId(), count, seller.getId()))
+        assertThatThrownBy(() -> cartService.register(product.getId(), count, seller.getId()))
                 .isInstanceOf(DuplicateException.class)
                 .hasMessage("이미 장바구니에 해당 상품이 존재합니다.");
+    }
+
+    @Test
+    @DisplayName("장바구니 삭제 성공")
+    void deleteSuccess() throws Exception {
+        //given
+        Product product1 = productRepository.findAll().get(0);
+        Seller seller = createSeller("성호창222", createAddress("122", "122", 12222, "2311114"));
+        em.persist(seller);
+        int count1 = 4;
+
+        Product product2 = productRepository.findAll().get(1);
+        int count2 = 3;
+
+        Long findCartId1 = cartService.register(product1.getId(), count1, seller.getId());
+        Long findCartId2 = cartService.register(product2.getId(), count2, seller.getId());
+
+        //when
+        cartService.delete(findCartId1, seller.getId());
+
+        //then
+        List<Cart> findCartList = cartRepository.findByUserIdWithProduct(seller.getId());
+        assertThat(findCartList.size()).isEqualTo(1);
+        assertThat(findCartList).extracting("id").contains(findCartId2);
+        assertThat(findCartList).extracting("id").doesNotContain(findCartId1);
+    }
+
+    @Test
+    @DisplayName("장바구니 삭제 실패, 장바구니에 존재하지 않는 상품 삭제시")
+    void deleteFail1() throws Exception {
+        //given
+        Product product1 = productRepository.findAll().get(0);
+        Seller seller = createSeller("성호창222", createAddress("122", "122", 12222, "2311114"));
+        em.persist(seller);
+        int count1 = 4;
+
+        Product product2 = productRepository.findAll().get(1);
+        int count2 = 3;
+
+        Long findCartId1 = cartService.register(product1.getId(), count1, seller.getId());
+        Long findCartId2 = cartService.register(product2.getId(), count2, seller.getId());
+
+        //when
+
+        //then
+        assertThatThrownBy(() -> cartService.delete(-1L, seller.getId()))
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("장바구니에 상품이 존재하지 않습니다.");
+    }
+
+    @Test
+    @DisplayName("장바구니 삭제 실패, 존재하지 않는 유저로 접근시")
+    void deleteFail2() throws Exception {
+        //given
+        Product product1 = productRepository.findAll().get(0);
+        Seller seller = createSeller("성호창222", createAddress("122", "122", 12222, "2311114"));
+        em.persist(seller);
+        int count1 = 4;
+
+        Product product2 = productRepository.findAll().get(1);
+        int count2 = 3;
+
+        Long findCartId1 = cartService.register(product1.getId(), count1, seller.getId());
+        Long findCartId2 = cartService.register(product2.getId(), count2, seller.getId());
+
+        //when
+
+        //then
+        assertThatThrownBy(() -> cartService.delete(findCartId2, seller.getId()+1))
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("존재하지 않는 유저입니다.");
+    }
+
+    @Test
+    @DisplayName("장바구니 삭제 실패, 삭제 권한이 없는 유저가 삭제 시도하는 경우")
+    void deleteFail3() throws Exception {
+        //given
+        Product product1 = productRepository.findAll().get(0);
+        Seller seller1 = createSeller("성호창222", createAddress("122", "122", 12222, "2311114"));
+        Seller seller2 = createSeller("강대현", createAddress("12222", "133322", 12252, "2동 234호"));
+        em.persist(seller1);
+        em.persist(seller2);
+        int count1 = 4;
+
+        Product product2 = productRepository.findAll().get(1);
+        int count2 = 3;
+
+        Long findCartId1 = cartService.register(product1.getId(), count1, seller1.getId());
+        Long findCartId2 = cartService.register(product2.getId(), count2, seller1.getId());
+
+        //when
+
+        //then
+        assertThatThrownBy(() -> cartService.delete(findCartId2, seller2.getId()))
+                .isInstanceOf(LoginAuthenticationException.class)
+                .hasMessage("삭제 권한이 없습니다.");
     }
 
     private Seller createSeller(String name, Address address) {
@@ -173,10 +270,6 @@ class CartServiceTest {
 
     private MockMultipartFile createMultipart(String name, String originalFileName, String contentType, String rootPath, String subPath) throws IOException {
         return new MockMultipartFile(name, originalFileName, contentType, new FileInputStream(FileStoreUtils.getFullPath(rootPath, subPath)));
-    }
-
-    private Product getProduct(Long productId) {
-        return productRepository.findById(productId).orElseThrow(() -> new NoSuchElementException("존재하지 않는 상품입니다"));
     }
 
     private void deleteFile(String path) {
