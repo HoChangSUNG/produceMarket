@@ -39,6 +39,12 @@ public class CartRepository {
                 .fetch();
     }
 
+    public List<Cart> findByUserId(Long userId) {
+        return queryFactory.selectFrom(cart)
+                .where(cart.user.id.eq(userId))
+                .fetch();
+    }
+
     public void delete(Cart cart) {
         em.remove(cart);
     }

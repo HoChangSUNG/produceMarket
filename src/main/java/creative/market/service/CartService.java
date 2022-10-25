@@ -14,7 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +56,15 @@ public class CartService {
         userAccessCheck(cart, user);
 
         cartRepository.delete(cart);
+    }
+
+    @Transactional
+    public void deleteCartListByProductIds(List<Long> productIds, Long userId) { // 상품 아이디에 해당하는 cart 가 존재시 제거
+        List<Cart> deleteCartList = cartRepository.findByUserId(userId).stream()
+                .filter(cart -> productIds.contains(cart.getProduct().getId()))
+                .collect(Collectors.toList());
+
+        deleteCartList.forEach(cart -> delete(cart.getId(), userId));
     }
 
     private void userAccessCheck(Cart cart, User user) {

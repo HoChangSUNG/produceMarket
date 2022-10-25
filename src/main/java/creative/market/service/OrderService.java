@@ -1,6 +1,7 @@
 package creative.market.service;
 
 import creative.market.domain.Address;
+import creative.market.domain.Cart;
 import creative.market.domain.order.Order;
 import creative.market.domain.order.OrderProduct;
 import creative.market.domain.order.OrderStatus;
@@ -31,18 +32,23 @@ public class OrderService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final OrderProductRepository orderProductRepository;
+    private final CartService cartService;
+
     @Transactional
-    public Long order(Long userId, List<OrderProductParamDTO> orderProductParams,Address address) { // 상품 주문
+    public Long order(Long userId, List<OrderProductParamDTO> orderProductParams, Address address) { // 상품 주문
 
         // 구매하는 user 정보 가져오기
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
 
+        // 구매하는 상품이 장바구니에 있는 경우 장바구니에서 삭제
+        deleteOrderCartList(orderProductParams,userId);
+
         // orderProducts 생성
         List<OrderProduct> orderProducts = createOrderProducts(orderProductParams);
 
         // order 생성
-        Order order = createOrder(orderProducts,user,address);
+        Order order = createOrder(orderProducts, user, address);
 
         // order 저장
         orderRepository.save(order);
@@ -50,12 +56,18 @@ public class OrderService {
         return order.getId();
     }
 
+    private void deleteOrderCartList(List<OrderProductParamDTO> orderProductParams, Long userId) {
+        List<Long> productIds = orderProductParams.stream()
+                .map(OrderProductParamDTO::getProductId).collect(Collectors.toList());
+        cartService.deleteCartListByProductIds(productIds, userId);
+    }
+
     @Transactional
-    public void orderCancel(Long orderProductId,Long userId) { // 주문 취소
+    public void orderCancel(Long orderProductId, Long userId) { // 주문 취소
 
         OrderProduct orderProduct = orderProductRepository.findByIdWithOrder(orderProductId)
                 .orElseThrow(() -> new NoSuchElementException("주문 내역이 존재하지 않습니다."));
-        buyerAccessCheck(orderProduct,userId); // 상품 취소 권한 확인
+        buyerAccessCheck(orderProduct, userId); // 상품 취소 권한 확인
         orderProduct.cancel();
     }
 
@@ -65,7 +77,7 @@ public class OrderService {
         }
     }
 
-    private Order createOrder(List<OrderProduct> orderProducts,User user,Address address) {
+    private Order createOrder(List<OrderProduct> orderProducts, User user, Address address) {
         return Order.builder()
                 .orderProducts(orderProducts)
                 .user(user)
