@@ -187,6 +187,33 @@ class CartServiceTest {
     }
 
     @Test
+    @DisplayName("장바구니 삭제 성공, 원하는 productId를 가지는 장바구니만 삭제")
+    void deleteCartByProductIds() throws Exception {
+        //given
+        Product product1 = productRepository.findAll().get(0);
+        Seller seller = createSeller("성호창222", createAddress("122", "122", 12222, "2311114"));
+        em.persist(seller);
+        int count1 = 4;
+
+        Product product2 = productRepository.findAll().get(1);
+        int count2 = 3;
+
+        Long findCartId1 = cartService.register(product1.getId(), count1, seller.getId());
+        Long findCartId2 = cartService.register(product2.getId(), count2, seller.getId());
+
+        List<Long> deleteProductIds = List.of(product1.getId());
+
+        //when
+        cartService.deleteCartListByProductIds(deleteProductIds, seller.getId());
+
+        //then
+        List<Cart> findCartList = cartRepository.findByUserIdWithProduct(seller.getId());
+        assertThat(findCartList.size()).isEqualTo(1);
+        assertThat(findCartList).extracting("product").contains(product2);
+        assertThat(findCartList).extracting("product").doesNotContain(product1);
+    }
+
+    @Test
     @DisplayName("장바구니 삭제 실패, 장바구니에 존재하지 않는 상품 삭제시")
     void deleteFail1() throws Exception {
         //given
@@ -227,7 +254,7 @@ class CartServiceTest {
         //when
 
         //then
-        assertThatThrownBy(() -> cartService.delete(findCartId2, seller.getId()+1))
+        assertThatThrownBy(() -> cartService.delete(findCartId2, seller.getId() + 1))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("존재하지 않는 유저입니다.");
     }
