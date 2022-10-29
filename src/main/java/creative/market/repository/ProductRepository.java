@@ -5,6 +5,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import creative.market.domain.category.QGrade;
 import creative.market.domain.product.Product;
+import creative.market.domain.user.QUser;
 import creative.market.repository.dto.ProductSearchConditionReq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -36,6 +37,10 @@ public class ProductRepository {
         return product.getId();
     }
 
+    public List<Product> findAll() {
+        return queryFactory.selectFrom(product).fetch();
+    }
+
     public Optional<Product> findById(Long id) {
         return Optional.ofNullable(em.find(Product.class, id));
     }
@@ -65,6 +70,15 @@ public class ProductRepository {
                         .join(product.user, user).fetchJoin()
                         .where(product.id.eq(productId))
                         .fetchOne());
+    }
+
+    public Optional<Product> findByIdAndSeller(Long productId,Long userId) {
+        return Optional.ofNullable(
+                queryFactory.selectFrom(product)
+                        .join(product.user, user)
+                        .where(product.id.eq(productId),user.id.eq(userId))
+                        .fetchOne()
+        );
     }
 
     public Optional<Product> findByIdFetchJoinItemCategory(Long productId) {

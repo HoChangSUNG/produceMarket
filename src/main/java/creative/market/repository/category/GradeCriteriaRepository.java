@@ -1,4 +1,4 @@
-package creative.market.repository;
+package creative.market.repository.category;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import creative.market.domain.category.GradeCriteria;

@@ -1,7 +1,7 @@
-package creative.market.web.controller;
+package creative.market.web.controller.category;
 
-import creative.market.service.ItemCategoryService;
-import creative.market.service.KindGradeService;
+import creative.market.service.category.ItemCategoryService;
+import creative.market.service.category.KindGradeService;
 import creative.market.service.dto.CriteriaSrcAndRetailUnitRes;
 import creative.market.web.dto.CategoryRes;
 import creative.market.web.dto.ResultRes;

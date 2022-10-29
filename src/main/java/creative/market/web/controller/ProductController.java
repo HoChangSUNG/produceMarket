@@ -12,13 +12,15 @@ import creative.market.service.dto.UploadFileDTO;
 import creative.market.service.query.ProductQueryService;
 import creative.market.util.FileStoreUtils;
 import creative.market.util.FileSubPath;
-import creative.market.web.dto.CreateProductFormReq;
+import creative.market.web.dto.CreateProductReq;
 import creative.market.web.dto.MessageRes;
 import creative.market.web.dto.ResultRes;
 import creative.market.service.dto.UpdateProductFormReq;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -41,13 +43,15 @@ public class ProductController {
     }
 
     @GetMapping("/{productId}")
-    public ResultRes GetProductDetail(@PathVariable Long productId) { // 상품 상세 조회
+    public ResultRes getProductDetail(@PathVariable Long productId) { // 상품 상세 조회
         return new ResultRes(productQueryService.productDetailInfo(productId));
     }
 
     @PostMapping
     @LoginCheck(type = {UserType.SELLER})
-    public ResultRes createProduct(@Valid CreateProductFormReq productReq, @Login LoginUserDTO loginUserDTO) { // 상품 생성
+    public ResultRes registerProduct(@Valid CreateProductReq productReq, @Login LoginUserDTO loginUserDTO) { // 상품 생성
+
+        fileEmptyCheck(productReq.getImg()); // 저장할 파일이 하나도 없는 경우
 
         try {
             // 사진 저장
@@ -65,18 +69,29 @@ public class ProductController {
     }
 
     @GetMapping("/update/{productId}")
-    public ResultRes getUpdateForm(@PathVariable Long productId) { // 상품 수정 정보 전달
+    @LoginCheck(type = {UserType.SELLER})
+    public ResultRes getUpdateForm(@PathVariable Long productId, @Login LoginUserDTO loginUserDTO) { // 상품 수정 전 기존 정보 전달
+        productService.sellerAccessCheck(productId, loginUserDTO.getId()); // 상품 수정 권환 확인
         return new ResultRes(productQueryService.productUpdateForm(productId));
     }
 
     @PostMapping("/update/{productId}")
     @LoginCheck(type = {UserType.SELLER})
     public ResultRes updateProduct(@Valid UpdateProductFormReq updateFormReq, @Login LoginUserDTO loginUserDTO, @PathVariable Long productId) { // 상품 수정
+
+        fileEmptyCheck(updateFormReq.getImg()); // 저장할 파일이 하나도 없는 경우
+
         productService.update(productId, updateFormReq, loginUserDTO.getId());
         return new ResultRes(new MessageRes("상품 수정 성공"));
     }
 
-    private RegisterProductDTO createRegisterProductDTO(CreateProductFormReq productReq, LoginUserDTO loginUserDTO, UploadFileDTO sigImage, List<UploadFileDTO> ordinalImages) {
+    private void fileEmptyCheck(List<MultipartFile> multipartFiles) {
+        if (CollectionUtils.isEmpty(multipartFiles)) {
+            throw  new FileSaveException("파일은 반드시 1개 이상 추가되어야 합니다.");
+        }
+    }
+
+    private RegisterProductDTO createRegisterProductDTO(CreateProductReq productReq, LoginUserDTO loginUserDTO, UploadFileDTO sigImage, List<UploadFileDTO> ordinalImages) {
         return new RegisterProductDTO(productReq.getKindGradeId(), productReq.getName(), productReq.getPrice(),
                 productReq.getInfo(), loginUserDTO.getId(), sigImage, ordinalImages);
     }

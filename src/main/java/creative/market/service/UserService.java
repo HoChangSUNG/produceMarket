@@ -107,7 +107,7 @@ public class UserService {
     }
 
     private void createSession(UserType userType, HttpServletRequest request, Long id, String name) {
-        LoginUserDTO loginUser = new LoginUserDTO(id, name);
+        LoginUserDTO loginUser = new LoginUserDTO(id, name,userType);
         SessionUtils.createSession(request, userType.name(), loginUser);
     }
 
