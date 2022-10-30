@@ -2,6 +2,7 @@ package creative.market.repository.query;
 
 import creative.market.domain.Address;
 import creative.market.domain.category.KindGrade;
+import creative.market.domain.order.Order;
 import creative.market.domain.product.Product;
 import creative.market.domain.user.Buyer;
 import creative.market.domain.user.Seller;
@@ -9,6 +10,7 @@ import creative.market.repository.ProductRepository;
 import creative.market.repository.category.KindGradeRepository;
 import creative.market.repository.dto.CategoryParamDTO;
 import creative.market.repository.dto.SellerAndTotalPricePerCategoryDTO;
+import creative.market.repository.order.OrderRepository;
 import creative.market.repository.user.SellerRepository;
 import creative.market.service.OrderService;
 import creative.market.service.dto.OrderProductParamDTO;
@@ -33,6 +35,9 @@ class OrderProductQueryRepositoryTest {
     EntityManager em;
     @Autowired
     OrderService orderService;
+
+    @Autowired
+    OrderRepository orderRepository;
     @Autowired
     KindGradeRepository kindGradeRepository;
 
@@ -72,10 +77,16 @@ class OrderProductQueryRepositoryTest {
         List<OrderProductParamDTO> orderParamList = addOrderProductParamDTO(orderProductParam1, orderProductParam2, orderProductParam3, orderProductParam4, orderProductParam5);
 
         Address orderAddress = createAddress("1111", "봉사산로", 12345, "동호수");
-        orderService.order(productBuyer.getId(), orderParamList, orderAddress);
 
-        Thread.sleep(1100);
-        orderService.order(productBuyer.getId(), orderParamList, orderAddress);
+        // 5일전 저장한 주문 내역
+        Long orderId1 = orderService.order(productBuyer.getId(), orderParamList, orderAddress);
+        Order findOrder1 = orderRepository.findById(orderId1).orElseThrow(() -> new NoSuchElementException("주문 내역이 존재하지 않습니다."));
+        findOrder1.changeCreatedDate(LocalDateTime.now().minusDays(5));
+
+        // 1시간전 저장한 주문 내역
+        Long orderId2 = orderService.order(productBuyer.getId(), orderParamList, orderAddress);
+        Order findOrder2 = orderRepository.findById(orderId2).orElseThrow(() -> new NoSuchElementException("주문 내역이 존재하지 않습니다."));
+        findOrder2.changeCreatedDate(LocalDateTime.now().minusHours(1));
 
     }
 
@@ -88,7 +99,7 @@ class OrderProductQueryRepositoryTest {
         Long kindGradeId = 432L;
         Seller seller = sellerRepository.findByLoginIdAndPassword(loginId, pw).orElseThrow(NoSuchElementException::new);
         LocalDateTime endDate = LocalDateTime.now();
-        LocalDateTime startDate = endDate.minusSeconds(1);
+        LocalDateTime startDate = endDate.minusHours(2);
         CategoryParamDTO categoryParamDTO = new CategoryParamDTO(null, null, null, kindGradeId);
 
         //when
@@ -102,7 +113,7 @@ class OrderProductQueryRepositoryTest {
     }
 
     @Test
-    @DisplayName("기간별 특정 카테고리에서 판매자 총 판매액, 총 판매액이 = 0")
+    @DisplayName("기간별 특정 카테고리에서 특정 판매자 총 판매액, 총 판매액이 = 0")
     void findCategorySellerNameAndPriceSuccess2() throws Exception {
         //given
         String loginId = "2";
@@ -110,7 +121,7 @@ class OrderProductQueryRepositoryTest {
         Long kindGradeId = 432L;
         Seller seller = sellerRepository.findByLoginIdAndPassword(loginId, pw).orElseThrow(NoSuchElementException::new);
         LocalDateTime endDate = LocalDateTime.now();
-        LocalDateTime startDate = endDate.minusNanos(10);
+        LocalDateTime startDate = endDate.minusMinutes(10);
         CategoryParamDTO categoryParamDTO = new CategoryParamDTO(null, null, null, kindGradeId);
 
         //when
@@ -118,7 +129,7 @@ class OrderProductQueryRepositoryTest {
 
         //then
         assertThat(result.getSellerName()).isNull();
-        assertThat(result.getTotalPrice()).isNull();
+        assertThat(result.getTotalPrice()).isEqualTo(0);
     }
 
     @Test
@@ -131,7 +142,7 @@ class OrderProductQueryRepositoryTest {
         int rankCount3 = 6; // 상위 6명
 
         LocalDateTime endDate = LocalDateTime.now();
-        LocalDateTime startDate = endDate.minusDays(1);
+        LocalDateTime startDate = endDate.minusDays(10);
 
         CategoryParamDTO categoryParamDTO = new CategoryParamDTO(null, null, null, kindGradeId);
 
@@ -168,7 +179,7 @@ class OrderProductQueryRepositoryTest {
         int rankCount2 = 3; // 상위 3명
 
         LocalDateTime endDate = LocalDateTime.now();
-        LocalDateTime startDate = endDate.minusDays(1);
+        LocalDateTime startDate = endDate.minusMinutes(1);
 
         CategoryParamDTO categoryParamDTO = new CategoryParamDTO(null, null, null, kindGradeId);
 
