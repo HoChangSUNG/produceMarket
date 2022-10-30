@@ -29,7 +29,7 @@ public class OrderProductQueryRepository {
     private final JPAQueryFactory queryFactory;
 
     public List<SellerAndTotalPricePerCategoryDTO> findCategoryTopRankSellerNameAndPrice(CategoryParamDTO categoryParam, LocalDateTime startDate, LocalDateTime endDate, int rankCount) {// 카테고리별 판매 상위 판매자 및 판매 가격 조회
-        return queryFactory.select(new QSellerAndTotalPricePerCategoryDTO(user.name, getTotalPrice().longValue()))
+        return queryFactory.select(new QSellerAndTotalPricePerCategoryDTO(user.name, getTotalPrice().coalesce(0L)))
                 .from(orderProduct)
                 .join(orderProduct.order, order)
                 .join(orderProduct.product, product)
@@ -52,7 +52,7 @@ public class OrderProductQueryRepository {
     }
 
     public SellerAndTotalPricePerCategoryDTO findCategorySellerNameAndPrice(CategoryParamDTO categoryParam, LocalDateTime startDate, LocalDateTime endDate, Long userId) {//선택된 카테고리 판매 내역에서 판매자의 이름 및 판매 가격 조회
-        return queryFactory.select(new QSellerAndTotalPricePerCategoryDTO(user.name, getTotalPrice().longValue()))
+        return queryFactory.select(new QSellerAndTotalPricePerCategoryDTO(user.name, getTotalPrice().coalesce(0L)))
                         .from(orderProduct)
                         .join(orderProduct.order, order)
                         .join(orderProduct.product, product)
@@ -71,8 +71,8 @@ public class OrderProductQueryRepository {
                         .fetchOne();
     }
 
-    private NumberExpression<Integer> getTotalPrice() {
-        return orderProduct.price.multiply(orderProduct.count).sum();
+    private NumberExpression<Long> getTotalPrice() {// orderProduct.count * orderProduct.price
+        return orderProduct.price.multiply(orderProduct.count).sum().longValue();
     }
 
     private BooleanExpression kindGradeEq(Long kindGradeId) {

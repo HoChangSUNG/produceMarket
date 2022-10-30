@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 
 @MappedSuperclass
 @Getter
-public class ChangeDate extends CreatedDate{
+public abstract class ChangeDate extends CreatedDate{
 
     private LocalDateTime changeDate;
 
@@ -18,4 +18,7 @@ public class ChangeDate extends CreatedDate{
         changeDate = LocalDateTime.now();
     }
 
+    public void updateChangeDate(LocalDateTime changeDate) {
+        this.changeDate = changeDate;
+    }
 }

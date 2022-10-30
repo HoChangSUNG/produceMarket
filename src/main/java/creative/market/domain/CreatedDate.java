@@ -8,12 +8,16 @@ import java.time.LocalDateTime;
 
 @MappedSuperclass
 @Getter
-public class CreatedDate {
+public abstract class CreatedDate {
 
     private LocalDateTime createdDate;
 
     @PrePersist
     private void prePersist() {
         createdDate = LocalDateTime.now();
+    }
+
+    public void changeCreatedDate(LocalDateTime createdDate) {
+        this.createdDate = createdDate;
     }
 }

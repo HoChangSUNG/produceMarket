@@ -1,17 +1,15 @@
 package creative.market.repository.order;
 
-import com.querydsl.core.Fetchable;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import creative.market.domain.order.OrderProduct;
-import creative.market.domain.order.QOrder;
 import creative.market.repository.dto.CategoryParamDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static creative.market.domain.category.QGradeCriteria.gradeCriteria;
@@ -45,8 +43,8 @@ public class OrderProductRepository {
         );
     }
 
-    public Long findCategoryOrderTotalPrice(CategoryParamDTO categoryParam, LocalDateTime startDate, LocalDateTime endDate) { //기간별 카테고리 총 판매액
-        return queryFactory.select(orderProduct.price.multiply(orderProduct.count).sum().longValue())
+    public Long findCategoryOrderTotalPriceSum(CategoryParamDTO categoryParam, LocalDateTime startDate, LocalDateTime endDate) { //기간별 카테고리 총 판매액
+        return queryFactory.select(getTotalPriceSum().coalesce(0L))
                 .from(orderProduct)
                 .join(orderProduct.order, order)
                 .join(orderProduct.product, product)
@@ -63,8 +61,8 @@ public class OrderProductRepository {
                 .fetchOne();
     }
 
-    public Long findCategoryOrderAvgPrice(CategoryParamDTO categoryParam, LocalDateTime startDate, LocalDateTime endDate) { //기간별 카테고리 평균 판매액
-        return queryFactory.select(orderProduct.price.multiply(orderProduct.count).avg().longValue())
+    public Long findCategoryOrderAvgPriceAvg(CategoryParamDTO categoryParam, LocalDateTime startDate, LocalDateTime endDate) { //기간별 카테고리 평균 판매액
+        return queryFactory.select(getTotalPriceAvg().coalesce(0L))
                 .from(orderProduct)
                 .join(orderProduct.order, order)
                 .join(orderProduct.product, product)
@@ -81,6 +79,17 @@ public class OrderProductRepository {
                 .fetchOne();
     }
 
+    private NumberExpression<Integer> getTotalPrice() {
+        return orderProduct.price.multiply(orderProduct.count);
+    }
+
+    private NumberExpression<Long> getTotalPriceSum() {
+        return getTotalPrice().sum().longValue();
+    }
+
+    private NumberExpression<Long> getTotalPriceAvg() {
+        return getTotalPrice().avg().longValue();
+    }
 
     private BooleanExpression kindGradeEq(Long kindGradeId) {
         return kindGradeId != null ? kindGrade.id.eq(kindGradeId) : null;
