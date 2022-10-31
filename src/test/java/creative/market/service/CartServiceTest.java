@@ -13,7 +13,6 @@ import creative.market.service.dto.UploadFileDTO;
 import creative.market.util.FileStoreUtils;
 import creative.market.util.FileSubPath;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -180,7 +179,7 @@ class CartServiceTest {
         cartService.delete(findCartId1, seller.getId());
 
         //then
-        List<Cart> findCartList = cartRepository.findByUserIdWithProduct(seller.getId());
+        List<Cart> findCartList = cartRepository.findByUserIdFetchJoinProductAndKind(seller.getId());
         assertThat(findCartList.size()).isEqualTo(1);
         assertThat(findCartList).extracting("id").contains(findCartId2);
         assertThat(findCartList).extracting("id").doesNotContain(findCartId1);
@@ -207,7 +206,7 @@ class CartServiceTest {
         cartService.deleteCartListByProductIds(deleteProductIds, seller.getId());
 
         //then
-        List<Cart> findCartList = cartRepository.findByUserIdWithProduct(seller.getId());
+        List<Cart> findCartList = cartRepository.findByUserIdFetchJoinProductAndKind(seller.getId());
         assertThat(findCartList.size()).isEqualTo(1);
         assertThat(findCartList).extracting("product").contains(product2);
         assertThat(findCartList).extracting("product").doesNotContain(product1);

@@ -15,7 +15,7 @@ public class CartQueryService {
     private final CartRepository cartRepository;
 
     public List<CartInfoRes> getCartList(Long userId) {
-        return cartRepository.findByUserIdWithProduct(userId).stream()
+        return cartRepository.findByUserIdFetchJoinProductAndKind(userId).stream()
                 .map(CartInfoRes::new)
                 .collect(Collectors.toList());
     }

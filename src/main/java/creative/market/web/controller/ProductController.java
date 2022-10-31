@@ -118,7 +118,7 @@ public class ProductController {
         SellerAndTotalPricePerCategoryDTO SellerPricePercent = orderProductQueryRepository.findCategorySellerNameAndPrice(categoryParamDTO, startDate, endDate, product.getUser().getId());
         PercentAndPriceRes percentAndPriceRes = convertToPricePercentDTO(SellerPricePercent, totalPriceSum, productId);
 
-        return new ResultRes(new PricePercentPieGraphPerCategory(priceTopRankPercentRes, percentAndPriceRes));
+        return new ResultRes(new PricePercentPieGraphPerCategoryRes(priceTopRankPercentRes, percentAndPriceRes));
     }
 
     private List<PercentAndPriceRes> convertToPricePercentDTOS(List<SellerAndTotalPricePerCategoryDTO> params, Long totalPriceSum, Long productId) {

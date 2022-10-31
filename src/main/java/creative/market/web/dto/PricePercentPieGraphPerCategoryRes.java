@@ -11,7 +11,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PricePercentPieGraphPerCategory {
+public class PricePercentPieGraphPerCategoryRes {
 
     private List<PercentAndPriceRes> topPieGraphPercent;
     private PercentAndPriceRes sellerPercent;

@@ -16,6 +16,7 @@ public class CartInfoRes {
     private int count;
     private String productName;
     private int price;
+    private String retailUnit;
     private String signatureImgSrc;
 
     public CartInfoRes(Cart cart) {
@@ -24,6 +25,7 @@ public class CartInfoRes {
         this.count = cart.getCount();
         this.productName = cart.getProduct().getName();
         this.price =  cart.getProduct().getPrice();
+        this.retailUnit = cart.getProduct().getKindGrade().getKind().getRetailsaleUnit();
         this.signatureImgSrc = cart.getProduct().getSignatureProductImage().getPath();
     }
 }

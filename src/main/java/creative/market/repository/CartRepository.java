@@ -2,9 +2,8 @@ package creative.market.repository;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import creative.market.domain.Cart;
-import creative.market.domain.QCart;
-import creative.market.domain.product.QProduct;
-import creative.market.domain.user.QUser;
+import creative.market.domain.category.QKind;
+import creative.market.domain.category.QKindGrade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -13,8 +12,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static creative.market.domain.QCart.*;
+import static creative.market.domain.category.QKind.*;
+import static creative.market.domain.category.QKindGrade.*;
 import static creative.market.domain.product.QProduct.*;
-import static creative.market.domain.user.QUser.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -32,9 +32,11 @@ public class CartRepository {
         return cart.getId();
     }
 
-    public List<Cart> findByUserIdWithProduct(Long userId) {
+    public List<Cart> findByUserIdFetchJoinProductAndKind(Long userId) {
         return queryFactory.selectFrom(cart)
                 .join(cart.product, product).fetchJoin()
+                .join(product.kindGrade, kindGrade)
+                .join(kindGrade.kind, kind)
                 .where(cart.user.id.eq(userId))
                 .fetch();
     }
