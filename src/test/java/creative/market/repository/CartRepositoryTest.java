@@ -109,8 +109,8 @@ class CartRepositoryTest {
         Long findCartId2 = cartService.register(product2.getId(), count2, seller1.getId());
 
         //when
-        List<Cart> findCart1 = cartRepository.findByUserIdWithProduct(seller1.getId());
-        List<Cart> findCart2 = cartRepository.findByUserIdWithProduct(seller2.getId());
+        List<Cart> findCart1 = cartRepository.findByUserIdFetchJoinProductAndKind(seller1.getId());
+        List<Cart> findCart2 = cartRepository.findByUserIdFetchJoinProductAndKind(seller2.getId());
 
         //then
         Assertions.assertThat(findCart1.size()).isEqualTo(2);

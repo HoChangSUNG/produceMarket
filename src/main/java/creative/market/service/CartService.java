@@ -1,7 +1,6 @@
 package creative.market.service;
 
 import creative.market.domain.Cart;
-import creative.market.domain.order.OrderProduct;
 import creative.market.domain.product.Product;
 import creative.market.domain.user.User;
 import creative.market.exception.DuplicateException;
@@ -74,7 +73,7 @@ public class CartService {
     }
 
     private void duplicateCart(Long userId, Long productId) {
-        long count = cartRepository.findByUserIdWithProduct(userId).stream()
+        long count = cartRepository.findByUserIdFetchJoinProductAndKind(userId).stream()
                 .filter(cart -> cart.getProduct().getId().equals(productId))
                 .count();
         if (count > 0) {
