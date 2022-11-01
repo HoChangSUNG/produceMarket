@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static creative.market.domain.category.QGradeCriteria.gradeCriteria;
@@ -41,6 +42,14 @@ public class OrderProductRepository {
                         .where(orderProduct.id.eq(orderProductId))
                         .fetchOne()
         );
+    }
+
+    public List<OrderProduct> findByProductIdAndUserId(Long productId, Long userId) {
+        return queryFactory
+                .selectFrom(orderProduct)
+                .join(orderProduct.order, order).fetchJoin()
+                .where(orderProduct.product.id.eq(productId).and(order.user.id.eq(userId)))
+                .fetch();
     }
 
     public Long findCategoryOrderTotalPriceSum(CategoryParamDTO categoryParam, LocalDateTime startDate, LocalDateTime endDate) { //기간별 카테고리 총 판매액
