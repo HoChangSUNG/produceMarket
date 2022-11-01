@@ -55,7 +55,7 @@ public class ReviewController {
         return new ResultRes(result);
     }
 
-    @PostMapping("/{reviewId}")
+    @PatchMapping("/{reviewId}")
     public ResultRes updateReview(@PathVariable Long reviewId, @RequestBody @Valid ReviewReq reviewReq, @Login LoginUserDTO loginUserDTO) {
 
         reviewService.update(reviewId, reviewReq, loginUserDTO.getId());
