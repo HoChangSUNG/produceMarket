@@ -45,6 +45,14 @@ public class OrderProductRepository {
         );
     }
 
+    public List<OrderProduct> findByProductIdAndUserId(Long productId, Long userId) {
+        return queryFactory
+                .selectFrom(orderProduct)
+                .join(orderProduct.order, order).fetchJoin()
+                .where(orderProduct.product.id.eq(productId).and(order.user.id.eq(userId)))
+                .fetch();
+    }
+
     public Long findCategoryOrderTotalPrice(CategoryParamDTO categoryParam, LocalDateTime startDate, LocalDateTime endDate) { //기간별 카테고리 총 판매액
         return queryFactory.select(orderProduct.price.multiply(orderProduct.count).sum().longValue())
                 .from(orderProduct)
