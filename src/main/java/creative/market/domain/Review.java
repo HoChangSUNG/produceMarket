@@ -16,17 +16,15 @@ import static javax.persistence.FetchType.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Review {
+public class Review extends CreatedDate{
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "review_id")
     private Long id;
 
-    private float rate;
+    private Float rate;
 
     private String content;
-
-    private LocalDateTime createdDate;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "user_id")
@@ -37,10 +35,9 @@ public class Review {
     private Product product;
 
     @Builder
-    public Review(float rate, String content, LocalDateTime createdDate, User user, Product product) {
+    public Review(Float rate, String content, User user, Product product) {
         this.rate = rate;
         this.content = content;
-        this.createdDate = createdDate;
         this.user = user;
         changeProduct(product);
     }
@@ -50,5 +47,14 @@ public class Review {
             this.product = product;
             product.getReviews().add(this);
         }
+    }
+
+    public void changeUser(User user) {
+        this.user = user;
+    }
+
+    public void changeReview(Float rate, String content) {
+        this.rate = rate;
+        this.content = content;
     }
 }
