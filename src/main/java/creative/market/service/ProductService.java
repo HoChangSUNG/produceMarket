@@ -112,7 +112,7 @@ public class ProductService {
     }
 
     public void sellerAccessCheck(Long productId, Long userId) {
-        productRepository.findByIdAndSeller(productId, userId).orElseThrow(() -> new LoginAuthenticationException("접근 권한이 없습니다."));
+        productRepository.findByIdAndSellerId(productId, userId).orElseThrow(() -> new LoginAuthenticationException("접근 권한이 없습니다."));
     }
 
 

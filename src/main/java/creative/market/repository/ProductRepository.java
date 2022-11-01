@@ -3,9 +3,7 @@ package creative.market.repository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import creative.market.domain.category.QGrade;
 import creative.market.domain.product.Product;
-import creative.market.domain.user.QUser;
 import creative.market.repository.dto.ProductSearchConditionReq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -72,11 +70,20 @@ public class ProductRepository {
                         .fetchOne());
     }
 
-    public Optional<Product> findByIdAndSeller(Long productId,Long userId) {
+    public Optional<Product> findByIdAndSellerId(Long productId, Long userId) {
         return Optional.ofNullable(
                 queryFactory.selectFrom(product)
                         .join(product.user, user)
                         .where(product.id.eq(productId),user.id.eq(userId))
+                        .fetchOne()
+        );
+    }
+
+    public Optional<Product> findByIdFetchJoinSeller(Long productId) {
+        return Optional.ofNullable(
+                queryFactory.selectFrom(product)
+                        .join(product.user, user).fetchJoin()
+                        .where(product.id.eq(productId))
                         .fetchOne()
         );
     }
