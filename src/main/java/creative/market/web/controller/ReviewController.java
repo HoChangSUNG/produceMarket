@@ -30,6 +30,7 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
+    @LoginCheck(type = {UserType.ADMIN,UserType.SELLER,UserType.BUYER})
     @PostMapping("/{productId}")
     public ResultRes createReview(@PathVariable Long productId, @RequestBody @Valid ReviewReq reviewReq, @Login LoginUserDTO loginUserDTO) {
 
@@ -43,6 +44,7 @@ public class ReviewController {
         return new ResultRes(new MessageRes("리뷰 등록 성공"));
     }
 
+    @LoginCheck(type = {UserType.ADMIN,UserType.SELLER,UserType.BUYER})
     @GetMapping("/{productId}")
     public ResultRes getReviews(@PathVariable Long productId) {
 
@@ -55,6 +57,7 @@ public class ReviewController {
         return new ResultRes(result);
     }
 
+    @LoginCheck(type = {UserType.ADMIN,UserType.SELLER,UserType.BUYER})
     @PatchMapping("/{reviewId}")
     public ResultRes updateReview(@PathVariable Long reviewId, @RequestBody @Valid ReviewReq reviewReq, @Login LoginUserDTO loginUserDTO) {
 
@@ -63,6 +66,7 @@ public class ReviewController {
         return new ResultRes(new MessageRes("리뷰 수정 성공"));
     }
 
+    @LoginCheck(type = {UserType.ADMIN,UserType.SELLER,UserType.BUYER})
     @DeleteMapping("/{reviewId}")
     public ResultRes deleteReview(@PathVariable Long reviewId, @Login LoginUserDTO loginUserDTO) {
 

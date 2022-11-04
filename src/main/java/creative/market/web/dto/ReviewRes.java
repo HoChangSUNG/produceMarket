@@ -23,11 +23,14 @@ public class ReviewRes {
 
     private String createdDate;
 
+    private Long userId;
+
     public ReviewRes(Review review) {
         this.reviewId = review.getId();
         this.name = review.getUser().getName();
         this.rate = review.getRate();
         this.content = review.getContent();
         this.createdDate = review.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm"));
+        this.userId = review.getUser().getId();
     }
 }
