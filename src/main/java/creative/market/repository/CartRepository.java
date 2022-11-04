@@ -35,8 +35,8 @@ public class CartRepository {
     public List<Cart> findByUserIdFetchJoinProductAndKind(Long userId) {
         return queryFactory.selectFrom(cart)
                 .join(cart.product, product).fetchJoin()
-                .join(product.kindGrade, kindGrade)
-                .join(kindGrade.kind, kind)
+                .join(product.kindGrade, kindGrade).fetchJoin()
+                .join(kindGrade.kind, kind).fetchJoin()
                 .where(cart.user.id.eq(userId))
                 .fetch();
     }
