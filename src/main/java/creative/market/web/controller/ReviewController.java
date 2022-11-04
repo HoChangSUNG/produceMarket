@@ -44,7 +44,6 @@ public class ReviewController {
         return new ResultRes(new MessageRes("리뷰 등록 성공"));
     }
 
-    @LoginCheck(type = {UserType.ADMIN,UserType.SELLER,UserType.BUYER})
     @GetMapping("/{productId}")
     public ResultRes getReviews(@PathVariable Long productId) {
 
