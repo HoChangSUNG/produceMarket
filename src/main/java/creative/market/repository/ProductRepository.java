@@ -39,6 +39,13 @@ public class ProductRepository {
         return queryFactory.selectFrom(product).fetch();
     }
 
+    public List<Product> findProductListOrderByCreatedDateDesc(int limit) {
+        return queryFactory.selectFrom(product)
+                .orderBy(product.createdDate.desc())
+                .limit(limit)
+                .fetch();
+    }
+
     public Optional<Product> findById(Long id) {
         return Optional.ofNullable(em.find(Product.class, id));
     }
@@ -58,6 +65,8 @@ public class ProductRepository {
                 .orderBy(orderCondition(condition.getOrderBy()))
                 .fetch();
     }
+
+
 
     public Optional<Product> findByIdFetchJoinSellerAndKind(Long productId) {
         return Optional.ofNullable(
