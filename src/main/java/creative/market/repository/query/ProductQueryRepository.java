@@ -34,13 +34,4 @@ public class ProductQueryRepository {
                 .limit(limit)
                 .fetch();
     }
-
-    private BooleanExpression imageTypeEq(ProductImageType productImageType) {
-        return productImageType != null ? productImage.type.eq(productImageType) : null;
-    }
-
-    private OrderSpecifier<?> orderByFieldList(List<Long> productIds) {
-        return Expressions.stringTemplate("FIELD({0}, {1})", product.id, productIds)
-                .asc();
-    }
 }

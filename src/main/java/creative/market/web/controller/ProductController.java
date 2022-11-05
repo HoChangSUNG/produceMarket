@@ -11,6 +11,7 @@ import creative.market.repository.dto.ProductSearchConditionReq;
 import creative.market.repository.dto.SellerAndTotalPricePerCategoryDTO;
 import creative.market.repository.order.OrderProductRepository;
 import creative.market.repository.query.OrderProductQueryRepository;
+import creative.market.repository.query.ProductQueryRepository;
 import creative.market.service.ProductService;
 import creative.market.service.dto.LoginUserDTO;
 import creative.market.service.dto.RegisterProductDTO;
@@ -43,6 +44,7 @@ public class ProductController {
     @Value("${images}")
     private String rootPath;
     private final ProductRepository productRepository;
+    private final ProductQueryRepository productQueryRepository;
     private final OrderProductQueryRepository orderProductQueryRepository;
     private final OrderProductRepository orderProductRepository;
     private final ProductService productService;
@@ -119,6 +121,12 @@ public class ProductController {
         PercentAndPriceRes percentAndPriceRes = convertToPricePercentDTO(SellerPricePercent, totalPriceSum, productId);
 
         return new ResultRes(new PricePercentPieGraphPerCategoryRes(priceTopRankPercentRes, percentAndPriceRes));
+    }
+
+    @GetMapping("/main-page/latest")
+    public ResultRes maiPageLatestByAllCategory() { //메인페이지 시간순 조회
+        int limit = 4;
+        return new ResultRes(productQueryRepository.findProductSigImgAndIdByLatestCreatedDate(limit));
     }
 
     private List<PercentAndPriceRes> convertToPricePercentDTOS(List<SellerAndTotalPricePerCategoryDTO> params, Long totalPriceSum, Long productId) {
