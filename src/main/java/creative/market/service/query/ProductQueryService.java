@@ -4,6 +4,7 @@ import creative.market.domain.category.KindGrade;
 import creative.market.domain.product.Product;
 import creative.market.repository.ProductRepository;
 import creative.market.repository.dto.ProductSearchConditionReq;
+import creative.market.repository.dto.ProductSigSrcAndIdRes;
 import creative.market.repository.dto.ProductUpdateFormRes;
 import creative.market.service.dto.ProductDetailRes;
 import creative.market.service.dto.ProductShortInfoRes;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -46,12 +48,23 @@ public class ProductQueryService {
         int sellerPercent = 0;
         int productAvgPrice = productRepository.findProductAvgPrice(kindGrade.getId()).intValue();// 상품 평균 가격
 
-        return new ProductDetailRes(product,sellerRank,sellerPercent,productAvgPrice,retailAndWholesalePriceResult);
+        return new ProductDetailRes(product, sellerRank, sellerPercent, productAvgPrice, retailAndWholesalePriceResult);
     }
 
     public ProductUpdateFormRes productUpdateForm(Long productId) {
         Product product = productRepository.findByIdFetchJoinItemCategory(productId)
                 .orElseThrow(() -> new NoSuchElementException("상품이 존재하지 않습니다."));
         return new ProductUpdateFormRes(product);
+    }
+
+    public List<ProductSigSrcAndIdRes> productSigSrcAndIdByOrderCount(int limit, LocalDateTime startDate, LocalDateTime endDate) { // // 메인 페이지 전체 상품 판매횟수순
+        return productRepository.findProductIdByOrderCountDesc(limit, startDate, endDate).stream()
+                .map(productId -> new ProductSigSrcAndIdRes(findProductById(productId)))
+                .collect(Collectors.toList());
+    }
+
+    private Product findProductById(Long productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new NoSuchElementException("상품이 존재하지 않습니다."));
     }
 }
