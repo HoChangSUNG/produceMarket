@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 
 import javax.persistence.EntityManager;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +21,8 @@ import static creative.market.domain.category.QItem.*;
 import static creative.market.domain.category.QItemCategory.*;
 import static creative.market.domain.category.QKind.*;
 import static creative.market.domain.category.QKindGrade.*;
+import static creative.market.domain.order.QOrder.order;
+import static creative.market.domain.order.QOrderProduct.*;
 import static creative.market.domain.product.QProduct.*;
 import static creative.market.domain.user.QUser.*;
 
@@ -66,12 +69,10 @@ public class ProductRepository {
                 .fetch();
     }
 
-
-
     public Optional<Product> findByIdFetchJoinSellerAndKind(Long productId) {
         return Optional.ofNullable(
                 queryFactory.selectFrom(product)
-                        .join(product.kindGrade,kindGrade).fetchJoin()
+                        .join(product.kindGrade, kindGrade).fetchJoin()
                         .join(kindGrade.kind, kind).fetchJoin()
                         .join(kindGrade.kind).fetchJoin()
                         .join(product.user, user).fetchJoin()
@@ -83,7 +84,7 @@ public class ProductRepository {
         return Optional.ofNullable(
                 queryFactory.selectFrom(product)
                         .join(product.user, user)
-                        .where(product.id.eq(productId),user.id.eq(userId))
+                        .where(product.id.eq(productId), user.id.eq(userId))
                         .fetchOne()
         );
     }
@@ -100,22 +101,38 @@ public class ProductRepository {
     public Optional<Product> findByIdFetchJoinItemCategory(Long productId) {
         return Optional.ofNullable(
                 queryFactory.selectFrom(product)
-                        .join(product.kindGrade,kindGrade).fetchJoin()
+                        .join(product.kindGrade, kindGrade).fetchJoin()
                         .join(kindGrade.grade, grade)
                         .join(kindGrade.kind, kind).fetchJoin()
-                        .join(kind.item,item).fetchJoin()
-                        .join(item.itemCategory,itemCategory)
+                        .join(kind.item, item).fetchJoin()
+                        .join(item.itemCategory, itemCategory)
                         .where(product.id.eq(productId))
                         .fetchOne()
         );
     }
 
     public Double findProductAvgPrice(Long kindGradeId) { // 상품 평균 가격
-        return queryFactory.select(product.price.avg())
+        return queryFactory.select(product.price.avg().coalesce(0D))
                 .from(product)
                 .join(product.kindGrade, kindGrade)
                 .where(kindGrade.id.eq(kindGradeId))
                 .fetchOne();
+    }
+
+    public List<Long> findProductIdByOrderCountDesc(int limit, LocalDateTime startDate, LocalDateTime endDate) { // 전체 카테고리에서 판매횟수 내림차순 정렬
+        return queryFactory.select(product.id)
+                .from(orderProduct)
+                .join(orderProduct.product, product)
+                .join(orderProduct.order, order)
+                .where(dateBetween(startDate, endDate))
+                .groupBy(product)
+                .orderBy(orderProduct.count().desc(), product.createdDate.asc())
+                .limit(limit)
+                .fetch();
+    }
+
+    private BooleanExpression dateBetween(LocalDateTime startDate, LocalDateTime endDate) {
+        return startDate != null && endDate != null ? order.createdDate.between(startDate, endDate) : null;
     }
 
     private OrderSpecifier<?> orderCondition(String orderBy) {

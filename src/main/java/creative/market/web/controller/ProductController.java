@@ -124,9 +124,22 @@ public class ProductController {
     }
 
     @GetMapping("/main-page/latest")
-    public ResultRes maiPageLatestByAllCategory() { //메인페이지 시간순 조회
+    public ResultRes maiPageLatestByAllCategory() { //메인 페이지 시간순 조회
         int limit = 4;
         return new ResultRes(productQueryRepository.findProductSigImgAndIdByLatestCreatedDate(limit));
+    }
+
+    @GetMapping("/main-page/order-count")
+    public ResultRes mainPageOrderCntByAllCategory() { // 메인 페이지 판매 횟수순 조회
+        int limit = 4;
+        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime startDate = endDate.minusMonths(1) // 한달 전
+                .withHour(0)
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0);
+        log.info("startDate={}, endDate={}", startDate, endDate);
+        return new ResultRes(productQueryService.productSigSrcAndIdByOrderCount(limit, startDate, endDate));
     }
 
     private List<PercentAndPriceRes> convertToPricePercentDTOS(List<SellerAndTotalPricePerCategoryDTO> params, Long totalPriceSum, Long productId) {
@@ -139,7 +152,7 @@ public class ProductController {
             totalPriceSumRemain -= param.getTotalPrice();
         }
 
-        if (totalPriceSumRemain != 0) { // 상품 카테고리별 원형 그래프에 출력할 상품 가격 합 < 특정 카테고리 가격 합 -> 원형 그래프에 '기타'로 나타내줘야 하는 경우ㅡ
+        if (totalPriceSumRemain != 0) { // 상품 카테고리별 원형 그래프에 출력할 상품 가격 합 < 특정 카테고리 가격 합 -> 원형 그래프에 '기타'로 나타내줘야 하는 경우
             PercentAndPriceRes etc = new PercentAndPriceRes("기타", totalPriceSumRemain, getPercent(totalPriceSumRemain, totalPriceSum));
             result.add(etc);
         }
