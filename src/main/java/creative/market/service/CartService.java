@@ -36,6 +36,9 @@ public class CartService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("회원이 존재하지 않습니다."));
 
+        // 본인이 등록한 상품을 장바구니에 담으려는 경우 예외 발생
+        checkMyProduct(product.getId(),userId);
+
         duplicateCart(userId, productId); // 해당 상품이 이미 장바구니에 존재하는지
 
         Cart cart = createCart(product, user, count);
@@ -87,5 +90,12 @@ public class CartService {
                 .product(product)
                 .user(user)
                 .build();
+    }
+
+    private void checkMyProduct(Long productId, Long userId) {
+        Product product = productRepository.findById(productId).orElseThrow(NoSuchElementException::new);
+        if (product.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("본인이 등록한 상품은 구매할 수 없습니다.");
+        }
     }
 }

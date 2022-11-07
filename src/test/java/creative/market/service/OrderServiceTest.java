@@ -259,7 +259,36 @@ class OrderServiceTest {
                 .hasMessage("주문한 상품이 존재하지 않습니다.");
     }
 
+    @Test
+    @DisplayName("상품 주문 실패, 자신이 등록한 상품을 구매한 경우")
+    void orderFail3() throws Exception {
+        //given
+        Seller productOwner1 = createSeller("성호창q", "123433", "3123334", "19990112", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        Seller productOwner2 = createSeller("성호창w", "133234", "2123334", "19991212", "sd45fwf@mae.com", "010-3644-3333", createAddress("1111", "봉사산로2", 12315, "2동2호"), "상호명2");
+        em.persist(productOwner1);
+        em.persist(productOwner2);
 
+        Product product1 = getProduct("상품", 12000, "상품입니다", 432L, productOwner1);
+        Product product2 = getProduct("상품2", 8000, "상품입니다2", 433L, productOwner2);
+        Product product3 = getProduct("상품3", 40000, "상품입니다3", 434L, productOwner2);
+
+        OrderProductParamDTO orderProductParam1 = new OrderProductParamDTO(2, product1.getId());
+        OrderProductParamDTO orderProductParam2 = new OrderProductParamDTO(1, product2.getId());
+        OrderProductParamDTO orderProductParam3 = new OrderProductParamDTO(3, product3.getId());
+        List<OrderProductParamDTO> orderParamList = new ArrayList<>();
+        orderParamList.add(orderProductParam1);
+        orderParamList.add(orderProductParam2);
+        orderParamList.add(orderProductParam3);
+
+        Address orderAddress = createAddress("1111", "봉사산로", 12345, "동호수");
+
+        //when
+
+        //then
+        assertThatThrownBy(() -> orderService.order(productOwner1.getId(), orderParamList, orderAddress))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("본인이 등록한 상품은 구매할 수 없습니다.");
+    }
     @Test
     @DisplayName("주문 취소 성공")
     void orderCancelSuccess() throws Exception {
