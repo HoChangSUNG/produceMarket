@@ -4,6 +4,7 @@ import creative.market.domain.Address;
 import creative.market.domain.Cart;
 import creative.market.domain.product.Product;
 import creative.market.domain.user.Seller;
+import creative.market.domain.user.User;
 import creative.market.exception.DuplicateException;
 import creative.market.exception.LoginAuthenticationException;
 import creative.market.repository.CartRepository;
@@ -155,9 +156,26 @@ class CartServiceTest {
         Long findCartId = cartService.register(product.getId(), count, seller.getId());
 
         //then
+        //이미 등록된 상품을 다시 장바구니에 저장
         assertThatThrownBy(() -> cartService.register(product.getId(), count, seller.getId()))
                 .isInstanceOf(DuplicateException.class)
                 .hasMessage("이미 장바구니에 해당 상품이 존재합니다.");
+    }
+
+    @Test
+    @DisplayName("장바구니 등록 실패, 본인이 등록한 상품을 장바구니에 등록하려는 경우")
+    void registerFail4() throws Exception {
+        //given
+        Product product = productRepository.findAll().get(0);
+        User seller = product.getUser();
+        int count = 4;
+
+        //when
+
+        //then
+        assertThatThrownBy(() -> cartService.register(product.getId(), count, seller.getId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("본인이 등록한 상품은 구매할 수 없습니다.");
     }
 
     @Test
