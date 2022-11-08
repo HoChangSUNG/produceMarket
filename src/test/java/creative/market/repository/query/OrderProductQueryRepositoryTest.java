@@ -226,7 +226,7 @@ class OrderProductQueryRepositoryTest {
 
             Long orderId = orderService.order(productBuyer.getId(), orderParamList1, orderAddress);
             Order findOrder = orderRepository.findById(orderId).orElseThrow(() -> new NoSuchElementException("주문 내역이 존재하지 않습니다."));
-            findOrder.changeCreatedDate(now.minusMonths(i));
+            findOrder.changeCreatedDate(now.minusMonths(i).withMinute(1));
 
             OrderProductParamDTO orderProductParam3 = new OrderProductParamDTO(i + 1, product3.getId());
             OrderProductParamDTO orderProductParam4 = new OrderProductParamDTO(i + 2, product4.getId());
@@ -234,7 +234,7 @@ class OrderProductQueryRepositoryTest {
 
             Long orderId2 = orderService.order(productBuyer.getId(), orderParamList2, orderAddress);
             Order findOrder2 = orderRepository.findById(orderId2).orElseThrow(() -> new NoSuchElementException("주문 내역이 존재하지 않습니다."));
-            findOrder2.changeCreatedDate(now.minusMonths(i));
+            findOrder2.changeCreatedDate(now.minusMonths(i).withMinute(2));
         }
 //        기간별 구매자 결제 금액
 //        이번달 : 1000*1 + 5000 * 2 + 10000* 1 + 20000 * 2 = 61000

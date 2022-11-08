@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.YearMonth;
 
@@ -19,8 +17,10 @@ import java.time.YearMonth;
 public class YearMonthPeriodReq {
 
     @DateTimeFormat(pattern = "yyyy-MM")
-    YearMonth start;
+    @NotNull(message = "시작 날짜를 입력해주세요")
+    YearMonth startDate;
 
     @DateTimeFormat(pattern = "yyyy-MM")
-    YearMonth end;
+    @NotNull(message = "종료 날짜를 입력해주세요")
+    YearMonth endDate;
 }
