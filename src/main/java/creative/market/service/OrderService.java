@@ -1,7 +1,6 @@
 package creative.market.service;
 
 import creative.market.domain.Address;
-import creative.market.domain.Cart;
 import creative.market.domain.order.Order;
 import creative.market.domain.order.OrderProduct;
 import creative.market.domain.order.OrderStatus;
@@ -44,6 +43,9 @@ public class OrderService {
         // 구매하는 상품이 장바구니에 있는 경우 장바구니에서 삭제
         deleteOrderCartList(orderProductParams,userId);
 
+        // 본인이 등록한 상품을 구매하려는 경우 예외 발생
+        checkMyProducts(orderProductParams,userId);
+
         // orderProducts 생성
         List<OrderProduct> orderProducts = createOrderProducts(orderProductParams);
 
@@ -54,6 +56,19 @@ public class OrderService {
         orderRepository.save(order);
 
         return order.getId();
+    }
+
+    private void checkMyProducts(List<OrderProductParamDTO> orderProductParams, Long userId) {
+        for (OrderProductParamDTO orderProductParam : orderProductParams) {
+            checkMyProduct(orderProductParam,userId);
+        }
+    }
+
+    private void checkMyProduct(OrderProductParamDTO param,Long userId) {
+        Product product = productRepository.findById(param.getProductId()).orElseThrow(NoSuchElementException::new);
+        if (product.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("본인이 등록한 상품은 구매할 수 없습니다.");
+        }
     }
 
     private void deleteOrderCartList(List<OrderProductParamDTO> orderProductParams, Long userId) {

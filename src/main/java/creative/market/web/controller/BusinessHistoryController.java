@@ -49,9 +49,24 @@ public class BusinessHistoryController {
 
     @GetMapping
     @LoginCheck(type = UserType.ADMIN)
-    public ResultRes getBusinessHistoryList() {
+    public ResultRes getBusinessHistoryUserList() {
 
-        return new ResultRes(businessHistoryQueryService.getBusinessHistoryList());
+        return new ResultRes(businessHistoryQueryService.getBusinessHistoryUserList());
+    }
+
+    @GetMapping("/{businessId}")
+    @LoginCheck(type = UserType.ADMIN)
+    public ResultRes getBusinessHistory(@PathVariable Long businessId) {
+
+        return new ResultRes(businessHistoryQueryService.getBusinessHistory(businessId));
+    }
+
+    @GetMapping("/user")
+    @LoginCheck(type = {UserType.SELLER, UserType.BUYER})
+    public ResultRes getUserBusinessHistoryList(@Login LoginUserDTO loginUserDTO) {
+
+
+        return new ResultRes(businessHistoryQueryService.getUserBusinessHistoryList(loginUserDTO.getId()));
     }
 
     @PostMapping("/accept/{businessId}")
