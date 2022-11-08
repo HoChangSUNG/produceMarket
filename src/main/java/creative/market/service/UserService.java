@@ -1,8 +1,6 @@
 package creative.market.service;
 
-import creative.market.aop.LoginCheck;
 import creative.market.aop.UserType;
-import creative.market.argumentresolver.Login;
 import creative.market.domain.Address;
 import creative.market.domain.user.Admin;
 import creative.market.domain.user.Buyer;
@@ -18,21 +16,19 @@ import creative.market.service.dto.LoginRes;
 import creative.market.service.dto.LoginUserDTO;
 import creative.market.service.dto.UserInfoRes;
 import creative.market.util.SessionUtils;
-import creative.market.web.dto.RegisterReq;
+import creative.market.web.dto.CreateAndChangeUserReq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserService {
-
-    // lazy로딩으로 조회할때만 queryrepository 만들어서 쓰고 다른 repository,service는 엔티티만 반환하기
-    // 수정해야함
 
     private final UserRepository userRepository;
     private final BuyerRepository buyerRepository;
@@ -44,9 +40,7 @@ public class UserService {
     }
 
     @Transactional
-    public Long register(RegisterReq registerReq) {
-
-        Buyer buyer = createBuyer(registerReq);
+    public Long register(Buyer buyer) {
 
         buyerRepository.findByLoginId(buyer.getLoginId())
                 .ifPresent((b) -> {
@@ -56,34 +50,43 @@ public class UserService {
         return buyerRepository.register(buyer);
     }
 
-    public LoginRes login(String loginId, String password, HttpServletRequest request) {
+    public User login(String loginId, String password) {
         Optional<Buyer> buyer = buyerRepository.findByLoginIdAndPassword(loginId, password);
         Optional<Seller> seller = sellerRepository.findByLoginIdAndPassword(loginId, password);
         Optional<Admin> admin = adminRepository.findByLoginIdAndPassword(loginId, password);
 
         User user = null;
-        UserType userType = null;
 
         if (buyer.isPresent()) {
             user = buyer.get();
-            userType = UserType.BUYER;
         } else if (seller.isPresent()) {
             user = seller.get();
-            userType = UserType.SELLER;
         } else if (admin.isPresent()) {
             user = admin.get();
-            userType = UserType.ADMIN;
         }
 
         if (user == null)
             throw new LoginAuthenticationException("로그인 실패");
 
-        createSession(userType, request, user.getId(), user.getName());
-        return new LoginRes(user.getId(), user.getName(), userType.name());
+        return user;
     }
 
-    public void logout(HttpServletRequest request) {
-        SessionUtils.expire(request);
+    @Transactional
+    public void update(CreateAndChangeUserReq req, Long userId, UserType type) {
+
+        User user = null;
+
+        if(type.equals(UserType.SELLER)) {
+            user = sellerRepository.findById(userId).get();
+        } else if(type.equals(UserType.BUYER)) {
+            user = buyerRepository.findById(userId).get();
+        } else {
+            throw new LoginAuthenticationException("로그인이 필요합니다.");
+        }
+
+        Address address = createAddress(req.getJibun(), req.getRoad(), req.getZipcode(), req.getDetailAddress());
+
+        user.updateUser(req.getName(), req.getLoginId(), req.getPassword(), req.getBirth(), req.getEmail(), req.getPhoneNumber(), address);
     }
 
     @Transactional
@@ -91,40 +94,26 @@ public class UserService {
         userRepository.delete(id);
     }
 
-    public UserInfoRes getInfo(LoginUserDTO loginUserDTO) {
-        Optional<Seller> sellerCheck = sellerRepository.findById(loginUserDTO.getId());
-        Optional<Buyer> buyerCheck = buyerRepository.findById(loginUserDTO.getId());
+    public Buyer getBuyer(Long id) {
+        Buyer buyer = buyerRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("회원이 존재하지 않습니다."));
 
-        if(sellerCheck.isPresent()) {
-            Seller seller = sellerCheck.get();
-            return new UserInfoRes(seller.getName(), seller.getLoginId(), seller.getPassword(), seller.getBirth(), seller.getEmail(), seller.getPhoneNumber(), seller.getAddress().getJibun(), seller.getAddress().getRoad(), seller.getAddress().getZipcode(), seller.getAddress().getDetailAddress());
-        } else if(buyerCheck.isPresent()) {
-            Buyer buyer = buyerCheck.get();
-            return new UserInfoRes(buyer.getName(), buyer.getLoginId(), buyer.getPassword(), buyer.getBirth(), buyer.getEmail(), buyer.getPhoneNumber(), buyer.getAddress().getJibun(), buyer.getAddress().getRoad(), buyer.getAddress().getZipcode(), buyer.getAddress().getDetailAddress());
-        } else {
-            throw new LoginAuthenticationException("권한이 없습니다");
-        }
-    }
-
-    private void createSession(UserType userType, HttpServletRequest request, Long id, String name) {
-        LoginUserDTO loginUser = new LoginUserDTO(id, name,userType);
-        SessionUtils.createSession(request, userType.name(), loginUser);
-    }
-
-    private Buyer createBuyer(RegisterReq registerReq) {
-        Buyer buyer = Buyer.builder()
-                .name(registerReq.getName())
-                .address(Address.builder()
-                        .jibun(registerReq.getJibun())
-                        .road(registerReq.getRoad())
-                        .zipcode(registerReq.getZipcode())
-                        .detailAddress(registerReq.getDetailAddress()).build())
-                .birth(registerReq.getBirth())
-                .loginId(registerReq.getLoginId())
-                .email(registerReq.getEmail())
-                .password(registerReq.getPassword())
-                .phoneNumber(registerReq.getPhoneNumber())
-                .build();
         return buyer;
+    }
+
+    public Seller getSeller(Long id) {
+        Seller seller = sellerRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("회원이 존재하지 않습니다."));
+
+        return seller;
+    }
+
+    private Address createAddress(String jibun, String road, int zipcode, String detailAddress) {
+        return Address.builder()
+                .jibun(jibun)
+                .road(road)
+                .zipcode(zipcode)
+                .detailAddress(detailAddress)
+                .build();
     }
 }

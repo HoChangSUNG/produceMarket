@@ -15,7 +15,7 @@ import javax.validation.constraints.NotNull;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegisterReq {
+public class CreateAndChangeUserReq {
 
     @NotEmpty
     private String name;
