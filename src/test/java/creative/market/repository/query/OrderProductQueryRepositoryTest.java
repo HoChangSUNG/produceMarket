@@ -8,12 +8,14 @@ import creative.market.domain.user.Buyer;
 import creative.market.domain.user.Seller;
 import creative.market.repository.ProductRepository;
 import creative.market.repository.category.KindGradeRepository;
+import creative.market.repository.dto.BuyerTotalPricePerPeriodDTO;
 import creative.market.repository.dto.CategoryParamDTO;
 import creative.market.repository.dto.SellerAndTotalPricePerCategoryDTO;
 import creative.market.repository.order.OrderRepository;
 import creative.market.repository.user.SellerRepository;
 import creative.market.service.OrderService;
 import creative.market.service.dto.OrderProductParamDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,13 +24,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
+@Slf4j
 class OrderProductQueryRepositoryTest {
 
     @Autowired
@@ -158,16 +165,16 @@ class OrderProductQueryRepositoryTest {
         // -> 강대현 : 100,000원
         // -> 강병관 : 22,000원
         assertThat(result1.size()).isEqualTo(2);
-        assertThat(result1).extracting("totalPrice").containsExactly(200000L,100000L);
-        assertThat(result1).extracting("sellerName").containsExactly("김현민","강대현");
+        assertThat(result1).extracting("totalPrice").containsExactly(200000L, 100000L);
+        assertThat(result1).extracting("sellerName").containsExactly("김현민", "강대현");
 
         assertThat(result2.size()).isEqualTo(3);
-        assertThat(result2).extracting("totalPrice").containsExactly(200000L,100000L,22000L);
-        assertThat(result2).extracting("sellerName").containsExactly("김현민","강대현","강병관");
+        assertThat(result2).extracting("totalPrice").containsExactly(200000L, 100000L, 22000L);
+        assertThat(result2).extracting("sellerName").containsExactly("김현민", "강대현", "강병관");
 
         assertThat(result3.size()).isEqualTo(3);
-        assertThat(result3).extracting("totalPrice").containsExactly(200000L,100000L,22000L);
-        assertThat(result3).extracting("sellerName").containsExactly("김현민","강대현","강병관");
+        assertThat(result3).extracting("totalPrice").containsExactly(200000L, 100000L, 22000L);
+        assertThat(result3).extracting("sellerName").containsExactly("김현민", "강대현", "강병관");
     }
 
     @Test
@@ -195,6 +202,74 @@ class OrderProductQueryRepositoryTest {
 
 
     }
+
+    @Test
+    void findBuyerTotalPricePerPeriod() throws Exception {
+        //given
+        Address orderAddress = createAddress("1111", "봉사산로", 12345, "동호수");
+        Seller productOwner1 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner1);
+        Buyer productBuyer = createBuyer("성호창32", "311111", "332222222", "19990512", "sdfw67f@mae.com", "010-3774-5555", orderAddress);
+        em.persist(productBuyer);
+
+        Product product1 = getProduct("상품111", 1000, "상품입니다111", 432L, productOwner1);
+        Product product2 = getProduct("상품222", 5000, "상품입니다222", 432L, productOwner1);
+        Product product3 = getProduct("상품111", 10000, "상품입니다333", 432L, productOwner1);
+        Product product4 = getProduct("상품222", 20000, "상품입니다444", 432L, productOwner1);
+
+        for (int i = 0; i < 4; i++) { // 주문
+            LocalDateTime now = LocalDateTime.now();
+
+            OrderProductParamDTO orderProductParam1 = new OrderProductParamDTO(i + 1, product1.getId());
+            OrderProductParamDTO orderProductParam2 = new OrderProductParamDTO(i + 2, product2.getId());
+            List<OrderProductParamDTO> orderParamList1 = addOrderProductParamDTO(orderProductParam1, orderProductParam2);
+
+            Long orderId = orderService.order(productBuyer.getId(), orderParamList1, orderAddress);
+            Order findOrder = orderRepository.findById(orderId).orElseThrow(() -> new NoSuchElementException("주문 내역이 존재하지 않습니다."));
+            findOrder.changeCreatedDate(now.minusMonths(i));
+
+            OrderProductParamDTO orderProductParam3 = new OrderProductParamDTO(i + 1, product3.getId());
+            OrderProductParamDTO orderProductParam4 = new OrderProductParamDTO(i + 2, product4.getId());
+            List<OrderProductParamDTO> orderParamList2 = addOrderProductParamDTO(orderProductParam3, orderProductParam4);
+
+            Long orderId2 = orderService.order(productBuyer.getId(), orderParamList2, orderAddress);
+            Order findOrder2 = orderRepository.findById(orderId2).orElseThrow(() -> new NoSuchElementException("주문 내역이 존재하지 않습니다."));
+            findOrder2.changeCreatedDate(now.minusMonths(i));
+        }
+//        기간별 구매자 결제 금액
+//        이번달 : 1000*1 + 5000 * 2 + 10000* 1 + 20000 * 2 = 61000
+//        1달전 : 1000*2 + 5000 * 3 + 10000* 2 + 20000 *3 = 77000
+//        2달전 : 1000*3 + 5000 * 4 + 10000* 3 + 20000 *4 = 133000
+//        3달전 : 1000*4 + 5000 * 5 + 10000* 4 + 20000 *5 = 169000
+
+        //when
+        LocalDateTime start1 = startMonthOfDayLocalDateTime(YearMonth.now().minusYears(1)); // 1년전
+        LocalDateTime end1 = endMonthOfDayLocalDateTime(YearMonth.now()); // 이번달
+        List<BuyerTotalPricePerPeriodDTO> result1 = orderProductQueryRepository.findBuyerTotalPricePerPeriod(start1, end1, productBuyer.getId());
+
+        LocalDateTime end2 = endMonthOfDayLocalDateTime(YearMonth.now().minusMonths(2)); // 2달전
+        LocalDateTime start2 = startMonthOfDayLocalDateTime(YearMonth.now().minusMonths(3)); // 3달전
+        List<BuyerTotalPricePerPeriodDTO> result2 = orderProductQueryRepository.findBuyerTotalPricePerPeriod(start2, end2, productBuyer.getId());
+
+        //then
+
+        String threeMonthsAgo = LocalDateTime.now().minusMonths(3).format(DateTimeFormatter.ofPattern("yyyy.MM")); //3달전
+        String twoMonthsAgo = LocalDateTime.now().minusMonths(2).format(DateTimeFormatter.ofPattern("yyyy.MM")); //2달전
+        String oneMonthsAgo = LocalDateTime.now().minusMonths(1).format(DateTimeFormatter.ofPattern("yyyy.MM")); //1달전
+        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM")); //이번달
+
+        //1년전 ~ 이번달
+        assertThat(result1.size()).isEqualTo(4);
+        assertThat(result1).extracting("date").containsExactly(threeMonthsAgo, twoMonthsAgo, oneMonthsAgo, now);
+        assertThat(result1).extracting("price").containsExactly(169000L, 133000L, 97000L, 61000L);
+
+        //2달전~ 3달전
+        assertThat(result2.size()).isEqualTo(2);
+        assertThat(result2).extracting("date").containsExactly(threeMonthsAgo, twoMonthsAgo);
+        assertThat(result2).extracting("price").containsExactly(169000L, 133000L);
+
+    }
+
     private List<OrderProductParamDTO> addOrderProductParamDTO(OrderProductParamDTO... orderProductParamDTOS) {
         List<OrderProductParamDTO> orderParamList = new ArrayList<>();
         Arrays.stream(orderProductParamDTOS).forEach(orderProductParamDTO -> orderParamList.add(orderProductParamDTO));
@@ -244,5 +319,16 @@ class OrderProductQueryRepositoryTest {
                 .road(road)
                 .zipcode(zipcode)
                 .detailAddress(detailAddress).build();
+    }
+
+    private LocalDateTime startMonthOfDayLocalDateTime(YearMonth yearMonth) {
+        return LocalDateTime.of(yearMonth.getYear(), yearMonth.getMonthValue(), 1, 0, 0);
+    }
+
+    private LocalDateTime endMonthOfDayLocalDateTime(YearMonth yearMonth) {
+        // 2022년 11월 -> 2022년 11월 30일 23:59:999999
+        LocalTime maxTime = LocalTime.MAX;
+        LocalDate localDate = yearMonth.atEndOfMonth();
+        return LocalDateTime.of(localDate, maxTime);
     }
 }
