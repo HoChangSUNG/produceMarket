@@ -30,4 +30,9 @@ public class Seller extends User {
         this.changeDate = changeDate;
     }
 
+    @Override
+    public void updateUser(String name, String loginId, String password, String birth, String email, String phoneNumber, Address address) {
+        super.updateUser(name, loginId, password, birth, email, phoneNumber, address);
+        this.address = address;
+    }
 }

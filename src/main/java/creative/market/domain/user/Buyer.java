@@ -19,4 +19,10 @@ public class Buyer extends User {
         super(name, loginId, password, birth, email, phoneNumber);
         this.address = address;
     }
+
+    @Override
+    public void updateUser(String name, String loginId, String password, String birth, String email, String phoneNumber, Address address) {
+        super.updateUser(name, loginId, password, birth, email, phoneNumber, address);
+        this.address = address;
+    }
 }

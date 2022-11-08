@@ -1,5 +1,6 @@
 package creative.market.domain.user;
 
+import creative.market.domain.Address;
 import lombok.*;
 
 import javax.persistence.*;
@@ -36,7 +37,7 @@ public abstract class User {
         this.phoneNumber = phoneNumber;
     }
 
-    public void updateUser(String name, String loginId, String password, String birth, String email, String phoneNumber) {
+    public void updateUser(String name, String loginId, String password, String birth, String email, String phoneNumber, Address address) {
         this.name = name;
         this.loginId = loginId;
         this.password = password;

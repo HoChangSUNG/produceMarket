@@ -51,12 +51,27 @@ public class BusinessHistoryRepository {
                 .fetchOne());
     }
 
-    public List<BusinessHistory> findByStatusWithUserAndImage() {
-        return queryFactory
+    public Optional<BusinessHistory> findByIdWithUserAndImage(Long id) {
+        return Optional.ofNullable(queryFactory
                 .selectFrom(businessHistory)
                 .join(businessHistory.user, user).fetchJoin()
                 .join(businessHistory.businessImage, businessImage).fetchJoin()
+                .where(businessHistory.id.eq(id))
+                .fetchOne());
+    }
+
+    public List<BusinessHistory> findByStatusWithUser() {
+        return queryFactory
+                .selectFrom(businessHistory)
+                .join(businessHistory.user, user).fetchJoin()
                 .where(businessHistory.status.eq(BusinessStatus.WAIT))
+                .fetch();
+    }
+
+    public List<BusinessHistory> findByUser(Long userId) {
+        return queryFactory
+                .selectFrom(businessHistory)
+                .where(businessHistory.user.id.eq(userId))
                 .fetch();
     }
 }
