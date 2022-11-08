@@ -77,7 +77,7 @@ public class OrderProductQueryRepository {
                 .join(orderProduct.order, order)
                 .join(order.user, user)
                 .where(dateBetween(startDate, endDate), userEq(userId))
-                .groupBy(order.createdDate)
+                .groupBy(order.createdDate.yearMonth())
                 .orderBy(order.createdDate.yearMonth().asc())
                 .fetch();
     }
