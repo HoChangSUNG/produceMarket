@@ -22,7 +22,11 @@ public class UserBusinessHistoryRes {
 
     public UserBusinessHistoryRes(BusinessHistory businessHistory) {
         this.createdDate = businessHistory.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm"));
-        this.changeDate = businessHistory.getChangeDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm"));
+        if(businessHistory.getChangeDate() == null) {
+            this.changeDate = "변경없음";
+        } else {
+            this.changeDate = businessHistory.getChangeDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm"));
+        }
         this.businessNumber = businessHistory.getBusinessNumber();
         this.businessName = businessHistory.getBusinessName();
         this.status = businessHistory.getStatus().name();
