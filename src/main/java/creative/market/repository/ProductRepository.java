@@ -53,7 +53,7 @@ public class ProductRepository {
         return Optional.ofNullable(em.find(Product.class, id));
     }
 
-    public List<Product> findProductByCondition(ProductSearchConditionReq condition) { // 조건에 따라 상품 리스트 조회
+    public List<Product> findProductByCondition(ProductSearchConditionReq condition, int offset, int limit) { // 조건에 따라 상품 리스트 조회
         return queryFactory.selectFrom(product)
                 .join(product.kindGrade, kindGrade)
                 .join(kindGrade.kind, kind)
@@ -66,7 +66,25 @@ public class ProductRepository {
                         kindEq(condition.getKindId()),
                         kindGradeEq(condition.getKindGradeId()))
                 .orderBy(orderCondition(condition.getOrderBy()))
+                .offset(offset)
+                .limit(limit)
                 .fetch();
+    }
+
+    public Long findProductByConditionTotalCount(ProductSearchConditionReq condition) { // 조건에 따라 상품 리스트 조회 count
+        return queryFactory.select(product.count())
+                .from(product)
+                .join(product.kindGrade, kindGrade)
+                .join(kindGrade.kind, kind)
+                .join(kind.item, item)
+                .join(item.itemCategory, itemCategory)
+                .join(item.gradeCriteria, gradeCriteria)
+                .where(productNameContains(condition.getProductName()),
+                        itemCategoryEq(condition.getItemCategoryCode()),
+                        itemCodeEq(condition.getItemCode()),
+                        kindEq(condition.getKindId()),
+                        kindGradeEq(condition.getKindGradeId()))
+                .fetchOne();
     }
 
     public Optional<Product> findByIdFetchJoinSellerAndKind(Long productId) {
@@ -119,7 +137,8 @@ public class ProductRepository {
                 .fetchOne();
     }
 
-    public List<Long> findProductIdByOrderCountDesc(int limit, LocalDateTime startDate, LocalDateTime endDate) { // 전체 카테고리에서 판매횟수 내림차순 정렬
+    public List<Long> findProductIdByOrderCountDesc(int offset, int limit, LocalDateTime startDate, LocalDateTime endDate) {
+        // 전체 카테고리에서 판매횟수 내림차순 정렬, 조건에 맞는 productId 리스트 리턴
         return queryFactory.select(product.id)
                 .from(orderProduct)
                 .join(orderProduct.product, product)
@@ -128,6 +147,7 @@ public class ProductRepository {
                 .groupBy(product)
                 .orderBy(orderProduct.count().desc(), product.createdDate.asc())
                 .limit(limit)
+                .offset(offset)
                 .fetch();
     }
 
@@ -136,10 +156,12 @@ public class ProductRepository {
     }
 
     private OrderSpecifier<?> orderCondition(String orderBy) {
-        if (orderBy.equals("latest")) { // 최신순
+        if (orderBy.equals("latest") || !StringUtils.hasText(orderBy)) { // 최신순
             return product.createdDate.desc();
-        } else {//가격순
+        } else if (orderBy.equals("price")) {//가격순
             return product.price.desc();
+        } else {
+            return product.id.asc();
         }
     }
 

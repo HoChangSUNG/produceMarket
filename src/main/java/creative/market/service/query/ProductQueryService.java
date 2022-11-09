@@ -8,12 +8,17 @@ import creative.market.repository.dto.ProductSigSrcAndIdRes;
 import creative.market.repository.dto.ProductUpdateFormRes;
 import creative.market.service.dto.ProductDetailRes;
 import creative.market.service.dto.ProductShortInfoRes;
+import creative.market.util.PagingUtils;
 import creative.market.util.WholesaleAndRetailUtils;
 import creative.market.repository.dto.LatestRetailAndWholesaleDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -28,8 +33,9 @@ public class ProductQueryService {
     // 신뢰 등급, 백분위 얻는 서비스 있어야 함
 
     //신뢰 등급, 백분위 얻는 코드 추가해야 함
-    public List<ProductShortInfoRes> productShortInfoList(ProductSearchConditionReq condition) {
-        List<Product> findProducts = productRepository.findProductByCondition(condition);
+    public List<ProductShortInfoRes> productShortInfoList(ProductSearchConditionReq condition, int offset, int limit) {
+
+        List<Product> findProducts = productRepository.findProductByCondition(condition, offset, limit);
 
         //신뢰등급, 백분위 찾아오는 함수 넣어야 함
         return findProducts.stream()
@@ -57,8 +63,8 @@ public class ProductQueryService {
         return new ProductUpdateFormRes(product);
     }
 
-    public List<ProductSigSrcAndIdRes> productSigSrcAndIdByOrderCount(int limit, LocalDateTime startDate, LocalDateTime endDate) { // // 메인 페이지 전체 상품 판매횟수순
-        return productRepository.findProductIdByOrderCountDesc(limit, startDate, endDate).stream()
+    public List<ProductSigSrcAndIdRes> productSigSrcAndIdByOrderCount(int offset, int limit, LocalDateTime startDate, LocalDateTime endDate) { // // 메인 페이지 전체 상품 판매횟수순
+        return productRepository.findProductIdByOrderCountDesc(offset, limit, startDate, endDate).stream()
                 .map(productId -> new ProductSigSrcAndIdRes(findProductById(productId)))
                 .collect(Collectors.toList());
     }

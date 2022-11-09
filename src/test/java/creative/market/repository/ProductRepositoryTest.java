@@ -13,9 +13,11 @@ import creative.market.repository.order.OrderRepository;
 import creative.market.repository.user.SellerRepository;
 import creative.market.service.OrderService;
 import creative.market.service.dto.OrderProductParamDTO;
+import creative.market.util.PagingUtils;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -25,7 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -35,6 +36,7 @@ import static org.assertj.core.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
+@Slf4j
 class ProductRepositoryTest {
 
     @Autowired
@@ -92,12 +94,7 @@ class ProductRepositoryTest {
     }
 
     private Product createProduct(String productName, int price, String productInfo, Seller seller, KindGrade kindGrade, ProductImage sigImg, List<ProductImage> ordinalImgList) {
-        Product product = Product.builder().name(productName).price(price).info(productInfo).user(seller)
-                .kindGrade(kindGrade)
-                .ordinalProductImages(ordinalImgList)
-                .signatureProductImage(sigImg)
-                .ordinalProductImages(ordinalImgList)
-                .build();
+        Product product = Product.builder().name(productName).price(price).info(productInfo).user(seller).kindGrade(kindGrade).ordinalProductImages(ordinalImgList).signatureProductImage(sigImg).ordinalProductImages(ordinalImgList).build();
         em.persist(product);
         return product;
     }
@@ -111,9 +108,7 @@ class ProductRepositoryTest {
     }
 
     private List<ProductImage> createOrdinalImgList(List<ImageDTO> imageDTOList) {
-        return imageDTOList.stream()
-                .map(imageDTO -> createProductImage(imageDTO.getName(), imageDTO.getPath(), ProductImageType.ORDINAL))
-                .collect(Collectors.toList());
+        return imageDTOList.stream().map(imageDTO -> createProductImage(imageDTO.getName(), imageDTO.getPath(), ProductImageType.ORDINAL)).collect(Collectors.toList());
     }
 
     @Getter
@@ -125,7 +120,7 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("kindGradeId로 조회")
+    @DisplayName("상품 리스트 조회, kindGradeId로 조회")
     void findByKindGradeId() throws Exception {
         //given
         ProductSearchConditionReq condition1 = new ProductSearchConditionReq(null, "latest", null, null, null, 432L);
@@ -135,10 +130,15 @@ class ProductRepositoryTest {
 
         System.out.println(condition2.getProductName());
         //when
-        List<Product> result1 = productRepository.findProductByCondition(condition1);
-        List<Product> result2 = productRepository.findProductByCondition(condition2);
-        List<Product> result3 = productRepository.findProductByCondition(condition3);
-        List<Product> result4 = productRepository.findProductByCondition(condition4);
+        Long totalCount1 = productRepository.findProductByConditionTotalCount(condition1);
+        Long totalCount2 = productRepository.findProductByConditionTotalCount(condition2);
+        Long totalCount3 = productRepository.findProductByConditionTotalCount(condition3);
+        Long totalCount4 = productRepository.findProductByConditionTotalCount(condition4);
+
+        List<Product> result1 = productRepository.findProductByCondition(condition1, 0, totalCount1.intValue() + 1);
+        List<Product> result2 = productRepository.findProductByCondition(condition2, 0, totalCount2.intValue() + 1);
+        List<Product> result3 = productRepository.findProductByCondition(condition3, 0, totalCount3.intValue() + 1);
+        List<Product> result4 = productRepository.findProductByCondition(condition4, 0, totalCount4.intValue() + 1);
 
         //then
         assertThat(result1.size()).isEqualTo(1);
@@ -153,13 +153,14 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("kindId로 조회")
+    @DisplayName("상품 리스트 조회, kindId로 조회")
     void findByKindId() throws Exception {
         //given
         ProductSearchConditionReq condition = new ProductSearchConditionReq(null, "latest", null, null, 1613L, null);
 
         //when
-        List<Product> result = productRepository.findProductByCondition(condition);
+        Long totalCount = productRepository.findProductByConditionTotalCount(condition);
+        List<Product> result = productRepository.findProductByCondition(condition, 0, totalCount.intValue() + 1);
 
         //then
         assertThat(result.size()).isEqualTo(2);
@@ -167,13 +168,14 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("itemCode로 조회, 가격순")
+    @DisplayName("상품 리스트 조회, itemCode로 조회, 가격순")
     void findByItemCode() throws Exception {
         //given
         ProductSearchConditionReq condition = new ProductSearchConditionReq(null, "price", null, 111, null, null);
 
         //when
-        List<Product> result = productRepository.findProductByCondition(condition);
+        Long totalCount = productRepository.findProductByConditionTotalCount(condition);
+        List<Product> result = productRepository.findProductByCondition(condition, 0, totalCount.intValue() + 1);
 
 
         //then
@@ -184,15 +186,17 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("itemCategoryCode로 조회, 가격순")
+    @DisplayName("상품 리스트 조회, itemCategoryCode로 조회, 가격순")
     void findByItemCategoryCode() throws Exception {
         //given
         ProductSearchConditionReq condition1 = new ProductSearchConditionReq(null, "price", 100, null, null, null);
         ProductSearchConditionReq condition2 = new ProductSearchConditionReq(null, "price", 200, null, null, null);
 
         //when
-        List<Product> result1 = productRepository.findProductByCondition(condition1);
-        List<Product> result2 = productRepository.findProductByCondition(condition2);
+        Long totalCount1 = productRepository.findProductByConditionTotalCount(condition1);
+        Long totalCount2 = productRepository.findProductByConditionTotalCount(condition2);
+        List<Product> result1 = productRepository.findProductByCondition(condition1, 0, totalCount1.intValue() + 1);
+        List<Product> result2 = productRepository.findProductByCondition(condition2, 0, totalCount2.intValue() + 1);
 
 
         //then
@@ -204,15 +208,17 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("모든 상품 대상 조회, 가격순")
+    @DisplayName("상품 리스트 조회, 모든 상품 대상 조회. 가격순")
     void findByAll() throws Exception {
         //given
         ProductSearchConditionReq condition1 = new ProductSearchConditionReq(null, "price", null, null, null, null);
         ProductSearchConditionReq condition2 = new ProductSearchConditionReq("", "price", null, null, null, null);
 
         //when
-        List<Product> result1 = productRepository.findProductByCondition(condition1);
-        List<Product> result2 = productRepository.findProductByCondition(condition2);
+        Long totalCount1 = productRepository.findProductByConditionTotalCount(condition1);
+        Long totalCount2 = productRepository.findProductByConditionTotalCount(condition2);
+        List<Product> result1 = productRepository.findProductByCondition(condition1, 0, totalCount1.intValue() + 1);
+        List<Product> result2 = productRepository.findProductByCondition(condition2, 0, totalCount2.intValue() + 1);
 
 
         //then
@@ -226,18 +232,59 @@ class ProductRepositoryTest {
     }
 
     @Test
-    @DisplayName("모든 상품 대상 제목 조회")
+    @DisplayName("상품 리스트 조회, 모든 상품 대상 제목 조회")
     void findByAllWithName() throws Exception {
         //given
         ProductSearchConditionReq condition1 = new ProductSearchConditionReq("쌀", "price", null, null, null, null);
 
         //when
-        List<Product> result1 = productRepository.findProductByCondition(condition1);
+        Long totalCount1 = productRepository.findProductByConditionTotalCount(condition1);
+        List<Product> result1 = productRepository.findProductByCondition(condition1, 0, totalCount1.intValue() + 1);
 
         //then
         assertThat(result1.size()).isEqualTo(3);
         assertThat(result1).extracting("name").contains("쌀-일반계-중품", "쌀-백미-등급없음", "쌀-일반계-상품");// 모든 상품 가격순
 
+    }
+
+
+    @Test
+    @DisplayName("상품 리스트 조회, 페이징 확인")
+    void findByKindGradePaging() throws Exception {
+        //given
+        Address address = createAddress("122", "11", 12, "234");
+        Seller seller = createSeller("성호창11111", "loginId22221", "pw13333", address);
+        em.persist(seller);
+
+        KindGrade kindGrade1 = createKindGrade(450L);
+
+        for (int i = 0; i < 100; i++) {
+            ProductImage sigImg1 = createSigImg("sigP1.jpg", "/ssf/sigP1.jpg");
+            List<ProductImage> ordinalImgList1 = createOrdinalImgList(Arrays.asList(new ImageDTO("ordinal" + i, "/ordinal1.jpg")));
+            Product product = createProduct("상품" + i, 10000 + i, "상품 맛있어요" + i, seller, kindGrade1, sigImg1, ordinalImgList1);
+            em.persist(product);
+        }
+
+        ProductSearchConditionReq condition = new ProductSearchConditionReq(null, "price", null, null, null, 450L);
+
+        //then
+
+        int pageSize = 13;
+        int offset = 0;
+        Long totalCount = productRepository.findProductByConditionTotalCount(condition);
+        int totalPageNum = PagingUtils.getTotalPageNum(totalCount, pageSize);
+        int lastPageCnt = totalCount.intValue() - (totalPageNum - 1) * pageSize; // 마지막 페이지 리스트 size
+
+        for (int i = 1; i < totalPageNum; i++) { // 마지막 페이지 전까지
+            offset = PagingUtils.getOffset(i, pageSize);
+            List<Product> result = productRepository.findProductByCondition(condition, offset, pageSize);
+            assertThat(result.size()).isEqualTo(pageSize);
+        }
+
+        //마지막 페이지
+        offset = PagingUtils.getOffset(totalPageNum, pageSize);
+        List<Product> result = productRepository.findProductByCondition(condition, offset, pageSize);
+        assertThat(result.size()).isEqualTo(lastPageCnt);
     }
 
     @Test
@@ -278,10 +325,11 @@ class ProductRepositoryTest {
     void orderCountDesc() throws Exception {
         //given
         int limit = 2;
+        int offset = 0;
         LocalDateTime endDate = LocalDateTime.now();
         LocalDateTime startDate = endDate.minusMonths(12);
         //when
-        List<Long> result = productRepository.findProductIdByOrderCountDesc(limit, startDate, endDate);
+        List<Long> result = productRepository.findProductIdByOrderCountDesc(offset, limit, startDate, endDate);
 
         //then
         assertThat(result.size()).isEqualTo(0);
@@ -305,8 +353,8 @@ class ProductRepositoryTest {
         Long orderId1 = orderProduct(seller.getId(), product1.getId(), address, 1);
         Long orderId2 = orderProduct(seller.getId(), product1.getId(), address, 1);
         LocalDateTime changeOrderDate = LocalDateTime.now().minusMonths(1);
-        changeOrderDate(orderId1,changeOrderDate); // 1달전으로 주문 날짜 변경
-        changeOrderDate(orderId2,changeOrderDate); // 1달전으로 주문 날짜 변경
+        changeOrderDate(orderId1, changeOrderDate); // 1달전으로 주문 날짜 변경
+        changeOrderDate(orderId2, changeOrderDate); // 1달전으로 주문 날짜 변경
 
         // product2 ->  3번 주문
         orderProduct(seller.getId(), product2.getId(), address, 2);
@@ -322,9 +370,10 @@ class ProductRepositoryTest {
 
         //when
         int limit = 2;
+        int offset = 0;
         LocalDateTime endDate = LocalDateTime.now();
         LocalDateTime startDate = endDate.minusDays(1);
-        List<Long> findProductIds = productRepository.findProductIdByOrderCountDesc(limit, startDate, endDate);
+        List<Long> findProductIds = productRepository.findProductIdByOrderCountDesc(offset, limit, startDate, endDate);
 
         //then
         assertThat(findProductIds.size()).isEqualTo(2);
@@ -353,16 +402,17 @@ class ProductRepositoryTest {
 
         //when
         int limit = 2;
+        int offset = 0;
         LocalDateTime endDate = LocalDateTime.now();
         LocalDateTime startDate = endDate.minusDays(1);
-        List<Long> findProductIds = productRepository.findProductIdByOrderCountDesc(limit, startDate, endDate);
+        List<Long> findProductIds = productRepository.findProductIdByOrderCountDesc(offset, limit, startDate, endDate);
 
         //then
         assertThat(findProductIds.size()).isEqualTo(2);
         assertThat(findProductIds).containsExactly(product1.getId(), product2.getId()); //2 3번 product 순
     }
 
-    private void changeOrderDate(Long orderId,LocalDateTime changeDate) {
+    private void changeOrderDate(Long orderId, LocalDateTime changeDate) {
         Order order = orderRepository.findById(orderId).orElseThrow(() -> new NoSuchElementException());
         order.changeCreatedDate(changeDate);
     }
@@ -374,7 +424,6 @@ class ProductRepositoryTest {
     }
 
     private KindGrade createKindGrade(Long kindGradeId) {
-        return kindGradeRepository.findById(kindGradeId)
-                .orElseThrow(() -> new IllegalArgumentException("잘못된 카테고리입니다"));
+        return kindGradeRepository.findById(kindGradeId).orElseThrow(() -> new IllegalArgumentException("잘못된 카테고리입니다"));
     }
 }

@@ -103,8 +103,9 @@ class ProductQueryRepositoryTest {
     void productListOrderByCreatedDateDesc() throws Exception {
         //given
         int limit = 4;
+        int offset = 0;
         //when
-        List<ProductSigSrcAndIdRes> result = productQueryRepository.findProductSigImgAndIdByLatestCreatedDate(limit);
+        List<ProductSigSrcAndIdRes> result = productQueryRepository.findProductSigImgAndIdByLatestCreatedDate(offset,limit);
 
         //then
         List<Long> productIds = productRepository.findProductListOrderByCreatedDateDesc(limit).stream()

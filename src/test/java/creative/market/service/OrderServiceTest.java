@@ -88,7 +88,7 @@ class OrderServiceTest {
         //then
         //10000*3 + 3000*5 + 40000*1 = 85000
         assertThat(findOrder.getTotalPrice()).isEqualTo(85000);
-        assertThat(findOrder.getUser()).isEqualTo(productBuyer);
+        assertThat(findOrder.getUser().getId()).isEqualTo(productBuyer.getId());
         assertThat(findOrder.getAddress().equals(orderAddress)).isTrue();
 
         assertThat(findOrder.getOrderProducts().size()).isEqualTo(3);
@@ -250,13 +250,14 @@ class OrderServiceTest {
         orderParamList.add(orderProductParam3);
 
         Address orderAddress = createAddress("1111", "봉사산로", 12345, "동호수");
-
+        em.flush();
+        em.clear();
         //when
 
         //then
         assertThatThrownBy(() -> orderService.order(productBuyer.getId(), orderParamList, orderAddress))
                 .isInstanceOf(NoSuchElementException.class)
-                .hasMessage("주문한 상품이 존재하지 않습니다.");
+                .hasMessage("주문할 상품이 존재하지 않습니다.");
     }
 
     @Test

@@ -19,6 +19,7 @@ import creative.market.service.dto.UploadFileDTO;
 import creative.market.service.query.ProductQueryService;
 import creative.market.util.FileStoreUtils;
 import creative.market.util.FileSubPath;
+import creative.market.util.PagingUtils;
 import creative.market.web.dto.*;
 import creative.market.service.dto.UpdateProductFormReq;
 import lombok.*;
@@ -28,7 +29,9 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.swing.*;
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -51,9 +54,15 @@ public class ProductController {
     private final ProductQueryService productQueryService;
 
     @GetMapping
-    public ResultRes getProductList(ProductSearchConditionReq searchCondition) {// 상품 리스트 조회
+    public PagingResultRes getProductList(@Valid ProductSearchConditionReq searchCondition,
+                                          @RequestParam(defaultValue = "10") @Min(1) int pageSize,
+                                          @RequestParam(defaultValue = "1") @Min(1) int pageNum) {// 상품 리스트 조회
 
-        return new ResultRes(productQueryService.productShortInfoList(searchCondition));
+        Long total = productRepository.findProductByConditionTotalCount(searchCondition);
+        int offset = PagingUtils.getOffset(pageNum, pageSize);
+        int totalPageNum = PagingUtils.getTotalPageNum(total, pageSize);
+
+        return new PagingResultRes(productQueryService.productShortInfoList(searchCondition, offset, pageSize), pageNum, totalPageNum);
     }
 
     @GetMapping("/{productId}")
@@ -125,13 +134,16 @@ public class ProductController {
 
     @GetMapping("/main-page/latest")
     public ResultRes maiPageLatestByAllCategory() { //메인 페이지 시간순 조회
+
         int limit = 4;
-        return new ResultRes(productQueryRepository.findProductSigImgAndIdByLatestCreatedDate(limit));
+        int offset = 0;
+        return new ResultRes(productQueryRepository.findProductSigImgAndIdByLatestCreatedDate(offset, limit));
     }
 
     @GetMapping("/main-page/order-count")
     public ResultRes mainPageOrderCntByAllCategory() { // 메인 페이지 판매 횟수순 조회
         int limit = 4;
+        int offset = 0;
         LocalDateTime endDate = LocalDateTime.now();
         LocalDateTime startDate = endDate.minusMonths(1) // 한달 전
                 .withHour(0)
@@ -139,7 +151,7 @@ public class ProductController {
                 .withSecond(0)
                 .withNano(0);
         log.info("startDate={}, endDate={}", startDate, endDate);
-        return new ResultRes(productQueryService.productSigSrcAndIdByOrderCount(limit, startDate, endDate));
+        return new ResultRes(productQueryService.productSigSrcAndIdByOrderCount(offset, limit, startDate, endDate));
     }
 
     private List<PercentAndPriceRes> convertToPricePercentDTOS(List<SellerAndTotalPricePerCategoryDTO> params, Long totalPriceSum, Long productId) {

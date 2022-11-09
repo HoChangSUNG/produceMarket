@@ -1,21 +1,19 @@
 package creative.market.repository.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @Getter
 @Setter
 @AllArgsConstructor
-@NoArgsConstructor
+@ToString
 public class ProductSearchConditionReq {
 
     private String productName;
-    private String orderBy="latest";
+    private String orderBy;
     private Integer itemCategoryCode;
     private Integer itemCode;
     private Long kindId;
     private Long kindGradeId;
+
 }
