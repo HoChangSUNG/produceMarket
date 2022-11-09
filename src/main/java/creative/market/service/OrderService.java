@@ -43,7 +43,7 @@ public class OrderService {
         // 구매하는 상품이 장바구니에 있는 경우 장바구니에서 삭제
         deleteOrderCartList(orderProductParams,userId);
 
-        // 본인이 등록한 상품을 구매하려는 경우 예외 발생
+        // 본인이 등록한 상품을 구매하려는 경우 + 존재하지 않는 상품인 경우 예외 발생
         checkMyProducts(orderProductParams,userId);
 
         // orderProducts 생성
@@ -65,7 +65,9 @@ public class OrderService {
     }
 
     private void checkMyProduct(OrderProductParamDTO param,Long userId) {
-        Product product = productRepository.findById(param.getProductId()).orElseThrow(NoSuchElementException::new);
+        //존재하지 않는 상품인 경우 예외 발생
+        Product product = productRepository.findById(param.getProductId()).orElseThrow(()-> new NoSuchElementException("주문할 상품이 존재하지 않습니다."));
+        //본인이 등록한 상품을 구매하려는 경우
         if (product.getUser().getId().equals(userId)) {
             throw new IllegalArgumentException("본인이 등록한 상품은 구매할 수 없습니다.");
         }
@@ -107,7 +109,7 @@ public class OrderService {
 
     private OrderProduct createOrderProduct(OrderProductParamDTO param) {
         Product product = productRepository.findById(param.getProductId())
-                .orElseThrow(() -> new NoSuchElementException("주문한 상품이 존재하지 않습니다."));
+                .orElseThrow(() -> new NoSuchElementException("주문할 상품이 존재하지 않습니다."));
         return OrderProduct.builder()
                 .product(product)
                 .price(product.getPrice())
