@@ -5,6 +5,9 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import creative.market.domain.order.OrderStatus;
+import creative.market.domain.product.ProductImageType;
+import creative.market.domain.product.QProductImage;
 import creative.market.repository.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -20,6 +23,7 @@ import static creative.market.domain.category.QKindGrade.kindGrade;
 import static creative.market.domain.order.QOrder.order;
 import static creative.market.domain.order.QOrderProduct.orderProduct;
 import static creative.market.domain.product.QProduct.product;
+import static creative.market.domain.product.QProductImage.*;
 import static creative.market.domain.user.QUser.user;
 
 @Repository
@@ -80,6 +84,32 @@ public class OrderProductQueryRepository {
                 .groupBy(order.createdDate.yearMonth())
                 .orderBy(order.createdDate.yearMonth().asc())
                 .fetch();
+    }
+
+    public List<BuyerOrderPerPeriodDTO> findBuyerOrderPerPeriod(LocalDateTime startDate, LocalDateTime endDate, Long userId, int offset, int limit) {
+        return queryFactory
+                .select(new QBuyerOrderPerPeriodDTO(order.id, product.id, order.createdDate, product.name, orderProduct.count, orderProduct.price, productImage.path, product.status.stringValue()))
+                .from(orderProduct)
+                .join(orderProduct.order, order)
+                .join(order.user, user)
+                .join(orderProduct.product, product)
+                .join(product.productImages, productImage)
+                .where(dateBetween(startDate, endDate), userEq(userId), productImage.type.eq(ProductImageType.SIGNATURE))
+                .offset(offset)
+                .limit(limit)
+                .fetch();
+    }
+
+    public Long findBuyerOrderPerPeriodTotalCount(LocalDateTime startDate, LocalDateTime endDate, Long userId) {
+        return queryFactory
+                .select(orderProduct.count())
+                .from(orderProduct)
+                .join(orderProduct.order, order)
+                .join(order.user, user)
+                .join(orderProduct.product, product)
+                .join(product.productImages, productImage)
+                .where(dateBetween(startDate, endDate), userEq(userId), productImage.type.eq(ProductImageType.SIGNATURE))
+                .fetchOne();
     }
 
     private NumberExpression<Long> getTotalPrice() {// orderProduct.count * orderProduct.price

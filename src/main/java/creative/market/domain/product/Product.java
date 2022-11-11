@@ -1,6 +1,7 @@
 package creative.market.domain.product;
 
 import creative.market.domain.CreatedDate;
+import creative.market.domain.CreatedDateAndStatus;
 import creative.market.domain.Review;
 import creative.market.domain.category.KindGrade;
 import creative.market.domain.user.User;
@@ -10,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +22,7 @@ import static javax.persistence.FetchType.*;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Product extends CreatedDate {
+public class Product extends CreatedDateAndStatus {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
@@ -31,7 +33,6 @@ public class Product extends CreatedDate {
     private int price;
 
     private String info;
-
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "kind_grade_id")
@@ -98,5 +99,4 @@ public class Product extends CreatedDate {
     public void addProductSignatureImage(ProductImage productSignatureImage) {
         productSignatureImage.changeProduct(this);
     }
-
 }
