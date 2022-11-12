@@ -48,6 +48,9 @@ class OrderServiceTest {
     OrderProductRepository orderProductRepository;
 
     @Autowired
+    ProductService productService;
+
+    @Autowired
     CartService cartService;
 
     @Autowired
@@ -161,8 +164,8 @@ class OrderServiceTest {
         orderParamList.add(orderProductParam2);
 
         //상품 장바구니에 등록
-        cartService.register(orderProductParam2.getProductId(),7,productBuyer.getId());
-        cartService.register(orderProductParam3.getProductId(),6,productBuyer.getId());
+        cartService.register(orderProductParam2.getProductId(), 7, productBuyer.getId());
+        cartService.register(orderProductParam3.getProductId(), 6, productBuyer.getId());
 
         //when
         Address orderAddress = createAddress("1111", "봉사산로", 12345, "동호수");
@@ -290,6 +293,7 @@ class OrderServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("본인이 등록한 상품은 구매할 수 없습니다.");
     }
+
     @Test
     @DisplayName("주문 취소 성공")
     void orderCancelSuccess() throws Exception {
@@ -409,6 +413,96 @@ class OrderServiceTest {
         assertThatThrownBy(() -> orderService.orderCancel(findOrderProduct.getId(), productOwner1.getId()))
                 .isInstanceOf(LoginAuthenticationException.class)
                 .hasMessage("주문 취소 권한이 없습니다.");
+    }
+
+    @Test
+    @DisplayName("주문 취소 실패, 삭제된 상품을 취소하려는 경우")
+    void orderCancelFail3() throws Exception {
+        //given
+        Address buyerAddress = createAddress("1111", "봉사산로3", 11111, "3동4호");
+        Seller productOwner1 = createSeller("성호창q", "123433", "3123334", "19990112", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        Seller productOwner2 = createSeller("성호창w", "133234", "2123334", "19991212", "sd45fwf@mae.com", "010-3644-3333", createAddress("1111", "봉사산로2", 12315, "2동2호"), "상호명2");
+        Buyer productBuyer = createBuyer("성호창3", "133234", "133234", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productOwner1);
+        em.persist(productOwner2);
+        em.persist(productBuyer);
+
+        Product product1 = getProduct("상품", 10000, "상품입니다", 432L, productOwner1);
+        Product product2 = getProduct("상품2", 3000, "상품입니다2", 433L, productOwner2);
+        Product product3 = getProduct("상품3", 40000, "상품입니다3", 434L, productOwner2);
+
+        OrderProductParamDTO orderProductParam1 = new OrderProductParamDTO(3, product1.getId());
+        OrderProductParamDTO orderProductParam2 = new OrderProductParamDTO(5, product2.getId());
+        OrderProductParamDTO orderProductParam3 = new OrderProductParamDTO(1, product3.getId());
+        List<OrderProductParamDTO> orderParamList = new ArrayList<>();
+        orderParamList.add(orderProductParam1);
+        orderParamList.add(orderProductParam2);
+        orderParamList.add(orderProductParam3);
+
+        Address orderAddress = createAddress("1111", "봉사산로", 12345, "동호수");
+        Long orderId = orderService.order(productBuyer.getId(), orderParamList, orderAddress);
+        Order findOrder = orderRepository.findById(orderId).orElseThrow(() -> new NoSuchElementException("주문이 존재하지 않습니다"));
+
+        //when
+
+        // 상품 삭제
+        productService.deleteProduct(product2.getId(), productOwner2.getId());
+
+        // 주무 내역 조회
+        OrderProduct findOrderProduct = findOrder.getOrderProducts().stream()
+                .filter(orderProduct -> orderProduct.getCount() == 5)
+                .findFirst().orElseThrow(() -> new NoSuchElementException("존재하지 않는 주문 내역입니다"));
+
+        //then
+
+        // 삭제된 상품을 취소하려는 경우
+        assertThatThrownBy(() -> orderService.orderCancel(findOrderProduct.getId(), productBuyer.getId()))
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("존재하지 않는 상품입니다.");
+    }
+
+    @Test
+    @DisplayName("주문 취소 실패, 이미 취소된 주문을 취소하려는 경우")
+    void orderCancelFail4() throws Exception {
+        //given
+        Address buyerAddress = createAddress("1111", "봉사산로3", 11111, "3동4호");
+        Seller productOwner1 = createSeller("성호창q", "123433", "3123334", "19990112", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        Seller productOwner2 = createSeller("성호창w", "133234", "2123334", "19991212", "sd45fwf@mae.com", "010-3644-3333", createAddress("1111", "봉사산로2", 12315, "2동2호"), "상호명2");
+        Buyer productBuyer = createBuyer("성호창3", "133234", "133234", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productOwner1);
+        em.persist(productOwner2);
+        em.persist(productBuyer);
+
+        Product product1 = getProduct("상품", 10000, "상품입니다", 432L, productOwner1);
+        Product product2 = getProduct("상품2", 3000, "상품입니다2", 433L, productOwner2);
+        Product product3 = getProduct("상품3", 40000, "상품입니다3", 434L, productOwner2);
+
+        OrderProductParamDTO orderProductParam1 = new OrderProductParamDTO(3, product1.getId());
+        OrderProductParamDTO orderProductParam2 = new OrderProductParamDTO(5, product2.getId());
+        OrderProductParamDTO orderProductParam3 = new OrderProductParamDTO(1, product3.getId());
+        List<OrderProductParamDTO> orderParamList = new ArrayList<>();
+        orderParamList.add(orderProductParam1);
+        orderParamList.add(orderProductParam2);
+        orderParamList.add(orderProductParam3);
+
+        Address orderAddress = createAddress("1111", "봉사산로", 12345, "동호수");
+        Long orderId = orderService.order(productBuyer.getId(), orderParamList, orderAddress);
+        Order findOrder = orderRepository.findById(orderId).orElseThrow(() -> new NoSuchElementException("주문이 존재하지 않습니다"));
+
+        //when
+        OrderProduct findOrderProduct = findOrder.getOrderProducts().stream()
+                .filter(orderProduct -> orderProduct.getCount() == 5)
+                .findFirst().orElseThrow(() -> new NoSuchElementException("존재하지 않는 주문 내역입니다"));
+
+        orderService.orderCancel(findOrderProduct.getId(), productBuyer.getId()); // 주문 취소(count =5 인 주문 취소)
+
+        //then
+
+        // 취소했던 주문 다시 취소
+        assertThatThrownBy(() -> orderService.orderCancel(findOrderProduct.getId(), productBuyer.getId()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이미 주문이 취소되었습니다.");
+
     }
 
     private Product getProduct(String name, int price, String info, Long kindGradeId, Seller seller) {

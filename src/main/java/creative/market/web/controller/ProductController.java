@@ -29,7 +29,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.swing.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.io.IOException;
@@ -68,6 +67,13 @@ public class ProductController {
     @GetMapping("/{productId}")
     public ResultRes getProductDetail(@PathVariable Long productId) { // 상품 상세 조회
         return new ResultRes(productQueryService.productDetailInfo(productId));
+    }
+
+    @DeleteMapping("/{productId}")
+    @LoginCheck(type = {UserType.SELLER})
+    public ResultRes deleteProduct(@PathVariable Long productId, @Login LoginUserDTO loginUserDTO) {
+        productService.deleteProduct(productId, loginUserDTO.getId());
+        return new ResultRes(new MessageRes("상품 삭제 성공"));
     }
 
     @PostMapping
@@ -131,6 +137,7 @@ public class ProductController {
 
         return new ResultRes(new PricePercentPieGraphPerCategoryRes(priceTopRankPercentRes, percentAndPriceRes));
     }
+
 
     @GetMapping("/main-page/latest")
     public ResultRes maiPageLatestByAllCategory() { //메인 페이지 시간순 조회

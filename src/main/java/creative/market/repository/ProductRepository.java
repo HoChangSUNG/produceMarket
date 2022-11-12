@@ -3,7 +3,9 @@ package creative.market.repository;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import creative.market.domain.order.OrderStatus;
 import creative.market.domain.product.Product;
+import creative.market.domain.product.ProductStatus;
 import creative.market.repository.dto.ProductSearchConditionReq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -39,7 +41,9 @@ public class ProductRepository {
     }
 
     public List<Product> findAll() {
-        return queryFactory.selectFrom(product).fetch();
+        return queryFactory.selectFrom(product)
+                .where(productExistCheck())
+                .fetch();
     }
 
     public List<Product> findProductListOrderByCreatedDateDesc(int limit) {
@@ -50,7 +54,10 @@ public class ProductRepository {
     }
 
     public Optional<Product> findById(Long id) {
-        return Optional.ofNullable(em.find(Product.class, id));
+        return Optional.ofNullable(
+                queryFactory.selectFrom(product)
+                        .where(productExistCheck(), product.id.eq(id))
+                        .fetchOne());
     }
 
     public List<Product> findProductByCondition(ProductSearchConditionReq condition, int offset, int limit) { // 조건에 따라 상품 리스트 조회
@@ -64,7 +71,8 @@ public class ProductRepository {
                         itemCategoryEq(condition.getItemCategoryCode()),
                         itemCodeEq(condition.getItemCode()),
                         kindEq(condition.getKindId()),
-                        kindGradeEq(condition.getKindGradeId()))
+                        kindGradeEq(condition.getKindGradeId()),
+                        productExistCheck())
                 .orderBy(orderCondition(condition.getOrderBy()))
                 .offset(offset)
                 .limit(limit)
@@ -83,7 +91,8 @@ public class ProductRepository {
                         itemCategoryEq(condition.getItemCategoryCode()),
                         itemCodeEq(condition.getItemCode()),
                         kindEq(condition.getKindId()),
-                        kindGradeEq(condition.getKindGradeId()))
+                        kindGradeEq(condition.getKindGradeId()),
+                        productExistCheck())
                 .fetchOne();
     }
 
@@ -94,7 +103,8 @@ public class ProductRepository {
                         .join(kindGrade.kind, kind).fetchJoin()
                         .join(kindGrade.kind).fetchJoin()
                         .join(product.user, user).fetchJoin()
-                        .where(product.id.eq(productId))
+                        .where(product.id.eq(productId),
+                                productExistCheck())
                         .fetchOne());
     }
 
@@ -124,7 +134,7 @@ public class ProductRepository {
                         .join(kindGrade.kind, kind).fetchJoin()
                         .join(kind.item, item).fetchJoin()
                         .join(item.itemCategory, itemCategory)
-                        .where(product.id.eq(productId))
+                        .where(product.id.eq(productId),productExistCheck())
                         .fetchOne()
         );
     }
@@ -143,7 +153,7 @@ public class ProductRepository {
                 .from(orderProduct)
                 .join(orderProduct.product, product)
                 .join(orderProduct.order, order)
-                .where(dateBetween(startDate, endDate))
+                .where(dateBetween(startDate, endDate),productExistCheck(),orderStatus())
                 .groupBy(product)
                 .orderBy(orderProduct.count().desc(), product.createdDate.asc())
                 .limit(limit)
@@ -184,4 +194,13 @@ public class ProductRepository {
     private BooleanExpression productNameContains(String productName) {
         return StringUtils.hasText(productName) ? product.name.contains(productName) : null;
     }
+
+    private BooleanExpression productExistCheck() {
+        return product.status.eq(ProductStatus.EXIST);
+    }
+
+    private BooleanExpression orderStatus() {
+        return orderProduct.status.eq(OrderStatus.ORDER);
+    }
+
 }

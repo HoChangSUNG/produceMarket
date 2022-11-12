@@ -1,8 +1,10 @@
 package creative.market.service;
 
 import creative.market.domain.Address;
+import creative.market.domain.category.KindGrade;
 import creative.market.domain.product.Product;
 import creative.market.domain.product.ProductImage;
+import creative.market.domain.product.ProductStatus;
 import creative.market.domain.user.Seller;
 import creative.market.exception.LoginAuthenticationException;
 import creative.market.repository.category.KindGradeRepository;
@@ -12,7 +14,6 @@ import creative.market.service.dto.UpdateProductFormReq;
 import creative.market.service.dto.UploadFileDTO;
 import creative.market.util.FileStoreUtils;
 import creative.market.util.FileSubPath;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +74,7 @@ class ProductServiceTest {
         assertThat(findProduct.getName()).isEqualTo("쌀팔기");
         assertThat(findProduct.getPrice()).isEqualTo(10000);
         assertThat(findProduct.getInfo()).isEqualTo("맛있어요");
+        assertThat(findProduct.getStatus()).isEqualTo(ProductStatus.EXIST);
         assertThat(findProduct.getKindGrade().getId()).isEqualTo(432L);
         assertThat(findProduct.getProductImages()).containsAll(findProductImages);
     }
@@ -154,7 +156,7 @@ class ProductServiceTest {
         assertThat(updateProduct.getOrdinalProductImage()).extracting("name").contains(resultOrdinalName);
         assertThat(updateProduct.getSignatureProductImage().getName()).isEqualTo(sigUploadFile.getUploadFileName());
         assertThat(updateProduct.getOrdinalProductImage()).extracting("path").contains(resultOrdinalPath);
-        assertThat(updateProduct.getSignatureProductImage().getPath()).isEqualTo(FileSubPath.PRODUCT_PATH+sigUploadFile.getStoreFileName());
+        assertThat(updateProduct.getSignatureProductImage().getPath()).isEqualTo(FileSubPath.PRODUCT_PATH + sigUploadFile.getStoreFileName());
 
         // 저장된 사진 제거
         updateProduct.getProductImages().forEach(productImage -> deleteFile(productImage.getPath()));
@@ -208,11 +210,11 @@ class ProductServiceTest {
 
         UploadFileDTO deletedImg = ordinalUploadFileBefore.stream().filter(ordinalUpload -> ordinalUpload.getUploadFileName().equals("감자.png")).collect(Collectors.toList()).get(0);
         File newSigFile = new File(FileStoreUtils.getFullPath(rootPath, (updateProduct.getSignatureProductImage().getPath())));
-        File beforeUpdateSigFile = new File(FileStoreUtils.getFullPath(rootPath,FileSubPath.PRODUCT_PATH + sigUploadFileBefore.getStoreFileName()));
+        File beforeUpdateSigFile = new File(FileStoreUtils.getFullPath(rootPath, FileSubPath.PRODUCT_PATH + sigUploadFileBefore.getStoreFileName()));
 
-        File deletedUOrdinalFile = new File(FileStoreUtils.getFullPath(rootPath,FileSubPath.PRODUCT_PATH + deletedImg.getStoreFileName()));
+        File deletedUOrdinalFile = new File(FileStoreUtils.getFullPath(rootPath, FileSubPath.PRODUCT_PATH + deletedImg.getStoreFileName()));
         File newUOrdinalFile1 = new File(FileStoreUtils.getFullPath(rootPath, updateProduct.getOrdinalProductImage().get(0).getPath()));
-        File newUOrdinalFile2 = new File(FileStoreUtils.getFullPath(rootPath,updateProduct.getOrdinalProductImage().get(1).getPath()));
+        File newUOrdinalFile2 = new File(FileStoreUtils.getFullPath(rootPath, updateProduct.getOrdinalProductImage().get(1).getPath()));
 
         // 상품 내용 수정 확인
         assertThat(updateProduct.getKindGrade().getId()).isEqualTo(432L);
@@ -223,14 +225,14 @@ class ProductServiceTest {
 
         //signature 변경된 사진 확인
         assertThat(updateProduct.getSignatureProductImage().getName()).isEqualTo(signatureMultipartAfter.getOriginalFilename());
-        Assertions.assertThat(newSigFile.exists()).isTrue(); // 고구마.png
-        Assertions.assertThat(beforeUpdateSigFile.exists()).isFalse();// 쌀.png
+        assertThat(newSigFile.exists()).isTrue(); // 고구마.png
+        assertThat(beforeUpdateSigFile.exists()).isFalse();// 쌀.png
 
         // 일반 사진 수정 확인
         assertThat(updateProduct.getOrdinalProductImage().size()).isEqualTo(2);
-        Assertions.assertThat(deletedUOrdinalFile.exists()).isFalse(); // 감자.png
-        Assertions.assertThat(newUOrdinalFile1.exists()).isTrue();
-        Assertions.assertThat(newUOrdinalFile2.exists()).isTrue();
+        assertThat(deletedUOrdinalFile.exists()).isFalse(); // 감자.png
+        assertThat(newUOrdinalFile1.exists()).isTrue();
+        assertThat(newUOrdinalFile2.exists()).isTrue();
 
 
         // 저장된 사진 제거
@@ -267,7 +269,7 @@ class ProductServiceTest {
         UpdateProductFormReq updateProductForm = new UpdateProductFormReq(433L, "쌀-일반계-상품", 10000, "쌀 맛있어222요1", ordinalMultipartList, signatureMultipart);
 
         //then
-        Assertions.assertThatThrownBy(()->productService.update(productId+1, updateProductForm, seller.getId()))
+        assertThatThrownBy(() -> productService.update(productId + 1, updateProductForm, seller.getId()))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("상품이 존재하지 않습니다.");
 
@@ -306,7 +308,7 @@ class ProductServiceTest {
         UpdateProductFormReq updateProductForm = new UpdateProductFormReq(1L, "쌀-일반계-상품", 10000, "쌀 맛있어요1", ordinalMultipartList, signatureMultipart);
 
         //then
-        Assertions.assertThatThrownBy(()->productService.update(productId, updateProductForm, seller.getId()))
+        assertThatThrownBy(() -> productService.update(productId, updateProductForm, seller.getId()))
                 .isInstanceOf(NoSuchElementException.class)
                 .hasMessage("존재하지 않는 카테고리입니다.");
 
@@ -345,7 +347,7 @@ class ProductServiceTest {
         UpdateProductFormReq updateProductForm = new UpdateProductFormReq(433L, "쌀-일반22계-상품", 100040, "쌀 맛65있어요1", ordinalMultipartList, signatureMultipart);
 
         //then
-        Assertions.assertThatThrownBy(()->productService.update(productId, updateProductForm, seller.getId()+1))
+        assertThatThrownBy(() -> productService.update(productId, updateProductForm, seller.getId() + 1))
                 .isInstanceOf(LoginAuthenticationException.class)
                 .hasMessage("접근 권한이 없습니다.");
 
@@ -353,6 +355,67 @@ class ProductServiceTest {
         Product beforeUpdateProduct = getProduct(productId);
         beforeUpdateProduct.getProductImages().forEach(productImage -> deleteFile(productImage.getPath()));
 
+    }
+
+    @Test
+    @DisplayName("상품 삭제 성공")
+    void deleteProductSuccess() throws Exception {
+        //given
+        Seller seller = createSeller("강병관", new Address("10", "20", 1, "천안"));
+        em.persist(seller);
+
+        KindGrade kindGrade = kindGradeRepository.findById(432L).orElseThrow(() -> new NoSuchElementException("카테고리가 존재하지 않습니다."));
+        Product product = Product.builder().user(seller).name("상품입니다").price(10000).info("상품 정보").kindGrade(kindGrade).build();
+        em.persist(product);
+
+        //when
+        Long deletedId = productService.deleteProduct(product.getId(), seller.getId());
+
+        //then
+        Product findProduct = em.find(Product.class, deletedId);
+        assertThat(findProduct.getId()).isEqualTo(product.getId());
+        assertThat(findProduct.getName()).isEqualTo(product.getName());
+        assertThat(findProduct.getInfo()).isEqualTo(product.getInfo());
+        assertThat(findProduct.getStatus()).isEqualTo(ProductStatus.DELETED);
+    }
+
+    @Test
+    @DisplayName("상품 삭제 실패, 이미 삭제된 상품을 삭제하는 경우")
+    void deleteProductFail1() throws Exception {
+        //given
+        Seller seller = createSeller("강병관", new Address("10", "20", 1, "천안"));
+        em.persist(seller);
+
+        KindGrade kindGrade = kindGradeRepository.findById(432L).orElseThrow(() -> new NoSuchElementException("카테고리가 존재하지 않습니다."));
+        Product product = Product.builder().user(seller).name("상품입니다").price(10000).info("상품 정보").kindGrade(kindGrade).build();
+        em.persist(product);
+
+        //when
+        productService.deleteProduct(product.getId(), seller.getId());
+
+        //then
+        assertThatThrownBy(() -> productService.deleteProduct(product.getId(), seller.getId()))
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessage("존재하지 않는 상품입니다.");
+    }
+
+    @Test
+    @DisplayName("상품 삭제 실패, 삭제 권한이 없는 경우")
+    void deleteProductFail2() throws Exception {
+        //given
+        Seller seller1 = createSeller("강병관", new Address("10", "20", 1, "천안"));
+        em.persist(seller1);
+        Seller seller2 = createSeller("강병관2", new Address("22", "222", 122, "천안2"));
+        em.persist(seller2);
+
+        KindGrade kindGrade = kindGradeRepository.findById(432L).orElseThrow(() -> new NoSuchElementException("카테고리가 존재하지 않습니다."));
+        Product product = Product.builder().user(seller1).name("상품입니다").price(10000).info("상품 정보").kindGrade(kindGrade).build();
+        em.persist(product);
+
+        //then
+        assertThatThrownBy(() -> productService.deleteProduct(product.getId(), seller2.getId()))
+                .isInstanceOf(LoginAuthenticationException.class)
+                .hasMessage("접근 권한이 없습니다.");
     }
 
     private MockMultipartFile createMultipart(String name, String originalFileName, String contentType, String rootPath, String subPath) throws IOException {
