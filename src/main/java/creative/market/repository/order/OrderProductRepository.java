@@ -4,6 +4,7 @@ import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import creative.market.domain.order.OrderProduct;
+import creative.market.domain.order.OrderStatus;
 import creative.market.repository.dto.CategoryParamDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -66,29 +67,11 @@ public class OrderProductRepository {
                         itemCodeEq(categoryParam.getItemCode()),
                         kindEq(categoryParam.getKindId()),
                         kindGradeEq(categoryParam.getKindGradeId()),
-                        dateBetween(startDate, endDate))
+                        dateBetween(startDate, endDate),
+                        orderStatus()
+                )
                 .fetchOne();
     }
-
-    public Long findCategoryOrderAvgPriceAvg(CategoryParamDTO categoryParam, LocalDateTime startDate, LocalDateTime endDate) { //기간별 카테고리 평균 판매액
-        return queryFactory.select(getTotalPriceAvg().coalesce(0L))
-                .from(orderProduct)
-                .join(orderProduct.order, order)
-                .join(orderProduct.product, product)
-                .join(product.kindGrade, kindGrade)
-                .join(kindGrade.kind, kind)
-                .join(kind.item, item)
-                .join(item.itemCategory, itemCategory)
-                .join(item.gradeCriteria, gradeCriteria)
-                .where(itemCategoryEq(categoryParam.getItemCategoryCode()),
-                        itemCodeEq(categoryParam.getItemCode()),
-                        kindEq(categoryParam.getKindId()),
-                        kindGradeEq(categoryParam.getKindGradeId()),
-                        dateBetween(startDate, endDate))
-                .fetchOne();
-    }
-
-
 
     private NumberExpression<Integer> getTotalPrice() {
         return orderProduct.price.multiply(orderProduct.count);
@@ -120,5 +103,9 @@ public class OrderProductRepository {
 
     private BooleanExpression dateBetween(LocalDateTime startDate, LocalDateTime endDate) {
         return startDate != null && endDate != null ? order.createdDate.between(startDate, endDate) : null;
+    }
+
+    private BooleanExpression orderStatus() {
+        return orderProduct.status.eq(OrderStatus.ORDER);
     }
 }

@@ -7,7 +7,6 @@ import creative.market.argumentresolver.Login;
 import creative.market.repository.dto.BuyerTotalPricePerPeriodDTO;
 import creative.market.repository.query.OrderProductQueryRepository;
 import creative.market.service.dto.LoginUserDTO;
-import creative.market.service.dto.OrderHistoryDTO;
 import creative.market.service.query.OrderProductQueryService;
 import creative.market.util.PagingUtils;
 import creative.market.web.dto.BuyerTotalPricePerPeriodRes;
@@ -76,7 +75,7 @@ public class BuyerMyPageController {
     }
 
     private boolean isRightPeriod(YearMonth startDate, YearMonth endDate) { // 날짜 기간이 올바른지(시작날짜가 종료날짜보다 빠른지)
-        return startDate.compareTo(endDate) < 0;
+        return startDate.compareTo(endDate) <= 0;
     }
 
     private LocalDateTime startMonthOfDayLocalDateTime(YearMonth yearMonth) { // MonthYear -> 시작 LocalDateTime 으로 변경

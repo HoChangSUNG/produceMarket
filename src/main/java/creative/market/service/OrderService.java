@@ -5,6 +5,7 @@ import creative.market.domain.order.Order;
 import creative.market.domain.order.OrderProduct;
 import creative.market.domain.order.OrderStatus;
 import creative.market.domain.product.Product;
+import creative.market.domain.product.ProductStatus;
 import creative.market.domain.user.User;
 import creative.market.exception.LoginAuthenticationException;
 import creative.market.repository.order.OrderProductRepository;
@@ -85,7 +86,20 @@ public class OrderService {
         OrderProduct orderProduct = orderProductRepository.findByIdWithOrder(orderProductId)
                 .orElseThrow(() -> new NoSuchElementException("주문 내역이 존재하지 않습니다."));
         buyerAccessCheck(orderProduct, userId); // 상품 취소 권한 확인
+
+        // 삭제된 상품을 취소하려는 경우
+        deletedProductCheck(orderProduct);
+
+        // 이미 취소된 주문을 취소하려는 경우
+        alreadyCancelCheck(orderProduct);
+
         orderProduct.cancel();
+    }
+
+    private void alreadyCancelCheck(OrderProduct orderProduct) {
+        if (orderProduct.getStatus() == OrderStatus.CANCEL) {
+            throw new IllegalArgumentException("이미 주문이 취소되었습니다.");
+        }
     }
 
     private void buyerAccessCheck(OrderProduct orderProduct, Long userId) {
@@ -93,6 +107,14 @@ public class OrderService {
             throw new LoginAuthenticationException("주문 취소 권한이 없습니다.");
         }
     }
+
+    private void deletedProductCheck(OrderProduct orderProduct) {
+        if (orderProduct.getProduct().getStatus() == ProductStatus.DELETED) {
+            throw new NoSuchElementException("존재하지 않는 상품입니다.");
+        }
+    }
+
+
 
     private Order createOrder(List<OrderProduct> orderProducts, User user, Address address) {
         return Order.builder()

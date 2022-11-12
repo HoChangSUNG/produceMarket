@@ -4,6 +4,7 @@ import creative.market.domain.category.KindGrade;
 import creative.market.domain.product.Product;
 import creative.market.domain.product.ProductImage;
 import creative.market.domain.product.ProductImageType;
+import creative.market.domain.product.ProductStatus;
 import creative.market.domain.user.User;
 import creative.market.exception.FileSaveException;
 import creative.market.exception.LoginAuthenticationException;
@@ -71,8 +72,22 @@ public class ProductService {
                 .signatureProductImage(sigProductImage)
                 .build();
         productRepository.save(product);
-        log.info("등록된 productId={}",product.getId());
+        log.info("등록된 productId={}", product.getId());
 
+        return product.getId();
+    }
+
+    @Transactional
+    public Long deleteProduct(Long productId, Long userId) {
+        // 이미 삭제되었거나 존재하지 않는 상품일 경우
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 상품입니다."));
+
+        // 삭제 권환 확인
+        sellerAccessCheck(productId, userId);
+
+        //상품 삭제
+        product.changeStatus(ProductStatus.DELETED);
         return product.getId();
     }
 
@@ -100,7 +115,7 @@ public class ProductService {
 
         sellerAccessCheck(productId, userId); // 상품을 등록한 사람인지 체크
 
-        //상푸 수정
+        //상품 수정
         findProduct.changeProduct(findKindGrade, updateFormReq.getProductName(), updateFormReq.getPrice(), updateFormReq.getInfo());
 
         //사진 수정
@@ -112,7 +127,8 @@ public class ProductService {
     }
 
     public void sellerAccessCheck(Long productId, Long userId) {
-        productRepository.findByIdAndSellerId(productId, userId).orElseThrow(() -> new LoginAuthenticationException("접근 권한이 없습니다."));
+        productRepository.findByIdAndSellerId(productId, userId)
+                .orElseThrow(() -> new LoginAuthenticationException("접근 권한이 없습니다."));
     }
 
 
@@ -120,14 +136,14 @@ public class ProductService {
         try {
             ProductImage signatureProductImage = product.getSignatureProductImage();
             String existingName = signatureProductImage.getName();// 기존 대표 이미지 이름
-            log.info("기존 signature image={}",existingName);
+            log.info("기존 signature image={}", existingName);
 
             if (!FileStoreUtils.getOriginalFileName(sigImg).equals(existingName)) { //기존 사진과 이름이 동일하지 않은 경우
                 deleteImage(product, signatureProductImage); // 사진 제거
                 UploadFileDTO uploadFileDTO = FileStoreUtils.storeFile(sigImg, rootPath, FileSubPath.PRODUCT_PATH);
                 product.addProductSignatureImage(createProductImage(uploadFileDTO, ProductImageType.SIGNATURE)); // 사진 추가
 
-                log.info("update 된 signature image={}",uploadFileDTO.getUploadFileName());
+                log.info("update 된 signature image={}", uploadFileDTO.getUploadFileName());
             }
         } catch (IOException e) {
             throw new FileSaveException("대표 이미지 변경에 실패했습니다. 다시 시도해주세요");
@@ -149,7 +165,7 @@ public class ProductService {
 
             // 들어온 사진 측 -> 들어온 파일 이름과 기존 파일 이름 같은 것 없으면 추가
             String[] ordinalImgNames = productOrdinalImages.stream().map(ProductImage::getName).toArray(String[]::new);
-            log.info("기존 ordinal images={}",Arrays.toString(ordinalImgNames));
+            log.info("기존 ordinal images={}", Arrays.toString(ordinalImgNames));
 
             List<MultipartFile> uploadFiles = ordinalImgList.stream()
                     .filter(ordinalImg -> !StringUtils.containsAny(ordinalImg.getOriginalFilename(), ordinalImgNames)).collect(Collectors.toList());

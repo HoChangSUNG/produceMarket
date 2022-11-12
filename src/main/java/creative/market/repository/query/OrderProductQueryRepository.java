@@ -1,13 +1,10 @@
 package creative.market.repository.query;
 
-import com.querydsl.core.Tuple;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import creative.market.domain.order.OrderStatus;
 import creative.market.domain.product.ProductImageType;
-import creative.market.domain.product.QProductImage;
 import creative.market.repository.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -47,7 +44,8 @@ public class OrderProductQueryRepository {
                         itemCodeEq(categoryParam.getItemCode()),
                         kindEq(categoryParam.getKindId()),
                         kindGradeEq(categoryParam.getKindGradeId()),
-                        dateBetween(startDate, endDate))
+                        dateBetween(startDate, endDate),
+                        orderStatus())
                 .orderBy(getTotalPrice().desc())
                 .groupBy(user)
                 .offset(0)
@@ -71,7 +69,9 @@ public class OrderProductQueryRepository {
                         kindEq(categoryParam.getKindId()),
                         kindGradeEq(categoryParam.getKindGradeId()),
                         dateBetween(startDate, endDate),
-                        userEq(userId))
+                        userEq(userId),
+                        orderStatus()
+                        )
                 .fetchOne();
     }
 //
@@ -138,5 +138,9 @@ public class OrderProductQueryRepository {
 
     private BooleanExpression userEq(Long userId) {
         return userId != null ? user.id.eq(userId) : null;
+    }
+
+    private BooleanExpression orderStatus() {
+        return orderProduct.status.eq(OrderStatus.ORDER);
     }
 }
