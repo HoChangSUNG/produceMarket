@@ -1,12 +1,10 @@
 package creative.market.repository.dto;
 
-import com.querydsl.core.annotations.QueryProjection;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.math.BigInteger;
 
 @Getter
 @Setter
@@ -14,14 +12,10 @@ import java.time.LocalDateTime;
 public class BuyerTotalPricePerPeriodDTO {
 
     private String date;
-    private Long price;
+    private Long totalPrice;
 
-    @QueryProjection
-
-    public BuyerTotalPricePerPeriodDTO(Long price, Integer year, Integer month) {
-        if (year != null && month != null) {
-            date =String.format("%4d.%02d",year,month);
-        }
-        this.price = price;
+    public BuyerTotalPricePerPeriodDTO(BigInteger totalPrice, String date) {
+        this.date = date;
+        this.totalPrice = totalPrice.longValue();
     }
 }

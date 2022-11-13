@@ -7,9 +7,13 @@ import creative.market.domain.order.OrderStatus;
 import creative.market.domain.product.ProductImageType;
 import creative.market.repository.dto.*;
 import lombok.RequiredArgsConstructor;
+import org.qlrm.mapper.JpaResultMapper;
 import org.springframework.stereotype.Repository;
 
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
 
 import static creative.market.domain.category.QGradeCriteria.gradeCriteria;
@@ -28,6 +32,8 @@ import static creative.market.domain.user.QUser.user;
 public class OrderProductQueryRepository {
 
     private final JPAQueryFactory queryFactory;
+    private final EntityManager em;
+    private final JpaResultMapper jpaResultMapper;
 
     public List<SellerAndTotalPricePerCategoryDTO> findCategoryTopRankSellerNameAndPrice(CategoryParamDTO categoryParam, LocalDateTime startDate, LocalDateTime endDate, int rankCount) {// 카테고리별 판매 상위 판매자 및 판매 가격 조회
         return queryFactory.select(new QSellerAndTotalPricePerCategoryDTO(user.name, getTotalPrice().coalesce(0L)))
@@ -75,15 +81,30 @@ public class OrderProductQueryRepository {
                 .fetchOne();
     }
 //
-    public List<BuyerTotalPricePerPeriodDTO> findBuyerTotalPricePerPeriod(LocalDateTime startDate, LocalDateTime endDate, Long userId) {// 구매자의 기간별 결제 금액
-        return queryFactory.select(new QBuyerTotalPricePerPeriodDTO(getTotalPrice(), order.createdDate.year(), order.createdDate.month()))
-                .from(orderProduct)
-                .join(orderProduct.order, order)
-                .join(order.user, user)
-                .where(dateBetween(startDate, endDate), userEq(userId))
-                .groupBy(order.createdDate.yearMonth())
-                .orderBy(order.createdDate.yearMonth().asc())
-                .fetch();
+    public List<BuyerTotalPricePerPeriodDTO> findBuyerTotalPricePerPeriod(YearMonth startDate, YearMonth endDate, Long userId) {// 구매자의 기간별 결제 금액
+        String sql = "select cast(ifNull(sum(op.price * op.count),0) AS SIGNED ) as totalPrice, month_year_tb.ym as date" +
+                " from (select opp.price as price, opp.count as count, o.created_date as created_date from order_product opp join orders o on opp.order_id = o.order_id where opp.status = 'ORDER' and o.user_id =:userId) op" +
+                " right outer join" +
+                " (WITH RECURSIVE ym AS" +
+                "        (" +
+                "        SELECT :startDate ym" +
+                "         UNION ALL" +
+                "        SELECT DATE_FORMAT(DATE_ADD(CONCAT(ym, '-01'), INTERVAL 1 MONTH), '%Y-%m') ym" +
+                "          FROM ym" +
+                "         WHERE ym < :endDate" +
+                "        )" +
+                "        SELECT *" +
+                "          FROM ym" +
+                ") as month_year_tb on date_format(op.created_date,'%Y-%m') = month_year_tb.ym" +
+                " group by month_year_tb.ym" +
+                " order by month_year_tb.ym";
+
+        Query query = em.createNativeQuery(sql)
+                .setParameter("userId", userId)
+                .setParameter("startDate", startDate.toString())
+                .setParameter("endDate", endDate.toString());
+
+        return jpaResultMapper.list(query, BuyerTotalPricePerPeriodDTO.class);
     }
 
     public List<BuyerOrderPerPeriodDTO> findBuyerOrderPerPeriod(LocalDateTime startDate, LocalDateTime endDate, Long userId, int offset, int limit) {

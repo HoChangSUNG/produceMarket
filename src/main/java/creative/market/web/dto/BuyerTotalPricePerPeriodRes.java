@@ -24,6 +24,6 @@ public class BuyerTotalPricePerPeriodRes {
                 .collect(Collectors.toList()); // 월별 리스트
 
         this.priceList = buyerTotalPricePerPeriodDTO.stream()
-                .map(BuyerTotalPricePerPeriodDTO::getPrice).collect(Collectors.toList()); // 가격 리스트
+                .map(BuyerTotalPricePerPeriodDTO::getTotalPrice).collect(Collectors.toList()); // 가격 리스트
     }
 }
