@@ -241,32 +241,36 @@ class OrderProductQueryRepositoryTest {
 //        1달전 : 1000*2 + 5000 * 3 + 10000* 2 + 20000 *3 = 77000
 //        2달전 : 1000*3 + 5000 * 4 + 10000* 3 + 20000 *4 = 133000
 //        3달전 : 1000*4 + 5000 * 5 + 10000* 4 + 20000 *5 = 169000
+//        4달전 : 0
+//        5달전 : 0
 
         //when
-        LocalDateTime start1 = startMonthOfDayLocalDateTime(YearMonth.now().minusYears(1)); // 1년전
-        LocalDateTime end1 = endMonthOfDayLocalDateTime(YearMonth.now()); // 이번달
-        List<BuyerTotalPricePerPeriodDTO> result1 = orderProductQueryRepository.findBuyerTotalPricePerPeriod(start1, end1, productBuyer.getId());
+        YearMonth startDate1 = YearMonth.now().minusMonths(5);// 5달전
+        YearMonth endDate1 = YearMonth.now(); // 이번달
+        List<BuyerTotalPricePerPeriodDTO> result1 = orderProductQueryRepository.findBuyerTotalPricePerPeriod(startDate1, endDate1, productBuyer.getId());
 
-        LocalDateTime end2 = endMonthOfDayLocalDateTime(YearMonth.now().minusMonths(2)); // 2달전
-        LocalDateTime start2 = startMonthOfDayLocalDateTime(YearMonth.now().minusMonths(3)); // 3달전
-        List<BuyerTotalPricePerPeriodDTO> result2 = orderProductQueryRepository.findBuyerTotalPricePerPeriod(start2, end2, productBuyer.getId());
+        YearMonth startDate2 = YearMonth.now().minusMonths(3); // 3달전
+        YearMonth endDate2 = YearMonth.now().minusMonths(2); // 2달전
+        List<BuyerTotalPricePerPeriodDTO> result2 = orderProductQueryRepository.findBuyerTotalPricePerPeriod(startDate2, endDate2, productBuyer.getId());
 
         //then
 
-        String threeMonthsAgo = LocalDateTime.now().minusMonths(3).format(DateTimeFormatter.ofPattern("yyyy.MM")); //3달전
-        String twoMonthsAgo = LocalDateTime.now().minusMonths(2).format(DateTimeFormatter.ofPattern("yyyy.MM")); //2달전
-        String oneMonthsAgo = LocalDateTime.now().minusMonths(1).format(DateTimeFormatter.ofPattern("yyyy.MM")); //1달전
-        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy.MM")); //이번달
+        String fiveMonthsAgo = LocalDateTime.now().minusMonths(5).format(DateTimeFormatter.ofPattern("yyyy-MM")); //5달전
+        String fourMonthsAgo = LocalDateTime.now().minusMonths(4).format(DateTimeFormatter.ofPattern("yyyy-MM")); //4달전
+        String threeMonthsAgo = LocalDateTime.now().minusMonths(3).format(DateTimeFormatter.ofPattern("yyyy-MM")); //3달전
+        String twoMonthsAgo = LocalDateTime.now().minusMonths(2).format(DateTimeFormatter.ofPattern("yyyy-MM")); //2달전
+        String oneMonthsAgo = LocalDateTime.now().minusMonths(1).format(DateTimeFormatter.ofPattern("yyyy-MM")); //1달전
+        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM")); //이번달
 
-        //1년전 ~ 이번달
-        assertThat(result1.size()).isEqualTo(4);
-        assertThat(result1).extracting("date").containsExactly(threeMonthsAgo, twoMonthsAgo, oneMonthsAgo, now);
-        assertThat(result1).extracting("price").containsExactly(169000L, 133000L, 97000L, 61000L);
+        //6달전 ~ 이번달
+        assertThat(result1.size()).isEqualTo(6);
+        assertThat(result1).extracting("date").containsExactly(fiveMonthsAgo, fourMonthsAgo, threeMonthsAgo, twoMonthsAgo, oneMonthsAgo, now);
+        assertThat(result1).extracting("totalPrice").containsExactly(0L, 0L, 169000L, 133000L, 97000L, 61000L);
 
         //2달전~ 3달전
         assertThat(result2.size()).isEqualTo(2);
         assertThat(result2).extracting("date").containsExactly(threeMonthsAgo, twoMonthsAgo);
-        assertThat(result2).extracting("price").containsExactly(169000L, 133000L);
+        assertThat(result2).extracting("totalPrice").containsExactly(169000L, 133000L);
 
     }
 

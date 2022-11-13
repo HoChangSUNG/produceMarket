@@ -55,7 +55,7 @@ public class BuyerMyPageController {
         int offset = PagingUtils.getOffset(pageNum, pageSize);
         int totalPageNum = PagingUtils.getTotalPageNum(total, pageSize);
 
-        return new PagingResultRes(orderProductQueryService.findBuyerOrderPerPeriod(startDate,endDate, loginUserDTO.getId(), offset, pageSize), pageNum, totalPageNum);
+        return new PagingResultRes(orderProductQueryService.findBuyerOrderPerPeriod(startDate, endDate, loginUserDTO.getId(), offset, pageSize), pageNum, totalPageNum);
     }
 
     @GetMapping("/order-price-statistics")
@@ -66,11 +66,11 @@ public class BuyerMyPageController {
             throw new IllegalArgumentException("기간이 올바르지 않습니다");
         }
 
-        LocalDateTime startDate = startMonthOfDayLocalDateTime(yearMonthPeriodReq.getStartDate()); // 시작 날짜
-        LocalDateTime endDate = endMonthOfDayLocalDateTime(yearMonthPeriodReq.getEndDate()); // 종료 날짜
-        log.info("startMonth={}, endMonth={}", startDate, endDate);
+//        LocalDateTime startDate = startMonthOfDayLocalDateTime(yearMonthPeriodReq.getStartDate()); // 시작 날짜
+//        LocalDateTime endDate = endMonthOfDayLocalDateTime(yearMonthPeriodReq.getEndDate()); // 종료 날짜
+//        log.info("startMonth={}, endMonth={}", startDate, endDate);
 
-        List<BuyerTotalPricePerPeriodDTO> buyerTotalPricePerPeriod = orderProductQueryRepository.findBuyerTotalPricePerPeriod(startDate, endDate, loginUserDTO.getId());
+        List<BuyerTotalPricePerPeriodDTO> buyerTotalPricePerPeriod = orderProductQueryRepository.findBuyerTotalPricePerPeriod(yearMonthPeriodReq.getStartDate(), yearMonthPeriodReq.getEndDate(), loginUserDTO.getId());
         return new ResultRes<>(new BuyerTotalPricePerPeriodRes(buyerTotalPricePerPeriod));
     }
 
