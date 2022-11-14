@@ -12,6 +12,7 @@ import java.time.format.DateTimeFormatter;
 @Getter
 @Setter
 @NoArgsConstructor
+@ToString
 public class BuyerOrderPerPeriodDTO {
 
     private Long orderId;

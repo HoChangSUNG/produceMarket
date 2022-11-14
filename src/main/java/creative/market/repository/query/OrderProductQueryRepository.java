@@ -99,7 +99,7 @@ public class OrderProductQueryRepository {
         return jpaResultMapper.list(query, BuyerTotalPricePerPeriodDTO.class);
     }
 
-    public List<BuyerOrderPerPeriodDTO> findBuyerOrderPerPeriod(LocalDateTime startDate, LocalDateTime endDate, Long userId) {
+    public List<BuyerOrderPerPeriodDTO> findBuyerOrderPerPeriod(LocalDateTime startDate, LocalDateTime endDate, Long userId, int offset, int pageSize) {
         return queryFactory
                 .select(new QBuyerOrderPerPeriodDTO(order.id, product.id, orderProduct.id, order.createdDate, product.name, orderProduct.count, orderProduct.price, productImage.path, orderProduct.status.stringValue()))
                 .from(orderProduct)
@@ -109,18 +109,19 @@ public class OrderProductQueryRepository {
                 .join(product.productImages, productImage)
                 .where(dateBetween(startDate, endDate), userEq(userId), productImage.type.eq(ProductImageType.SIGNATURE))
                 .orderBy(order.createdDate.asc())
+                .offset(offset)
+                .limit(pageSize)
                 .fetch();
     }
 
     public Long findBuyerOrderPerPeriodTotalCount(LocalDateTime startDate, LocalDateTime endDate, Long userId) {
         return queryFactory
-                .select(orderProduct.count())
+                .select(order.countDistinct())
                 .from(orderProduct)
                 .join(orderProduct.order, order)
                 .join(order.user, user)
                 .join(orderProduct.product, product)
                 .join(product.productImages, productImage)
-                .groupBy(order.id)
                 .where(dateBetween(startDate, endDate), userEq(userId), productImage.type.eq(ProductImageType.SIGNATURE))
                 .fetchOne();
     }
