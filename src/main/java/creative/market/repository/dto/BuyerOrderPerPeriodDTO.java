@@ -18,6 +18,8 @@ public class BuyerOrderPerPeriodDTO {
 
     private Long productId;
 
+    private Long orderProductId;
+
     private String createdDate;
 
     private String productName;
@@ -31,9 +33,10 @@ public class BuyerOrderPerPeriodDTO {
     private String status;
 
     @QueryProjection
-    public BuyerOrderPerPeriodDTO(Long orderId, Long productId, LocalDateTime createDate, String productName, int count, int price, String path, String status) {
+    public BuyerOrderPerPeriodDTO(Long orderId, Long productId, Long orderProductId, LocalDateTime createDate, String productName, int count, int price, String path, String status) {
         this.orderId = orderId;
         this.productId = productId;
+        this.orderProductId = orderProductId;
         this.createdDate = createDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm"));
         this.productName = productName;
         this.count = count;

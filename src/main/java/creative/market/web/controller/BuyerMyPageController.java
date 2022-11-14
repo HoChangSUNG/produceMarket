@@ -9,10 +9,7 @@ import creative.market.repository.query.OrderProductQueryRepository;
 import creative.market.service.dto.LoginUserDTO;
 import creative.market.service.query.OrderProductQueryService;
 import creative.market.util.PagingUtils;
-import creative.market.web.dto.BuyerTotalPricePerPeriodRes;
-import creative.market.web.dto.PagingResultRes;
-import creative.market.web.dto.ResultRes;
-import creative.market.web.dto.YearMonthPeriodReq;
+import creative.market.web.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,10 +36,7 @@ public class BuyerMyPageController {
 
     @GetMapping("/order-history")
     @LoginCheck(type = {UserType.BUYER, UserType.SELLER})
-    public PagingResultRes getOrderHistoryByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq,
-                                                   @RequestParam(defaultValue = "10") @Min(1) int pageSize,
-                                                   @RequestParam(defaultValue = "1") @Min(1) int pageNum,
-                                                   @Login LoginUserDTO loginUserDTO) {
+    public ScrollResultRes getOrderHistoryByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq, @Login LoginUserDTO loginUserDTO) {
 
         if (!isRightPeriod(yearMonthPeriodReq.getStartDate(), yearMonthPeriodReq.getEndDate())) {
             throw new IllegalArgumentException("기간이 올바르지 않습니다");
@@ -52,10 +46,8 @@ public class BuyerMyPageController {
         LocalDateTime endDate = endMonthOfDayLocalDateTime(yearMonthPeriodReq.getEndDate()); // 종료 날짜
 
         Long total = orderProductQueryRepository.findBuyerOrderPerPeriodTotalCount(startDate, endDate, loginUserDTO.getId());
-        int offset = PagingUtils.getOffset(pageNum, pageSize);
-        int totalPageNum = PagingUtils.getTotalPageNum(total, pageSize);
 
-        return new PagingResultRes(orderProductQueryService.findBuyerOrderPerPeriod(startDate, endDate, loginUserDTO.getId(), offset, pageSize), pageNum, totalPageNum);
+        return new ScrollResultRes(orderProductQueryService.findBuyerOrderPerPeriod(startDate, endDate, loginUserDTO.getId()), total);
     }
 
     @GetMapping("/order-price-statistics")

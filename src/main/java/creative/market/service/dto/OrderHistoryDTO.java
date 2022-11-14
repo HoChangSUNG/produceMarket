@@ -20,7 +20,5 @@ public class OrderHistoryDTO {
 
     private String createdDate;
 
-    private String status;
-
     private List<BuyerOrderPerPeriodDTO> productList;
 }
