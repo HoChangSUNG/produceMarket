@@ -77,25 +77,17 @@ public class OrderProductQueryRepository {
                         dateBetween(startDate, endDate),
                         userEq(userId),
                         orderStatus()
-                        )
+                )
                 .fetchOne();
     }
-//
+
+    //
     public List<BuyerTotalPricePerPeriodDTO> findBuyerTotalPricePerPeriod(YearMonth startDate, YearMonth endDate, Long userId) {// 구매자의 기간별 결제 금액
         String sql = "select cast(ifNull(sum(op.price * op.count),0) AS SIGNED ) as totalPrice, month_year_tb.ym as date" +
                 " from (select opp.price as price, opp.count as count, o.created_date as created_date from order_product opp join orders o on opp.order_id = o.order_id where opp.status = 'ORDER' and o.user_id =:userId) op" +
-                " right outer join" +
-                " (WITH RECURSIVE ym AS" +
-                "        (" +
-                "        SELECT :startDate ym" +
-                "         UNION ALL" +
-                "        SELECT DATE_FORMAT(DATE_ADD(CONCAT(ym, '-01'), INTERVAL 1 MONTH), '%Y-%m') ym" +
-                "          FROM ym" +
-                "         WHERE ym < :endDate" +
-                "        )" +
-                "        SELECT *" +
-                "          FROM ym" +
-                ") as month_year_tb on date_format(op.created_date,'%Y-%m') = month_year_tb.ym" +
+                " right outer join year_month_data" +
+                " as month_year_tb on date_format(op.created_date,'%Y-%m') = month_year_tb.ym" +
+                " where month_year_tb.ym>=:startDate and  month_year_tb.ym<=:endDate" +
                 " group by month_year_tb.ym" +
                 " order by month_year_tb.ym";
 
