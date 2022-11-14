@@ -41,9 +41,7 @@ public class BuyerMyPageController {
                                                    @RequestParam(defaultValue = "1") @Min(1) int pageNum,
                                                    @Login LoginUserDTO loginUserDTO) {
 
-        if (!isRightPeriod(yearMonthPeriodReq.getStartDate(), yearMonthPeriodReq.getEndDate())) {
-            throw new IllegalArgumentException("기간이 올바르지 않습니다");
-        }
+        checkRightPeriod(yearMonthPeriodReq.getStartDate(), yearMonthPeriodReq.getEndDate());
 
         int offset = PagingUtils.getOffset(pageNum, pageSize);
 
@@ -59,20 +57,21 @@ public class BuyerMyPageController {
     @LoginCheck(type = {UserType.BUYER, UserType.SELLER})
     public ResultRes getOrderPriceByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq, @Login LoginUserDTO loginUserDTO) {
 
-        if (!isRightPeriod(yearMonthPeriodReq.getStartDate(), yearMonthPeriodReq.getEndDate())) {
-            throw new IllegalArgumentException("기간이 올바르지 않습니다");
-        }
-
-//        LocalDateTime startDate = startMonthOfDayLocalDateTime(yearMonthPeriodReq.getStartDate()); // 시작 날짜
-//        LocalDateTime endDate = endMonthOfDayLocalDateTime(yearMonthPeriodReq.getEndDate()); // 종료 날짜
-//        log.info("startMonth={}, endMonth={}", startDate, endDate);
+        checkRightPeriod(yearMonthPeriodReq.getStartDate(), yearMonthPeriodReq.getEndDate());
 
         List<BuyerTotalPricePerPeriodDTO> buyerTotalPricePerPeriod = orderProductQueryRepository.findBuyerTotalPricePerPeriod(yearMonthPeriodReq.getStartDate(), yearMonthPeriodReq.getEndDate(), loginUserDTO.getId());
         return new ResultRes<>(new BuyerTotalPricePerPeriodRes(buyerTotalPricePerPeriod));
     }
 
-    private boolean isRightPeriod(YearMonth startDate, YearMonth endDate) { // 날짜 기간이 올바른지(시작날짜가 종료날짜보다 빠른지)
-        return startDate.compareTo(endDate) <= 0;
+    private void checkRightPeriod(YearMonth startDate, YearMonth endDate) {
+        if (!isRightPeriod(startDate, endDate)) {
+            throw new IllegalArgumentException("기간이 올바르지 않습니다");
+        }
+    }
+
+    private boolean isRightPeriod(YearMonth startDate, YearMonth endDate) {
+        // 날짜 기간이 올바른지(시작날짜가 종료날짜보다 같거나빠른지, 종료날짜가 현재 날짜보다 같거나 빠른지)
+        return startDate.compareTo(endDate) <= 0 && endDate.compareTo(YearMonth.now()) <= 0;
     }
 
     private LocalDateTime startMonthOfDayLocalDateTime(YearMonth yearMonth) { // MonthYear -> 시작 LocalDateTime 으로 변경
