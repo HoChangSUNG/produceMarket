@@ -48,7 +48,7 @@ public class ProductRepository {
 
     public List<Product> findProductListOrderByCreatedDateDesc(int limit) {
         return queryFactory.selectFrom(product)
-                .orderBy(product.createdDate.desc())
+                .orderBy(product.createdDate.desc(),product.name.asc())
                 .limit(limit)
                 .fetch();
     }

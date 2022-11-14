@@ -28,7 +28,7 @@ public class ProductQueryRepository {
                 .join(product.kindGrade, kindGrade)
                 .join(kindGrade.kind, kind)
                 .where(productImage.type.eq(ProductImageType.SIGNATURE), productExistCheck())
-                .orderBy(product.createdDate.desc())
+                .orderBy(product.createdDate.desc(), product.name.asc())
                 .limit(limit)
                 .offset(offset)
                 .fetch();
