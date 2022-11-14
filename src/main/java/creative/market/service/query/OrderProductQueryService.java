@@ -37,7 +37,7 @@ public class OrderProductQueryService {
                     .sum();
 
             int cnt = (int) dtos.stream()
-                    .filter(dto -> dto.getStatus().equals(OrderStatus.ORDER.toString()))
+                    .filter(dto -> dto.getStatus().equals(OrderStatus.CANCEL.toString()))
                     .count();
 
             result.add(new OrderHistoryDTO(key, dtos.size()-cnt, sum, dtos.get(0).getCreatedDate(), dtos));
