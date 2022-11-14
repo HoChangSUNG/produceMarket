@@ -58,7 +58,7 @@ class OrderProductQueryRepositoryTest {
     OrderProductQueryRepository orderProductQueryRepository;
 
     @BeforeEach
-    public void before() throws InterruptedException {
+    public void before(){
         Address buyerAddress = createAddress("1111", "봉사산로3", 11111, "3동4호");
         Seller productOwner1 = createSeller("강대현", "1", "11", "19990112", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
         Seller productOwner2 = createSeller("강병관", "2", "22", "19991212", "sd45fwf@mae.com", "010-3644-3333", createAddress("1111", "봉사산로2", 12315, "2동2호"), "상호명2");
@@ -73,7 +73,7 @@ class OrderProductQueryRepositoryTest {
         Product product2 = getProduct("상품2", 3000, "상품입니다2", 432L, productOwner2);
         Product product3 = getProduct("상품3", 5000, "상품입니다3", 432L, productOwner2);
         Product product4 = getProduct("상품4", 50000, "상품입니다4", 432L, productOwner3);
-        Product product5 = getProduct("상품3", 40000, "상품입니다5", 433L, productOwner2);
+        Product product5 = getProduct("상품5", 40000, "상품입니다5", 433L, productOwner2);
 
         OrderProductParamDTO orderProductParam1 = new OrderProductParamDTO(5, product1.getId());
         OrderProductParamDTO orderProductParam2 = new OrderProductParamDTO(2, product2.getId());
@@ -85,10 +85,10 @@ class OrderProductQueryRepositoryTest {
 
         Address orderAddress = createAddress("1111", "봉사산로", 12345, "동호수");
 
-        // 5일전 저장한 주문 내역
+        // 1달전 저장한 주문 내역
         Long orderId1 = orderService.order(productBuyer.getId(), orderParamList, orderAddress);
         Order findOrder1 = orderRepository.findById(orderId1).orElseThrow(() -> new NoSuchElementException("주문 내역이 존재하지 않습니다."));
-        findOrder1.changeCreatedDate(LocalDateTime.now().minusDays(5));
+        findOrder1.changeCreatedDate(LocalDateTime.now().minusMonths(1));
 
         // 1시간전 저장한 주문 내역
         Long orderId2 = orderService.order(productBuyer.getId(), orderParamList, orderAddress);
@@ -149,7 +149,7 @@ class OrderProductQueryRepositoryTest {
         int rankCount3 = 6; // 상위 6명
 
         LocalDateTime endDate = LocalDateTime.now();
-        LocalDateTime startDate = endDate.minusDays(10);
+        LocalDateTime startDate = endDate.minusMonths(3);
 
         CategoryParamDTO categoryParamDTO = new CategoryParamDTO(null, null, null, kindGradeId);
 
