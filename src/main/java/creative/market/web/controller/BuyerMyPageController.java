@@ -36,18 +36,23 @@ public class BuyerMyPageController {
 
     @GetMapping("/order-history")
     @LoginCheck(type = {UserType.BUYER, UserType.SELLER})
-    public ScrollResultRes getOrderHistoryByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq, @Login LoginUserDTO loginUserDTO) {
+    public PagingResultRes getOrderHistoryByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq,
+                                                   @RequestParam(defaultValue = "10") @Min(1) int pageSize,
+                                                   @RequestParam(defaultValue = "1") @Min(1) int pageNum,
+                                                   @Login LoginUserDTO loginUserDTO) {
 
         if (!isRightPeriod(yearMonthPeriodReq.getStartDate(), yearMonthPeriodReq.getEndDate())) {
             throw new IllegalArgumentException("기간이 올바르지 않습니다");
         }
 
+        int offset = PagingUtils.getOffset(pageNum, pageSize);
+
         LocalDateTime startDate = startMonthOfDayLocalDateTime(yearMonthPeriodReq.getStartDate()); // 시작 날짜
         LocalDateTime endDate = endMonthOfDayLocalDateTime(yearMonthPeriodReq.getEndDate()); // 종료 날짜
 
-        Long total = orderProductQueryRepository.findBuyerOrderPerPeriodTotalCount(startDate, endDate, loginUserDTO.getId());
+        int total = orderProductQueryRepository.findBuyerOrderPerPeriodTotalCount(startDate, endDate, loginUserDTO.getId()).intValue();
 
-        return new ScrollResultRes(orderProductQueryService.findBuyerOrderPerPeriod(startDate, endDate, loginUserDTO.getId()), total);
+        return new PagingResultRes(orderProductQueryService.findBuyerOrderPerPeriod(startDate, endDate, loginUserDTO.getId(), offset, pageSize), pageNum, total);
     }
 
     @GetMapping("/order-price-statistics")
