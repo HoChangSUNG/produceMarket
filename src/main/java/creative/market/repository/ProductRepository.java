@@ -6,6 +6,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import creative.market.domain.order.OrderStatus;
 import creative.market.domain.product.Product;
 import creative.market.domain.product.ProductStatus;
+import creative.market.domain.product.QProductImage;
 import creative.market.repository.dto.ProductSearchConditionReq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -26,6 +27,7 @@ import static creative.market.domain.category.QKindGrade.*;
 import static creative.market.domain.order.QOrder.order;
 import static creative.market.domain.order.QOrderProduct.*;
 import static creative.market.domain.product.QProduct.*;
+import static creative.market.domain.product.QProductImage.*;
 import static creative.market.domain.user.QUser.*;
 
 @Repository
@@ -159,6 +161,27 @@ public class ProductRepository {
                 .limit(limit)
                 .offset(offset)
                 .fetch();
+    }
+
+    public List<Product> findByUserId(Long userId, int offset, int limit) {
+        return queryFactory
+                .selectFrom(product)
+                .join(product.kindGrade, kindGrade).fetchJoin()
+                .join(kindGrade.kind, kind).fetchJoin()
+                .join(kind.item, item).fetchJoin()
+                .where(productExistCheck(), product.user.id.eq(userId))
+                .offset(offset)
+                .limit(limit)
+                .orderBy(product.createdDate.asc())
+                .fetch();
+    }
+
+    public Long findByUserIdCount(Long userId) {
+        return queryFactory
+                .select(product.count())
+                .from(product)
+                .where(productExistCheck(), product.user.id.eq(userId))
+                .fetchOne();
     }
 
     private BooleanExpression dateBetween(LocalDateTime startDate, LocalDateTime endDate) {

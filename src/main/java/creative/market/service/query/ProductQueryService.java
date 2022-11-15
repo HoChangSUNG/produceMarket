@@ -8,6 +8,7 @@ import creative.market.repository.dto.ProductSigSrcAndIdRes;
 import creative.market.repository.dto.ProductUpdateFormRes;
 import creative.market.service.dto.ProductDetailRes;
 import creative.market.service.dto.ProductShortInfoRes;
+import creative.market.service.dto.SaleListRes;
 import creative.market.util.PagingUtils;
 import creative.market.util.WholesaleAndRetailUtils;
 import creative.market.repository.dto.LatestRetailAndWholesaleDTO;
@@ -66,6 +67,12 @@ public class ProductQueryService {
     public List<ProductSigSrcAndIdRes> productSigSrcAndIdByOrderCount(int offset, int limit, LocalDateTime startDate, LocalDateTime endDate) { // // 메인 페이지 전체 상품 판매횟수순
         return productRepository.findProductIdByOrderCountDesc(offset, limit, startDate, endDate).stream()
                 .map(productId -> new ProductSigSrcAndIdRes(findProductById(productId)))
+                .collect(Collectors.toList());
+    }
+
+    public List<SaleListRes> getSaleList(Long userId, int offset, int limit) {
+        return productRepository.findByUserId(userId, offset, limit).stream()
+                .map(SaleListRes::new)
                 .collect(Collectors.toList());
     }
 
