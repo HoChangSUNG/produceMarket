@@ -18,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -93,7 +95,18 @@ public class OrderService {
         // 이미 취소된 주문을 취소하려는 경우
         alreadyCancelCheck(orderProduct);
 
+        //구매일로부터 주문 취소가 가능 날짜 확인
+        checkValidPeriod(orderProduct);
+
         orderProduct.cancel();
+    }
+
+    private void checkValidPeriod(OrderProduct orderProduct) {
+        int availableDay = 3; // 3일 이내 주문 취소 가능
+        LocalDate createdDate = orderProduct.getOrder().getCreatedDate().toLocalDate();
+        if (!LocalDate.now().isBefore(createdDate.plusDays(availableDay))) {
+            throw new IllegalStateException("주문일로부터 "+availableDay +"일 이내에 주문 취소가 가능합니다.");
+        }
     }
 
     private void alreadyCancelCheck(OrderProduct orderProduct) {

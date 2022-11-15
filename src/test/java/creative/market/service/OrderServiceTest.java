@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -503,6 +504,48 @@ class OrderServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("이미 주문이 취소되었습니다.");
 
+    }
+
+    @Test
+    @DisplayName("주문 취소 실패, 구매일로부터 특정 시간 이내에 취소하지 않는경우")
+    void orderCancelFail5() throws Exception {
+        //given
+        Address buyerAddress = createAddress("1111", "봉사산로3", 11111, "3동4호");
+        Seller productOwner1 = createSeller("성호창q", "123433", "3123334", "19990112", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        Seller productOwner2 = createSeller("성호창w", "133234", "2123334", "19991212", "sd45fwf@mae.com", "010-3644-3333", createAddress("1111", "봉사산로2", 12315, "2동2호"), "상호명2");
+        Buyer productBuyer = createBuyer("성호창3", "133234", "133234", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productOwner1);
+        em.persist(productOwner2);
+        em.persist(productBuyer);
+
+        Product product1 = getProduct("상품", 10000, "상품입니다", 432L, productOwner1);
+        Product product2 = getProduct("상품2", 3000, "상품입니다2", 433L, productOwner2);
+        Product product3 = getProduct("상품3", 40000, "상품입니다3", 434L, productOwner2);
+
+        OrderProductParamDTO orderProductParam1 = new OrderProductParamDTO(3, product1.getId());
+        OrderProductParamDTO orderProductParam2 = new OrderProductParamDTO(5, product2.getId());
+        OrderProductParamDTO orderProductParam3 = new OrderProductParamDTO(1, product3.getId());
+        List<OrderProductParamDTO> orderParamList = new ArrayList<>();
+        orderParamList.add(orderProductParam1);
+        orderParamList.add(orderProductParam2);
+        orderParamList.add(orderProductParam3);
+
+        Address orderAddress = createAddress("1111", "봉사산로", 12345, "동호수");
+        Long orderId = orderService.order(productBuyer.getId(), orderParamList, orderAddress);
+        Order findOrder = orderRepository.findById(orderId).orElseThrow(() -> new NoSuchElementException("주문이 존재하지 않습니다"));
+
+        //when
+        OrderProduct findOrderProduct = findOrder.getOrderProducts().stream()
+                .filter(orderProduct -> orderProduct.getCount() == 5)
+                .findFirst().orElseThrow(() -> new NoSuchElementException("존재하지 않는 주문 내역입니다"));
+        // 주문 날짜를 오늘 기준 3일 전으로
+        findOrderProduct.getOrder().changeCreatedDate(LocalDateTime.now().minusDays(3));
+
+        //then
+        //주문 취소(count =5 인 주문 취소)
+        assertThatThrownBy(() -> orderService.orderCancel(findOrderProduct.getId(), productBuyer.getId()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage(("주문일로부터 3일 이내에 주문 취소가 가능합니다."));
     }
 
     private Product getProduct(String name, int price, String info, Long kindGradeId, Seller seller) {
