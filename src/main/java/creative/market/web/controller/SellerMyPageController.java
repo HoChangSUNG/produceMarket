@@ -5,15 +5,15 @@ import creative.market.aop.UserType;
 import creative.market.argumentresolver.Login;
 import creative.market.repository.ProductRepository;
 import creative.market.repository.dto.BuyerTotalPricePerPeriodDTO;
+import creative.market.repository.dto.CategoryParamDTO;
+import creative.market.repository.dto.SellerPricePerPeriodDTO;
 import creative.market.repository.order.OrderProductRepository;
 import creative.market.repository.query.OrderProductQueryRepository;
+import creative.market.repository.user.SellerRepository;
 import creative.market.service.dto.LoginUserDTO;
 import creative.market.service.query.ProductQueryService;
 import creative.market.util.PagingUtils;
-import creative.market.web.dto.BuyerTotalPricePerPeriodRes;
-import creative.market.web.dto.PagingResultRes;
-import creative.market.web.dto.ResultRes;
-import creative.market.web.dto.YearMonthPeriodReq;
+import creative.market.web.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,6 +38,7 @@ public class SellerMyPageController {
     private final ProductQueryService productQueryService;
     private final ProductRepository productRepository;
     private final OrderProductQueryRepository orderProductQueryRepository;
+    private final SellerRepository sellerRepository;
 
     @GetMapping("/sale-list")
     @LoginCheck(type = UserType.SELLER)
@@ -71,6 +73,49 @@ public class SellerMyPageController {
         int totalPageNum = PagingUtils.getTotalPageNum(total, pageSize);
 
         return new PagingResultRes(orderProductQueryRepository.findSaleHistoryPerPeriod(startDate, endDate, loginUserDTO.getId(), offset, pageSize), pageNum, totalPageNum);
+    }
+
+    @GetMapping("/order-price-statistics")
+    @LoginCheck(type = {UserType.SELLER})
+    public ResultRes getOrderPriceByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq, CategoryParamDTO categoryParamDTO, @Login LoginUserDTO loginUserDTO) {
+        YearMonth startDate = yearMonthPeriodReq.getStartDate();
+        YearMonth endDate = yearMonthPeriodReq.getEndDate();
+
+        checkRightPeriod(startDate, endDate);
+
+        List<SellerPricePerPeriodDTO> allSellerTotalPrice = orderProductQueryRepository.findAllSellerTotalPricePerPeriodAndCategory(startDate, endDate, categoryParamDTO);
+        List<SellerPricePerPeriodDTO> allSellerAvgPricePerPeriodList = convertToTotalSellerAvgPrice(allSellerTotalPrice);
+
+        List<SellerPricePerPeriodDTO> sellerTotalPricePerPeriodList = orderProductQueryRepository.findSellerTotalPricePerPeriodAndCategory(startDate, endDate, categoryParamDTO, loginUserDTO.getId());
+
+        return new ResultRes<>(convertToPriceCompareByPeriodDTO(allSellerAvgPricePerPeriodList,sellerTotalPricePerPeriodList));
+    }
+
+    private PriceCompareByPeriodRes convertToPriceCompareByPeriodDTO(List<SellerPricePerPeriodDTO> allSellerAvgPriceList, List<SellerPricePerPeriodDTO> sellerPriceList) {
+        List<String> dateList = allSellerAvgPriceList.stream()
+                .map(SellerPricePerPeriodDTO::getDate)
+                .collect(Collectors.toList());
+        List<Long> avgList = allSellerAvgPriceList.stream()
+                .map(SellerPricePerPeriodDTO::getTotalPrice)
+                .collect(Collectors.toList());
+        List<Long> sellerPrices = sellerPriceList.stream()
+                .map(SellerPricePerPeriodDTO::getTotalPrice)
+                .collect(Collectors.toList());
+
+        return new PriceCompareByPeriodRes(dateList,sellerPrices,avgList);
+    }
+
+    private List<SellerPricePerPeriodDTO> convertToTotalSellerAvgPrice(List<SellerPricePerPeriodDTO> allSellerTotalPrice) {
+        Long totalCount = sellerRepository.findAllSellerCountWithExistAndDeletedSeller();
+        if (totalCount == 0) {
+            return allSellerTotalPrice.stream()
+                    .map(priceDTO -> new SellerPricePerPeriodDTO(0L, priceDTO.getDate()))
+                    .collect(Collectors.toList());
+        } else {
+            return allSellerTotalPrice.stream()
+                    .map(priceDTO -> new SellerPricePerPeriodDTO(priceDTO.getTotalPrice()/totalCount, priceDTO.getDate()))
+                    .collect(Collectors.toList());
+        }
     }
 
 
