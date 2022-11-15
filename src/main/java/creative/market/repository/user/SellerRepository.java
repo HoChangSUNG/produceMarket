@@ -1,7 +1,6 @@
 package creative.market.repository.user;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import creative.market.domain.user.QSeller;
 import creative.market.domain.user.Seller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -29,5 +28,11 @@ public class SellerRepository {
     public Optional<Seller> findById(Long id) {
         Seller seller = em.find(Seller.class, id);
         return Optional.ofNullable(seller);
+    }
+
+    public Long findAllSellerCountWithExistAndDeletedSeller() { // 삭제된 seller + 존재하는 seller 모두 count
+        return queryFactory.select(seller.count().longValue())
+                .from(seller)
+                .fetchOne();
     }
 }

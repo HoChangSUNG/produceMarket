@@ -9,13 +9,12 @@ import creative.market.domain.user.Seller;
 import creative.market.repository.ProductRepository;
 import creative.market.repository.category.KindGradeRepository;
 import creative.market.repository.dto.CategoryParamDTO;
-import creative.market.repository.dto.SellerTotalPricePerPeriodDTO;
+import creative.market.repository.dto.SellerPricePerPeriodDTO;
 import creative.market.repository.order.OrderRepository;
 import creative.market.repository.user.SellerRepository;
 import creative.market.service.OrderService;
 import creative.market.service.dto.OrderProductParamDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -153,8 +152,8 @@ class OrderProductQueryRepositoryTempTest {
     }
 
     @Test
-    @DisplayName("기간별 카테고리 전체 판매액, 카테고리 = kindGradeId 기준")
-    void sellerTotalPriceByPeriodAndCategory1() throws Exception {
+    @DisplayName("기간별 카테고리 전체 판매자 판매액, 카테고리 = kindGradeId 기준")
+    void allSellerTotalPriceByPeriodAndCategory1() throws Exception {
         Address buyerAddress = createAddress("1122", "봉사산로", 12345, "동호수");
         Seller productOwner1 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
         em.persist(productOwner1);
@@ -175,15 +174,15 @@ class OrderProductQueryRepositoryTempTest {
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM")); //이번달
 
         // 채소류-배추-봄-상품 (2달전 ~ 이번달)
-        List<SellerTotalPricePerPeriodDTO> result1 = orderProductQueryRepositoryTemp
+        List<SellerPricePerPeriodDTO> result1 = orderProductQueryRepositoryTemp
                 .findAllSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, null, null, 474L));
 
         //식량작물-쌀-일반계-상품(2달전 ~ 이번달)
-        List<SellerTotalPricePerPeriodDTO> result2 = orderProductQueryRepositoryTemp
+        List<SellerPricePerPeriodDTO> result2 = orderProductQueryRepositoryTemp
                 .findAllSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, null, null, 432L));
 
         // 채소류-상추-적-상품 (2달전 ~ 이번달)
-        List<SellerTotalPricePerPeriodDTO> result3 = orderProductQueryRepositoryTemp
+        List<SellerPricePerPeriodDTO> result3 = orderProductQueryRepositoryTemp
                 .findAllSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, null, null, 492L));
 
         //then
@@ -204,8 +203,8 @@ class OrderProductQueryRepositoryTempTest {
     }
 
     @Test
-    @DisplayName("기간별 카테고리 전체 판매액, 카테고리 = kindId 기준")
-    void sellerTotalPriceByPeriodAndCategory2() throws Exception {
+    @DisplayName("기간별 카테고리 전체 판매자 판매액, 카테고리 = kindId 기준")
+    void allSellerTotalPriceByPeriodAndCategory2() throws Exception {
         Address buyerAddress = createAddress("1122", "봉사산로", 12345, "동호수");
         Seller productOwner1 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
         em.persist(productOwner1);
@@ -226,15 +225,15 @@ class OrderProductQueryRepositoryTempTest {
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM")); //이번달
 
         // 채소류-배추-봄 (2달전 ~ 이번달)
-        List<SellerTotalPricePerPeriodDTO> result1 = orderProductQueryRepositoryTemp
+        List<SellerPricePerPeriodDTO> result1 = orderProductQueryRepositoryTemp
                 .findAllSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, null, 1662L, null));
 
         //식량작물-쌀-일반계(2달전 ~ 이번달)
-        List<SellerTotalPricePerPeriodDTO> result2 = orderProductQueryRepositoryTemp
+        List<SellerPricePerPeriodDTO> result2 = orderProductQueryRepositoryTemp
                 .findAllSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, null, 1613L, null));
 
         // 채소류-상추-적(2달전 ~ 이번달)
-        List<SellerTotalPricePerPeriodDTO> result3 = orderProductQueryRepositoryTemp
+        List<SellerPricePerPeriodDTO> result3 = orderProductQueryRepositoryTemp
                 .findAllSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, null, 1680L, null));
 
         //then
@@ -255,8 +254,8 @@ class OrderProductQueryRepositoryTempTest {
     }
 
     @Test
-    @DisplayName("기간별 카테고리 전체 판매액, 카테고리 = itemId 기준")
-    void sellerTotalPriceByPeriodAndCategory3() throws Exception {
+    @DisplayName("기간별 카테고리 전체 판매자 판매액, 카테고리 = itemId 기준")
+    void allSellerTotalPriceByPeriodAndCategory3() throws Exception {
         Address buyerAddress = createAddress("1122", "봉사산로", 12345, "동호수");
         Seller productOwner1 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
         em.persist(productOwner1);
@@ -277,15 +276,15 @@ class OrderProductQueryRepositoryTempTest {
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM")); //이번달
 
         // 채소류-배추 (2달전 ~ 이번달)
-        List<SellerTotalPricePerPeriodDTO> result1 = orderProductQueryRepositoryTemp
+        List<SellerPricePerPeriodDTO> result1 = orderProductQueryRepositoryTemp
                 .findAllSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, 211, null, null));
 
         //식량작물-쌀(2달전 ~ 이번달)
-        List<SellerTotalPricePerPeriodDTO> result2 = orderProductQueryRepositoryTemp
+        List<SellerPricePerPeriodDTO> result2 = orderProductQueryRepositoryTemp
                 .findAllSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, 111, null, null));
 
         // 채소류-상추(2달전 ~ 이번달)
-        List<SellerTotalPricePerPeriodDTO> result3 = orderProductQueryRepositoryTemp
+        List<SellerPricePerPeriodDTO> result3 = orderProductQueryRepositoryTemp
                 .findAllSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, 214, null, null));
 
         //then
@@ -306,8 +305,8 @@ class OrderProductQueryRepositoryTempTest {
     }
 
     @Test
-    @DisplayName("기간별 카테고리 전체 판매액, 카테고리 = itemCategory 기준")
-    void sellerTotalPriceByPeriodAndCategory4() throws Exception {
+    @DisplayName("기간별 카테고리 전체 판매자 판매액, 카테고리 = itemCategory 기준")
+    void allSellerTotalPriceByPeriodAndCategory4() throws Exception {
         Address buyerAddress = createAddress("1122", "봉사산로", 12345, "동호수");
         Seller productOwner1 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
         em.persist(productOwner1);
@@ -336,19 +335,19 @@ class OrderProductQueryRepositoryTempTest {
         String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM")); //이번달
 
         // 채소류(2달전 ~ 이번달)
-        List<SellerTotalPricePerPeriodDTO> result1 = orderProductQueryRepositoryTemp
+        List<SellerPricePerPeriodDTO> result1 = orderProductQueryRepositoryTemp
                 .findAllSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(200, null, null, null));
 
         //식량작물(2달전 ~ 이번달)
-        List<SellerTotalPricePerPeriodDTO> result2 = orderProductQueryRepositoryTemp
+        List<SellerPricePerPeriodDTO> result2 = orderProductQueryRepositoryTemp
                 .findAllSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(100, null, null, null));
 
         // 과일류(2달전 ~ 이번달)
-        List<SellerTotalPricePerPeriodDTO> result3 = orderProductQueryRepositoryTemp
+        List<SellerPricePerPeriodDTO> result3 = orderProductQueryRepositoryTemp
                 .findAllSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(400, null, null, null));
 
         // 모든 상품(2달전 ~ 이번달)
-        List<SellerTotalPricePerPeriodDTO> result4 = orderProductQueryRepositoryTemp
+        List<SellerPricePerPeriodDTO> result4 = orderProductQueryRepositoryTemp
                 .findAllSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, null, null, null));
 
         //then
@@ -373,11 +372,237 @@ class OrderProductQueryRepositoryTempTest {
         assertThat(result4).extracting("date").containsExactly(twoMonthsAgo.toString(), oneMonthsAgo.toString(), now.toString());
     }
 
+    @Test
+    @DisplayName("기간별 카테고리 특정 판매자 판매액, 카테고리 = kindGradeId 기준")
+    void sellerTotalPriceByPeriodAndCategory1() throws Exception {
+        Address buyerAddress = createAddress("1122", "봉사산로", 12345, "동호수");
+        Seller productOwner1 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner1);
+        Seller productOwner2 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner2);
+
+        Buyer productBuyer = createBuyer("성호창32", "311111", "332222222", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productBuyer);
+
+        sellerTotalPriceGraphInit(productOwner1, productOwner2, productBuyer);
+
+        //when
+        YearMonth startDate = YearMonth.now().minusMonths(2);
+        YearMonth endDate = YearMonth.now();
+
+        String twoMonthsAgo = LocalDateTime.now().minusMonths(2).format(DateTimeFormatter.ofPattern("yyyy-MM")); //2달전
+        String oneMonthsAgo = LocalDateTime.now().minusMonths(1).format(DateTimeFormatter.ofPattern("yyyy-MM")); //1달전
+        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM")); //이번달
+
+        // 채소류-배추-봄-상품 (2달전 ~ 이번달)
+        List<SellerPricePerPeriodDTO> result1 = orderProductQueryRepositoryTemp
+                .findSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, null, null, 474L), productOwner1.getId());
+
+        //식량작물-쌀-일반계-상품(2달전 ~ 이번달)
+        List<SellerPricePerPeriodDTO> result2 = orderProductQueryRepositoryTemp
+                .findSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, null, null, 432L), productOwner1.getId());
+
+        // 채소류-상추-적-상품 (2달전 ~ 이번달)
+        List<SellerPricePerPeriodDTO> result3 = orderProductQueryRepositoryTemp
+                .findSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, null, null, 492L), productOwner1.getId());
+
+        //then
+        // 채소류-배추-봄-상품 (2달전 ~ 이번달)
+        assertThat(result1.size()).isEqualTo(3);
+        assertThat(result1).extracting("totalPrice").containsExactly(0L, 2000L, 1000L);
+        assertThat(result1).extracting("date").containsExactly(twoMonthsAgo.toString(), oneMonthsAgo.toString(), now.toString());
+
+        //식량작물-쌀-일반계-상품(2달전 ~ 이번달)
+        assertThat(result2.size()).isEqualTo(3);
+        assertThat(result2).extracting("totalPrice").containsExactly(0L, 0L, 0L);
+        assertThat(result2).extracting("date").containsExactly(twoMonthsAgo.toString(), oneMonthsAgo.toString(), now.toString());
+
+        // 채소류-상추-적-상품 (2달전 ~ 이번달)
+        assertThat(result3.size()).isEqualTo(3);
+        assertThat(result3).extracting("totalPrice").containsExactly(0L, 0L, 0L);
+        assertThat(result3).extracting("date").containsExactly(twoMonthsAgo.toString(), oneMonthsAgo.toString(), now.toString());
+    }
+
+    @Test
+    @DisplayName("기간별 카테고리 특정 판매자 판매액, 카테고리 = kindId 기준")
+    void sellerTotalPriceByPeriodAndCategory2() throws Exception {
+        Address buyerAddress = createAddress("1122", "봉사산로", 12345, "동호수");
+        Seller productOwner1 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner1);
+        Seller productOwner2 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner2);
+
+        Buyer productBuyer = createBuyer("성호창32", "311111", "332222222", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productBuyer);
+
+        sellerTotalPriceGraphInit(productOwner1, productOwner2, productBuyer);
+
+        //when
+        YearMonth startDate = YearMonth.now().minusMonths(2);
+        YearMonth endDate = YearMonth.now();
+
+        String twoMonthsAgo = LocalDateTime.now().minusMonths(2).format(DateTimeFormatter.ofPattern("yyyy-MM")); //2달전
+        String oneMonthsAgo = LocalDateTime.now().minusMonths(1).format(DateTimeFormatter.ofPattern("yyyy-MM")); //1달전
+        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM")); //이번달
+
+        // 채소류-배추-봄 (2달전 ~ 이번달)
+        List<SellerPricePerPeriodDTO> result1 = orderProductQueryRepositoryTemp
+                .findSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, null, 1662L, null), productOwner1.getId());
+
+        //식량작물-쌀-일반계(2달전 ~ 이번달)
+        List<SellerPricePerPeriodDTO> result2 = orderProductQueryRepositoryTemp
+                .findSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, null, 1613L, null), productOwner1.getId());
+
+        // 채소류-상추-적(2달전 ~ 이번달)
+        List<SellerPricePerPeriodDTO> result3 = orderProductQueryRepositoryTemp
+                .findSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, null, 1680L, null), productOwner1.getId());
+
+        //then
+        // 채소류-배추-봄 (2달전 ~ 이번달)
+        assertThat(result1.size()).isEqualTo(3);
+        assertThat(result1).extracting("totalPrice").containsExactly(0L, 6000L, 3000L);
+        assertThat(result1).extracting("date").containsExactly(twoMonthsAgo.toString(), oneMonthsAgo.toString(), now.toString());
+
+        //식량작물-쌀-일반계(2달전 ~ 이번달)
+        assertThat(result2.size()).isEqualTo(3);
+        assertThat(result2).extracting("totalPrice").containsExactly(0L, 0L, 0L);
+        assertThat(result2).extracting("date").containsExactly(twoMonthsAgo.toString(), oneMonthsAgo.toString(), now.toString());
+
+        // 채소류-상추-적 (2달전 ~ 이번달)
+        assertThat(result3.size()).isEqualTo(3);
+        assertThat(result3).extracting("totalPrice").containsExactly(0L, 0L, 0L);
+        assertThat(result3).extracting("date").containsExactly(twoMonthsAgo.toString(), oneMonthsAgo.toString(), now.toString());
+    }
+
+    @Test
+    @DisplayName("기간별 카테고리 특정 판매자 판매액, 카테고리 = itemId 기준")
+    void sellerTotalPriceByPeriodAndCategory3() throws Exception {
+        Address buyerAddress = createAddress("1122", "봉사산로", 12345, "동호수");
+        Seller productOwner1 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner1);
+        Seller productOwner2 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner2);
+
+        Buyer productBuyer = createBuyer("성호창32", "311111", "332222222", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productBuyer);
+
+        sellerTotalPriceGraphInit(productOwner1, productOwner2, productBuyer);
+
+        // 채소류-배추-고랭지-상품 결제 내역 추가
+        Product product1 = getProduct("고랭지상품2222222", 100000, "고랭지 배추입니다.", 477L, productOwner1); //채소류-배추-고랭지-상품
+
+        OrderProductParamDTO orderProductParam1 = new OrderProductParamDTO(2, product1.getId());
+        List<OrderProductParamDTO> orderParamList1 = addOrderProductParamDTO(orderProductParam1);
+        orderService.order(productBuyer.getId(), orderParamList1, buyerAddress);
+
+        //when
+        YearMonth startDate = YearMonth.now().minusMonths(2);
+        YearMonth endDate = YearMonth.now();
+
+        String twoMonthsAgo = LocalDateTime.now().minusMonths(2).format(DateTimeFormatter.ofPattern("yyyy-MM")); //2달전
+        String oneMonthsAgo = LocalDateTime.now().minusMonths(1).format(DateTimeFormatter.ofPattern("yyyy-MM")); //1달전
+        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM")); //이번달
+
+        // 채소류-배추 (2달전 ~ 이번달)
+        List<SellerPricePerPeriodDTO> result1 = orderProductQueryRepositoryTemp
+                .findSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, 211, null, null), productOwner1.getId());
+
+        //식량작물-쌀(2달전 ~ 이번달)
+        List<SellerPricePerPeriodDTO> result2 = orderProductQueryRepositoryTemp
+                .findSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, 111, null, null), productOwner1.getId());
+
+        //then
+        // 채소류-배추 (2달전 ~ 이번달)
+        assertThat(result1.size()).isEqualTo(3);
+        assertThat(result1).extracting("totalPrice").containsExactly(0L, 6000L, 203000L);
+        assertThat(result1).extracting("date").containsExactly(twoMonthsAgo.toString(), oneMonthsAgo.toString(), now.toString());
+
+        //식량작물-쌀(2달전 ~ 이번달)
+        assertThat(result2.size()).isEqualTo(3);
+        assertThat(result2).extracting("totalPrice").containsExactly(0L, 0L, 0L);
+        assertThat(result2).extracting("date").containsExactly(twoMonthsAgo.toString(), oneMonthsAgo.toString(), now.toString());
+
+    }
+
+    @Test
+    @DisplayName("기간별 카테고리 특정 판매자 판매액, 카테고리 = itemCategory 기준")
+    void sellerTotalPriceByPeriodAndCategory4() throws Exception {
+        Address buyerAddress = createAddress("1122", "봉사산로", 12345, "동호수");
+        Seller productOwner1 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner1);
+        Seller productOwner2 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner2);
+
+        Buyer productBuyer = createBuyer("성호창32", "311111", "332222222", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productBuyer);
+
+        sellerTotalPriceGraphInit(productOwner1, productOwner2, productBuyer);
+
+        //과일류-사과-홍옥-상품 결제 내역 추가
+        Product product1 = getProduct("사과상품2222222", 120000, "사과입니다.", 702L, productOwner1); // 과일류-사과-홍옥-상품
+
+        OrderProductParamDTO orderProductParam1 = new OrderProductParamDTO(1, product1.getId());
+        List<OrderProductParamDTO> orderParamList1 = addOrderProductParamDTO(orderProductParam1);
+        orderService.order(productBuyer.getId(), orderParamList1, buyerAddress);
+
+        // 채소류-배추-고랭지-상품 결제 내역 추가
+        Product product2 = getProduct("고랭지상품2222222", 100000, "고랭지 배추입니다.", 477L, productOwner1); //채소류-배추-고랭지-상품
+
+        OrderProductParamDTO orderProductParam2 = new OrderProductParamDTO(2, product2.getId());
+        List<OrderProductParamDTO> orderParamList2 = addOrderProductParamDTO(orderProductParam2);
+        orderService.order(productBuyer.getId(), orderParamList2, buyerAddress);
+
+        //when
+        YearMonth startDate = YearMonth.now().minusMonths(2);
+        YearMonth endDate = YearMonth.now();
+
+        String twoMonthsAgo = LocalDateTime.now().minusMonths(2).format(DateTimeFormatter.ofPattern("yyyy-MM")); //2달전
+        String oneMonthsAgo = LocalDateTime.now().minusMonths(1).format(DateTimeFormatter.ofPattern("yyyy-MM")); //1달전
+        String now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM")); //이번달
+
+        // 채소류(2달전 ~ 이번달)
+        List<SellerPricePerPeriodDTO> result1 = orderProductQueryRepositoryTemp
+                .findSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(200, null, null, null), productOwner1.getId());
+
+        //식량작물(2달전 ~ 이번달)
+        List<SellerPricePerPeriodDTO> result2 = orderProductQueryRepositoryTemp
+                .findSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(100, null, null, null), productOwner1.getId());
+
+        // 과일류(2달전 ~ 이번달)
+        List<SellerPricePerPeriodDTO> result3 = orderProductQueryRepositoryTemp
+                .findSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(400, null, null, null), productOwner1.getId());
+
+        // 모든 상품(2달전 ~ 이번달)
+        List<SellerPricePerPeriodDTO> result4 = orderProductQueryRepositoryTemp
+                .findSellerTotalPricePerPeriodAndCategory(startDate, endDate, new CategoryParamDTO(null, null, null, null), productOwner1.getId());
+
+        //then
+        // 채소류(2달전 ~ 이번달)
+        assertThat(result1.size()).isEqualTo(3);
+        assertThat(result1).extracting("totalPrice").containsExactly(0L, 6000L, 203000L);
+        assertThat(result1).extracting("date").containsExactly(twoMonthsAgo.toString(), oneMonthsAgo.toString(), now.toString());
+
+        //식량작물(2달전 ~ 이번달)
+        assertThat(result2.size()).isEqualTo(3);
+        assertThat(result2).extracting("totalPrice").containsExactly(0L, 0L, 0L);
+        assertThat(result2).extracting("date").containsExactly(twoMonthsAgo.toString(), oneMonthsAgo.toString(), now.toString());
+
+        // 과일류(2달전 ~ 이번달)
+        assertThat(result3.size()).isEqualTo(3);
+        assertThat(result3).extracting("totalPrice").containsExactly(0L, 0L, 120000L);
+        assertThat(result3).extracting("date").containsExactly(twoMonthsAgo.toString(), oneMonthsAgo.toString(), now.toString());
+
+        // 모든상품(2달전 ~ 이번달)
+        assertThat(result4.size()).isEqualTo(3);
+        assertThat(result4).extracting("totalPrice").containsExactly(0L, 6000L, 323000L);
+        assertThat(result4).extracting("date").containsExactly(twoMonthsAgo.toString(), oneMonthsAgo.toString(), now.toString());
+    }
+
     private void sellerTotalPriceGraphInit(Seller productOwner1, Seller productOwner2, Buyer productBuyer) {
         Address orderAddress = createAddress("1111", "봉사산로", 12345, "동호수");
 
-        Product product1 = getProduct("상품111", 1000, "상품입니다111", 474L, productOwner1); // 채소류-배추-봄-상품
-        Product product2 = getProduct("상품222", 2000, "상품입니다222", 475L, productOwner1); // 채소류-배추-봄-중품
+        Product product1 = getProduct("상품111", 1000, "상품입니다111", 474L, productOwner1); // 채소류-배추-상품
+        Product product2 = getProduct("상품222", 2000, "상품입니다222", 475L, productOwner1); // 채소류-봄-배추-봄-중품
         Product product3 = getProduct("상품111", 3000, "상품입니다333", 477L, productOwner2); // 채소류-배추-고랭지-상품
         Product product4 = getProduct("상품222", 4000, "상품입니다444", 480L, productOwner2); // 채소류 배추-가을-상품
 

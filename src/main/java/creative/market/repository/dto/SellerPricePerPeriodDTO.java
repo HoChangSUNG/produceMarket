@@ -9,12 +9,17 @@ import java.math.BigInteger;
 @Getter
 @Setter
 @NoArgsConstructor
-public class SellerTotalPricePerPeriodDTO {
+public class SellerPricePerPeriodDTO {
 
     private String date;
     private Long totalPrice;
 
-    public SellerTotalPricePerPeriodDTO(BigInteger totalPrice, String date) {
+    public SellerPricePerPeriodDTO(BigInteger totalPrice, String date) {
+        this.date = date;
+        this.totalPrice = totalPrice.longValue();
+    }
+
+    public SellerPricePerPeriodDTO(Long totalPrice, String date) {
         this.date = date;
         this.totalPrice = totalPrice.longValue();
     }
