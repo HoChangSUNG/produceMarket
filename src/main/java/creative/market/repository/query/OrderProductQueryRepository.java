@@ -3,6 +3,7 @@ package creative.market.repository.query;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import creative.market.domain.order.OrderProduct;
 import creative.market.domain.order.OrderStatus;
 import creative.market.domain.product.ProductImageType;
 import creative.market.repository.dto.*;
@@ -107,7 +108,7 @@ public class OrderProductQueryRepository {
                 .join(order.user, user)
                 .join(orderProduct.product, product)
                 .join(product.productImages, productImage)
-                .where(dateBetween(startDate, endDate), userEq(userId), productImage.type.eq(ProductImageType.SIGNATURE))
+                .where(dateBetween(startDate, endDate), userEq(userId), productImageType())
                 .orderBy(order.createdDate.asc())
                 .offset(offset)
                 .limit(pageSize)
@@ -122,7 +123,31 @@ public class OrderProductQueryRepository {
                 .join(order.user, user)
                 .join(orderProduct.product, product)
                 .join(product.productImages, productImage)
-                .where(dateBetween(startDate, endDate), userEq(userId), productImage.type.eq(ProductImageType.SIGNATURE))
+                .where(dateBetween(startDate, endDate), userEq(userId), productImageType())
+                .fetchOne();
+    }
+
+    public List<SaleHistoryRes> findSaleHistoryPerPeriod(LocalDateTime startDate, LocalDateTime endDate, Long userId, int offset, int limit) {
+        return queryFactory
+                .select(new QSaleHistoryRes(product.id, orderProduct.count, orderProduct.price, product.name, order.createdDate, order.address.jibun, order.address.road,order.address.detailAddress, order.address.zipcode, user.phoneNumber, productImage.path))
+                .from(orderProduct)
+                .join(orderProduct.product, product)
+                .join(orderProduct.order, order)
+                .join(order.user, user)
+                .join(product.productImages, productImage)
+                .where(dateBetween(startDate, endDate), orderStatus(), product.user.id.eq(userId), productImageType())
+                .orderBy(order.createdDate.asc())
+                .offset(offset)
+                .limit(limit)
+                .fetch();
+    }
+
+    public Long findSaleHistoryPerPeriodCount(LocalDateTime startDate, LocalDateTime endDate, Long userId) {
+        return queryFactory
+                .select(orderProduct.count())
+                .from(orderProduct)
+                .join(orderProduct.product, product)
+                .where(dateBetween(startDate, endDate), orderStatus(), product.user.id.eq(userId))
                 .fetchOne();
     }
 
@@ -156,5 +181,9 @@ public class OrderProductQueryRepository {
 
     private BooleanExpression orderStatus() {
         return orderProduct.status.eq(OrderStatus.ORDER);
+    }
+
+    private BooleanExpression productImageType() {
+        return productImage.type.eq(ProductImageType.SIGNATURE);
     }
 }
