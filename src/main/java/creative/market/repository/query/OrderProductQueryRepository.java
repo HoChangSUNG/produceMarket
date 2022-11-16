@@ -102,22 +102,24 @@ public class OrderProductQueryRepository {
     }
 
     public List<SellerPricePerPeriodDTO> findAllSellerTotalPricePerPeriodAndCategory(YearMonth startDate, YearMonth endDate, CategoryParamDTO categoryParamDTO) {//기간별 판매액 비교(카테고리별 전체 판매자 기간별 총 금액)
-//        String sql = "select cast(ifNull(sum(op.price * op.count),0) as SIGNED) as totalPrice, month_year_tb.ym as date" +
-//                " from (select opp.price as price, opp.count as count, o.created_date as created_date" +
-//                "    from order_product opp " +
-//                "    join orders o on opp.order_id = o.order_id " +
-//                "    join product p on opp.product_id = p.product_id" +
-//                "    join kind_grade kg on p.kind_grade_id = kg.kind_grade_id" +
-//                "    join kind k on kg.kind_id = k.kind_id" +
-//                "    join item i on k.item_code = i.item_code" +
-//                "    join item_category ic on i.item_category_code = ic.item_category_code" +
-//                "    where opp.status = 'ORDER' 카테고리_dynamicQuery ) op" +
-//                " right outer join  year_month_data" +
-//                " as month_year_tb on date_format(op.created_date,'%Y-%m') = month_year_tb.ym" +
-//                " where month_year_tb.ym>=:startDate and  month_year_tb.ym<=:endDate" +
-//                " group by month_year_tb.ym" +
-//                " order by month_year_tb.ym";
+/*
 
+        String sql = "select cast(ifNull(sum(op.price * op.count),0) as SIGNED) as totalPrice, month_year_tb.ym as date" +
+                " from (select opp.price as price, opp.count as count, o.created_date as created_date" +
+                "    from order_product opp " +
+                "    join orders o on opp.order_id = o.order_id " +
+                "    join product p on opp.product_id = p.product_id" +
+                "    join kind_grade kg on p.kind_grade_id = kg.kind_grade_id" +
+                "    join kind k on kg.kind_id = k.kind_id" +
+                "    join item i on k.item_code = i.item_code" +
+                "    join item_category ic on i.item_category_code = ic.item_category_code" +
+                "    where opp.status = 'ORDER' 카테고리_dynamicQuery ) op" +
+                " right outer join  year_month_data" +
+                " as month_year_tb on date_format(op.created_date,'%Y-%m') = month_year_tb.ym" +
+                " where month_year_tb.ym>=:startDate and  month_year_tb.ym<=:endDate" +
+                " group by month_year_tb.ym" +
+                " order by month_year_tb.ym";
+*/
         StringBuilder sb = new StringBuilder();
         String sql = sb.append("select cast(ifNull(sum(op.price * op.count),0) as SIGNED) as totalPrice, month_year_tb.ym as date")
                 .append(" from (select opp.price as price, opp.count as count, o.created_date as created_date")
@@ -144,22 +146,24 @@ public class OrderProductQueryRepository {
     }
 
     public List<SellerPricePerPeriodDTO> findSellerTotalPricePerPeriodAndCategory(YearMonth startDate, YearMonth endDate, CategoryParamDTO categoryParamDTO, Long userId) {//기간별 판매액 비교(카테고리별 특정 판매자 기간별 총 금액)
-//        String sql = "select cast(ifNull(sum(op.price * op.count),0) as SIGNED) as totalPrice, month_year_tb.ym as date" +
-//                "from (select opp.price as price, opp.count as count, o.created_date as created_date " +
-//                "    from order_product opp " +
-//                "    join orders o on opp.order_id = o.order_id " +
-//                "    join product p on opp.product_id = p.product_id" +
-//                "    join user u on p.user_id = u.user_id" +
-//                "    join kind_grade kg on p.kind_grade_id = kg.kind_grade_id" +
-//                "    join kind k on kg.kind_id = k.kind_id" +
-//                "    join item i on k.item_code = i.item_code" +
-//                "    join item_category ic on i.item_category_code = ic.item_category_code" +
-//                "    where opp.status = 'ORDER' and u.user_id =:userId 카테고리_dynamicQuery ) op" +
-//                " right outer join  year_month_data" +
-//                " as month_year_tb on date_format(op.created_date,'%Y-%m') = month_year_tb.ym" +
-//                " where month_year_tb.ym>='2022-01' and  month_year_tb.ym<='2022-11'" +
-//                " group by month_year_tb.ym" +
-//                " order by month_year_tb.ym";
+
+/*        String sql = "select cast(ifNull(sum(op.price * op.count),0) as SIGNED) as totalPrice, month_year_tb.ym as date" +
+                "from (select opp.price as price, opp.count as count, o.created_date as created_date " +
+                "    from order_product opp " +
+                "    join orders o on opp.order_id = o.order_id " +
+                "    join product p on opp.product_id = p.product_id" +
+                "    join user u on p.user_id = u.user_id" +
+                "    join kind_grade kg on p.kind_grade_id = kg.kind_grade_id" +
+                "    join kind k on kg.kind_id = k.kind_id" +
+                "    join item i on k.item_code = i.item_code" +
+                "    join item_category ic on i.item_category_code = ic.item_category_code" +
+                "    where opp.status = 'ORDER' and u.user_id =:userId 카테고리_dynamicQuery ) op" +
+                " right outer join  year_month_data" +
+                " as month_year_tb on date_format(op.created_date,'%Y-%m') = month_year_tb.ym" +
+                " where month_year_tb.ym>='2022-01' and  month_year_tb.ym<='2022-11'" +
+                " group by month_year_tb.ym" +
+                " order by month_year_tb.ym";
+*/
 
         StringBuilder sb = new StringBuilder();
         String sql = sb.append("select cast(ifNull(sum(op.price * op.count),0) as SIGNED) as totalPrice, month_year_tb.ym as date")
@@ -186,6 +190,75 @@ public class OrderProductQueryRepository {
                 .setParameter("userId", userId);
 
         return jpaResultMapper.list(query, SellerPricePerPeriodDTO.class);
+    }
+
+    public List<SellerPercentileDTO> findSellerTotalPricePercentileByPeriodAndCategory(YearMonth startDate, YearMonth endDate, CategoryParamDTO categoryParamDTO, Long userId) {// 기간별 해당 판매자 판매액 백분위 그래프
+/*
+
+        select (1 - op.percent_ranking)*100 as percentile, ym as date
+        from(
+                select ym_seller.user_id,ifNull(sum(count*price),0) total_price, ym, PERCENT_RANK() OVER (partition by ym ORDER BY ifNull(sum(count*price),0) desc) AS percent_ranking
+                from(
+                        select o.user_id as user_id, op.price as price, op.count as count, date_format(o.created_date,'%Y-%m')as date
+                        from order_product op
+                        join orders o on op.order_id = o.order_id
+                        join product p on op.product_id = p.product_id
+                        join user u on p.user_id = u.user_id
+                        join kind_grade kg on p.kind_grade_id = kg.kind_grade_id
+                        join kind k on kg.kind_id = k.kind_id
+                        join item i on k.item_code = i.item_code
+                        join item_category ic on i.item_category_code = ic.item_category_code
+                        where op.status = 'ORDER'
+                ) op
+                right join
+                (
+                      select ym, user_id from year_month_data
+                      cross join user
+                      where user.dtype='Seller' and '2022-07'<=ym and  ym <='2022-11'
+                ) ym_seller
+                on op.user_id=ym_seller.user_id and op.date = ym_seller.ym
+                group by ym_seller.user_id, ym
+                ) op
+        where op.user_id = 2
+        order by date;
+*/
+
+        StringBuilder sb = new StringBuilder();
+        String sql = sb
+                .append("select (1 - op.percent_ranking)*100 as percentile, ym as date ")
+                .append(" from(")
+                .append("   select ym_seller.user_id, ifNull(sum(count*price),0) as total_price, ym, PERCENT_RANK() OVER (partition by ym ORDER BY ifNull(sum(count*price),0) desc) AS percent_ranking")
+                .append("   from(")
+                .append("       select o.user_id as user_id, op.price as price, op.count as count, date_format(o.created_date,'%Y-%m')as date")
+                .append("       from order_product op ")
+                .append("           join orders o on op.order_id = o.order_id ")
+                .append("           join product p on op.product_id = p.product_id")
+                .append("           join user u on p.user_id = u.user_id")
+                .append("           join kind_grade kg on p.kind_grade_id = kg.kind_grade_id")
+                .append("           join kind k on kg.kind_id = k.kind_id")
+                .append("           join item i on k.item_code = i.item_code")
+                .append("           join item_category ic on i.item_category_code = ic.item_category_code")
+                .append("       where op.status = 'ORDER'").append(categoryDynamic(categoryParamDTO))
+                .append("   ) op")
+                .append("   right join ")
+                .append("   (")
+                .append("       select ym, user_id from year_month_data")
+                .append("       cross join user")
+                .append("       where user.dtype='Seller' and :startDate <= ym and  ym <= :endDate")
+                .append("   ) ym_seller")
+                .append("   on op.user_id=ym_seller.user_id and op.date = ym_seller.ym")
+                .append("   group by ym_seller.user_id, ym")
+                .append("   ) op")
+                .append(" where op.user_id =:userId")
+                .append(" order by date")
+                .toString();
+
+        Query query = em.createNativeQuery(sql)
+                .setParameter("startDate", startDate.toString())
+                .setParameter("endDate", endDate.toString())
+                .setParameter("userId", userId);
+        return jpaResultMapper.list(query, SellerPercentileDTO.class);
+
     }
 
     private String categoryDynamic(CategoryParamDTO categoryParamDTO) {
