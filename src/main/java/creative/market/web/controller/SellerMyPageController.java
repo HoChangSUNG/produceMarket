@@ -4,10 +4,9 @@ import creative.market.aop.LoginCheck;
 import creative.market.aop.UserType;
 import creative.market.argumentresolver.Login;
 import creative.market.repository.ProductRepository;
-import creative.market.repository.dto.BuyerTotalPricePerPeriodDTO;
 import creative.market.repository.dto.CategoryParamDTO;
+import creative.market.repository.dto.SellerPercentileDTO;
 import creative.market.repository.dto.SellerPricePerPeriodDTO;
-import creative.market.repository.order.OrderProductRepository;
 import creative.market.repository.query.OrderProductQueryRepository;
 import creative.market.repository.user.SellerRepository;
 import creative.market.service.dto.LoginUserDTO;
@@ -16,8 +15,6 @@ import creative.market.util.PagingUtils;
 import creative.market.web.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -91,6 +88,29 @@ public class SellerMyPageController {
         return new ResultRes<>(convertToPriceCompareByPeriodDTO(allSellerAvgPricePerPeriodList,sellerTotalPricePerPeriodList));
     }
 
+    @GetMapping("/order-price-percentile-statistics")
+    @LoginCheck(type = {UserType.SELLER})
+    public ResultRes getOrderPricePercentileByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq, CategoryParamDTO categoryParamDTO, @Login LoginUserDTO loginUserDTO) {
+        YearMonth startDate = yearMonthPeriodReq.getStartDate();
+        YearMonth endDate = yearMonthPeriodReq.getEndDate();
+
+        checkRightPeriod(startDate, endDate);
+
+        List<SellerPercentileDTO> sellerPercentileList = orderProductQueryRepository.findSellerTotalPricePercentileByPeriodAndCategory(startDate, endDate, categoryParamDTO, loginUserDTO.getId());
+
+        return new ResultRes<>(convertToOrderPricePercentileGraphByPeriodDTO(sellerPercentileList));
+    }
+
+    private OrderPricePercentileGraphByPeriodRes convertToOrderPricePercentileGraphByPeriodDTO(List<SellerPercentileDTO> sellerPercentileList) {
+        List<String> dateList = sellerPercentileList.stream()
+                .map(SellerPercentileDTO::getDate)
+                .collect(Collectors.toList());
+        List<String> percentileList = sellerPercentileList.stream()
+                .map(SellerPercentileDTO::getPercentile)
+                .collect(Collectors.toList());
+        return new OrderPricePercentileGraphByPeriodRes(dateList,percentileList);
+    }
+
     private PriceCompareByPeriodRes convertToPriceCompareByPeriodDTO(List<SellerPricePerPeriodDTO> allSellerAvgPriceList, List<SellerPricePerPeriodDTO> sellerPriceList) {
         List<String> dateList = allSellerAvgPriceList.stream()
                 .map(SellerPricePerPeriodDTO::getDate)
@@ -117,7 +137,6 @@ public class SellerMyPageController {
                     .collect(Collectors.toList());
         }
     }
-
 
     private void checkRightPeriod(YearMonth startDate, YearMonth endDate) {
         if (!isRightPeriod(startDate, endDate)) {
