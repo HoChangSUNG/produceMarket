@@ -199,7 +199,7 @@ public class OrderProductQueryRepository {
         from(
                 select ym_seller.user_id,ifNull(sum(count*price),0) total_price, ym, PERCENT_RANK() OVER (partition by ym ORDER BY ifNull(sum(count*price),0) desc) AS percent_ranking
                 from(
-                        select o.user_id as user_id, op.price as price, op.count as count, date_format(o.created_date,'%Y-%m')as date
+                        select p.user_id as user_id, op.price as price, op.count as count, date_format(o.created_date,'%Y-%m')as date
                         from order_product op
                         join orders o on op.order_id = o.order_id
                         join product p on op.product_id = p.product_id
@@ -229,7 +229,7 @@ public class OrderProductQueryRepository {
                 .append(" from(")
                 .append("   select ym_seller.user_id, ifNull(sum(count*price),0) as total_price, ym, PERCENT_RANK() OVER (partition by ym ORDER BY ifNull(sum(count*price),0) desc) AS percent_ranking")
                 .append("   from(")
-                .append("       select o.user_id as user_id, op.price as price, op.count as count, date_format(o.created_date,'%Y-%m')as date")
+                .append("       select p.user_id as user_id, op.price as price, op.count as count, date_format(o.created_date,'%Y-%m')as date")
                 .append("       from order_product op ")
                 .append("           join orders o on op.order_id = o.order_id ")
                 .append("           join product p on op.product_id = p.product_id")
