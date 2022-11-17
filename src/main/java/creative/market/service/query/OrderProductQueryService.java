@@ -5,6 +5,7 @@ import creative.market.exception.NotExistOrder;
 import creative.market.repository.dto.*;
 import creative.market.repository.order.OrderProductRepository;
 import creative.market.repository.query.OrderProductQueryRepository;
+import creative.market.service.dto.OrderCountCompareByPeriodRes;
 import creative.market.service.dto.OrderHistoryDTO;
 import creative.market.service.dto.PriceCompareByPeriodRes;
 import creative.market.service.dto.OrderPricePercentileGraphByPeriodRes;
@@ -72,6 +73,20 @@ public class OrderProductQueryService {
         return convertToOrderPricePercentileGraphByPeriod(sellerPricePercentile);
 
     }
+
+    public OrderCountCompareByPeriodRes findSellerTotalOrderCountCompareByPeriod(YearMonth startDate, YearMonth endDate, CategoryParamDTO categoryParamDTO, Long sellerId) { // 기간별 판매횟수 비교 그래프
+
+        checkOrderProductExist(sellerId); // 특정 판매자의 상품이 판매된 적이 있는지
+
+        //전체 판매자
+        List<SellerOrderCountPerPeriodDTO> allSellerTotalOrderCount = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParamDTO);
+        List<SellerOrderCountPerPeriodDTO> allSellerAvgOrderCountPerPeriodList = convertToTotalSellerAvgOrderCount(allSellerTotalOrderCount, startDate, endDate, categoryParamDTO);
+
+        //특정 판매자
+        List<SellerOrderCountPerPeriodDTO> sellerTotalOrderCountPerPeriodList = orderProductQueryRepository.findSellerTotalOrderCountPerPeriodAndCategory(startDate, endDate, categoryParamDTO, sellerId);
+        return convertToOrderCountCompareByPeriodDTO(allSellerAvgOrderCountPerPeriodList, sellerTotalOrderCountPerPeriodList);
+    }
+
     private void checkOrderProductExist(Long sellerId) {// 특정 판매자의 상품이 판매된 적이 있는지
         Long count = orderProductRepository.findOrderProductCountBySeller(sellerId);
         if (count == 0) {
@@ -121,5 +136,40 @@ public class OrderProductQueryService {
                 .collect(Collectors.toList());
         return new OrderPricePercentileGraphByPeriodRes(dateList, percentileList);
     }
+
+
+    private OrderCountCompareByPeriodRes convertToOrderCountCompareByPeriodDTO(List<SellerOrderCountPerPeriodDTO> allSellerAvgOrderCountList, List<SellerOrderCountPerPeriodDTO> sellerOrderCountList) {
+        List<String> dateList = allSellerAvgOrderCountList.stream()
+                .map(SellerOrderCountPerPeriodDTO::getDate)
+                .collect(Collectors.toList());
+        List<Long> avgList = allSellerAvgOrderCountList.stream()
+                .map(SellerOrderCountPerPeriodDTO::getTotalCount)
+                .collect(Collectors.toList());
+        List<Long> sellerOrderCounts = sellerOrderCountList.stream()
+                .map(SellerOrderCountPerPeriodDTO::getTotalCount)
+                .collect(Collectors.toList());
+
+        return new OrderCountCompareByPeriodRes(dateList, sellerOrderCounts, avgList);
+    }
+
+    private List<SellerOrderCountPerPeriodDTO> convertToTotalSellerAvgOrderCount(List<SellerOrderCountPerPeriodDTO> allSellerOrderCountList, YearMonth startDate, YearMonth endDate, CategoryParamDTO categoryParamDTO) {
+        List<SellerOrderCountPerPeriodDTO> sellerOrderCountPerPeriodDTOS = new ArrayList<>();
+        List<SellerCountByPeriodDTO> countByPeriod = orderProductQueryRepository.findSellerCountOrderProductExistByPeriod(startDate, endDate, categoryParamDTO);
+
+        for (int i = 0; i < countByPeriod.size(); i++) {
+            Long sellerCount = countByPeriod.get(i).getCount(); // 월별 판매자 수
+            String date = countByPeriod.get(i).getDate(); // 년월  (2020-01)
+            Long totalOrderCount = allSellerOrderCountList.get(i).getTotalCount(); // 월별 카테고리별 총 판매 횟수
+
+            if (sellerCount == 0) {
+                sellerOrderCountPerPeriodDTOS.add(new SellerOrderCountPerPeriodDTO(0L, date));
+            } else {
+                sellerOrderCountPerPeriodDTOS.add(new SellerOrderCountPerPeriodDTO(totalOrderCount / sellerCount, date));
+            }
+        }
+        return sellerOrderCountPerPeriodDTOS;
+    }
+
+
 
 }

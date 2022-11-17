@@ -70,7 +70,7 @@ public class SellerMyPageController {
     @GetMapping("/order-price-statistics")
     @LoginCheck(type = {UserType.SELLER})
     public ResultRes getOrderPriceByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq, CategoryParamDTO categoryParamDTO,
-                                           @Login LoginUserDTO loginUserDTO) {
+                                           @Login LoginUserDTO loginUserDTO) { // 기간별 판매액 비교 그래프
         YearMonth startDate = yearMonthPeriodReq.getStartDate();
         YearMonth endDate = yearMonthPeriodReq.getEndDate();
 
@@ -82,13 +82,25 @@ public class SellerMyPageController {
     @GetMapping("/order-price-percentile-statistics")
     @LoginCheck(type = {UserType.SELLER})
     public ResultRes getOrderPricePercentileByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq, CategoryParamDTO categoryParamDTO,
-                                                     @Login LoginUserDTO loginUserDTO) {
+                                                     @Login LoginUserDTO loginUserDTO) { // 기간별 해당 판매자 판매액 백분위 그래프
         YearMonth startDate = yearMonthPeriodReq.getStartDate();
         YearMonth endDate = yearMonthPeriodReq.getEndDate();
 
         checkRightPeriod(startDate, endDate);
 
         return new ResultRes<>(orderProductQueryService.findSellerPercentileList(startDate,endDate,categoryParamDTO, loginUserDTO.getId()));
+    }
+
+    @GetMapping("/order-count-statistics")
+    @LoginCheck(type = {UserType.SELLER})
+    public ResultRes getOrderCountByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq, CategoryParamDTO categoryParamDTO,
+                                           @Login LoginUserDTO loginUserDTO) { // 기간별 판매횟수 비교 그래프
+        YearMonth startDate = yearMonthPeriodReq.getStartDate();
+        YearMonth endDate = yearMonthPeriodReq.getEndDate();
+
+        checkRightPeriod(startDate, endDate);
+
+        return new ResultRes<>(orderProductQueryService.findSellerTotalOrderCountCompareByPeriod(startDate,endDate,categoryParamDTO,loginUserDTO.getId()));
     }
 
     private void checkRightPeriod(YearMonth startDate, YearMonth endDate) {
