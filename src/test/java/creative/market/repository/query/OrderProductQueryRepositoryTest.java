@@ -8,10 +8,7 @@ import creative.market.domain.user.Buyer;
 import creative.market.domain.user.Seller;
 import creative.market.repository.ProductRepository;
 import creative.market.repository.category.KindGradeRepository;
-import creative.market.repository.dto.BuyerTotalPricePerPeriodDTO;
-import creative.market.repository.dto.CategoryParamDTO;
-import creative.market.repository.dto.SellerAndTotalPricePerCategoryDTO;
-import creative.market.repository.dto.SellerPricePerPeriodDTO;
+import creative.market.repository.dto.*;
 import creative.market.repository.order.OrderRepository;
 import creative.market.repository.user.SellerRepository;
 import creative.market.service.OrderService;
@@ -276,7 +273,7 @@ class OrderProductQueryRepositoryTest {
     }
 
     @Test
-    @DisplayName("기간별 카테고리 전체 판매자 판매액, 카테고리 = kindGradeId 기준")
+    @DisplayName("기간별 카테고리 전체 판매자 판매액, 카테고리 = kindGrade 기준")
     void allSellerTotalPriceByPeriodAndCategory1() throws Exception {
         Address buyerAddress = createAddress("1122", "봉사산로", 12345, "동호수");
         Seller productOwner1 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
@@ -327,7 +324,7 @@ class OrderProductQueryRepositoryTest {
     }
 
     @Test
-    @DisplayName("기간별 카테고리 전체 판매자 판매액, 카테고리 = kindId 기준")
+    @DisplayName("기간별 카테고리 전체 판매자 판매액, 카테고리 = kind 기준")
     void allSellerTotalPriceByPeriodAndCategory2() throws Exception {
         Address buyerAddress = createAddress("1122", "봉사산로", 12345, "동호수");
         Seller productOwner1 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
@@ -378,7 +375,7 @@ class OrderProductQueryRepositoryTest {
     }
 
     @Test
-    @DisplayName("기간별 카테고리 전체 판매자 판매액, 카테고리 = itemId 기준")
+    @DisplayName("기간별 카테고리 전체 판매자 판매액, 카테고리 = item 기준")
     void allSellerTotalPriceByPeriodAndCategory3() throws Exception {
         Address buyerAddress = createAddress("1122", "봉사산로", 12345, "동호수");
         Seller productOwner1 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
@@ -497,7 +494,7 @@ class OrderProductQueryRepositoryTest {
     }
 
     @Test
-    @DisplayName("기간별 카테고리 특정 판매자 판매액, 카테고리 = kindGradeId 기준")
+    @DisplayName("기간별 카테고리 특정 판매자 판매액, 카테고리 = kindGrade 기준")
     void sellerTotalPriceByPeriodAndCategory1() throws Exception {
         Address buyerAddress = createAddress("1122", "봉사산로", 12345, "동호수");
         Seller productOwner1 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
@@ -548,7 +545,7 @@ class OrderProductQueryRepositoryTest {
     }
 
     @Test
-    @DisplayName("기간별 카테고리 특정 판매자 판매액, 카테고리 = kindId 기준")
+    @DisplayName("기간별 카테고리 특정 판매자 판매액, 카테고리 = kind 기준")
     void sellerTotalPriceByPeriodAndCategory2() throws Exception {
         Address buyerAddress = createAddress("1122", "봉사산로", 12345, "동호수");
         Seller productOwner1 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
@@ -599,7 +596,7 @@ class OrderProductQueryRepositoryTest {
     }
 
     @Test
-    @DisplayName("기간별 카테고리 특정 판매자 판매액, 카테고리 = itemId 기준")
+    @DisplayName("기간별 카테고리 특정 판매자 판매액, 카테고리 = item 기준")
     void sellerTotalPriceByPeriodAndCategory3() throws Exception {
         Address buyerAddress = createAddress("1122", "봉사산로", 12345, "동호수");
         Seller productOwner1 = createSeller("강대현2", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
@@ -722,6 +719,436 @@ class OrderProductQueryRepositoryTest {
         assertThat(result4).extracting("date").containsExactly(twoMonthsAgo.toString(), oneMonthsAgo.toString(), now.toString());
     }
 
+    @Test
+    @DisplayName("기간별 카테고리 전체 판매자 판매횟수, 카테고리 = kindGrade 기준")
+    void allSellerTotalCountByPeriodAndCategory1() throws Exception{
+        //given
+        Address buyerAddress = createAddress("11ㅈ22", "봉사산로ㅈㅈ", 12345, "동호ㅈ수");
+        Seller productOwner1 = createSeller("김시관1", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner1);
+        Seller productOwner2 = createSeller("김시관2", "22222222", "11sdfw", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner2);
+
+        Buyer productBuyer = createBuyer("성호창32", "311111", "332222222", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productBuyer);
+
+        YearMonth startDate = YearMonth.now().minusMonths(7);
+        YearMonth endDate = YearMonth.now().minusMonths(5);
+
+        String sevenMonthsAgo = LocalDateTime.now().minusMonths(7).format(DateTimeFormatter.ofPattern("yyyy-MM")); //7달전
+        String sixMonthsAgo = LocalDateTime.now().minusMonths(6).format(DateTimeFormatter.ofPattern("yyyy-MM")); //6달전
+        String fiveMonthsAgo = LocalDateTime.now().minusMonths(5).format(DateTimeFormatter.ofPattern("yyyy-MM")); //5달전
+
+        // 초기 값
+        sellerOrderCountGraphInit(productOwner1,productOwner2,productBuyer);
+
+        //when
+        CategoryParamDTO categoryParam1 = new CategoryParamDTO(null, null, null, 468L); //식량작물-감자-수미-상품
+        CategoryParamDTO categoryParam2 = new CategoryParamDTO(null, null, null, 469L); //식량작물-감자-수미-중품
+        CategoryParamDTO categoryParam3 = new CategoryParamDTO(null, null, null, 470L); //식량작물-감자-수미-하품
+        CategoryParamDTO categoryParam4 = new CategoryParamDTO(null, null, null, 471L); //식량작물-감자-대지마-상품
+        CategoryParamDTO categoryParam5 = new CategoryParamDTO(null, null, null, 669L); //특용작물-참깨-백색(국산)-상품
+        CategoryParamDTO categoryParam6 = new CategoryParamDTO(null, null, null, 432L); //식량작물-쌀-일반계-상품
+
+
+        List<SellerOrderCountPerPeriodDTO> result1 = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParam1);
+        List<SellerOrderCountPerPeriodDTO> result2 = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParam2);
+        List<SellerOrderCountPerPeriodDTO> result3 = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParam3);
+        List<SellerOrderCountPerPeriodDTO> result4 = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParam4);
+        List<SellerOrderCountPerPeriodDTO> result5 = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParam5);
+        List<SellerOrderCountPerPeriodDTO> result6 = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParam6);
+
+        //then
+        //식량작물-감자-수미-상품
+        assertThat(result1.size()).isEqualTo(3);
+        assertThat(result1).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result1).extracting("totalCount").containsExactly(0L,5L,3L);
+
+        //식량작물-감자-수미-중품
+        assertThat(result2.size()).isEqualTo(3);
+        assertThat(result2).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result2).extracting("totalCount").containsExactly(0L,0L,0L);
+
+        //식량작물-감자-수미-하품
+        assertThat(result3.size()).isEqualTo(3);
+        assertThat(result3).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result3).extracting("totalCount").containsExactly(0L,4L,3L);
+
+        //식량작물-감자-대지마-상품
+        assertThat(result4.size()).isEqualTo(3);
+        assertThat(result4).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result4).extracting("totalCount").containsExactly(0L,5L,4L);
+
+        //특용작물-참깨-백색(국산)-상품
+        assertThat(result5.size()).isEqualTo(3);
+        assertThat(result5).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result5).extracting("totalCount").containsExactly(0L,6L,3L);
+
+        //식량작물-쌀-일반계-상품
+        assertThat(result6.size()).isEqualTo(3);
+        assertThat(result6).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result6).extracting("totalCount").containsExactly(0L,11L,11L);
+    }
+
+    @Test
+    @DisplayName("기간별 카테고리 전체 판매자 판매횟수, 카테고리 = kind 기준")
+    void allSellerTotalCountByPeriodAndCategory2() throws Exception{
+        //given
+        Address buyerAddress = createAddress("11ㅈ22", "봉사산로ㅈㅈ", 12345, "동호ㅈ수");
+        Seller productOwner1 = createSeller("김시관1", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner1);
+        Seller productOwner2 = createSeller("김시관2", "22222222", "11sdfw", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner2);
+
+        Buyer productBuyer = createBuyer("성호창32", "311111", "332222222", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productBuyer);
+
+        YearMonth startDate = YearMonth.now().minusMonths(7);
+        YearMonth endDate = YearMonth.now().minusMonths(5);
+
+        String sevenMonthsAgo = LocalDateTime.now().minusMonths(7).format(DateTimeFormatter.ofPattern("yyyy-MM")); //7달전
+        String sixMonthsAgo = LocalDateTime.now().minusMonths(6).format(DateTimeFormatter.ofPattern("yyyy-MM")); //6달전
+        String fiveMonthsAgo = LocalDateTime.now().minusMonths(5).format(DateTimeFormatter.ofPattern("yyyy-MM")); //5달전
+
+        // 초기 값
+        sellerOrderCountGraphInit(productOwner1,productOwner2,productBuyer);
+
+        //when
+        CategoryParamDTO categoryParam1 = new CategoryParamDTO(null, null, 1652L, null); //식량작물-감자-수미
+        CategoryParamDTO categoryParam2 = new CategoryParamDTO(null, null, 1655L, null); //식량작물-감자-대지마
+        CategoryParamDTO categoryParam3 = new CategoryParamDTO(null, null, 1874L, null); //특용작물-참깨-중국
+
+
+        List<SellerOrderCountPerPeriodDTO> result1 = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParam1 );
+        List<SellerOrderCountPerPeriodDTO> result2 = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParam2);
+        List<SellerOrderCountPerPeriodDTO> result3 = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParam3 );
+
+        //then
+        //식량작물-감자-수미
+        assertThat(result1.size()).isEqualTo(3);
+        assertThat(result1).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result1).extracting("totalCount").containsExactly(0L,9L,6L);
+
+        //식량작물-감자-대지마
+        assertThat(result2.size()).isEqualTo(3);
+        assertThat(result2).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result2).extracting("totalCount").containsExactly(0L,5L,4L);
+
+        //특용작물-참깨-중국
+        assertThat(result3.size()).isEqualTo(3);
+        assertThat(result3).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result3).extracting("totalCount").containsExactly(0L,0L,0L);
+    }
+
+    @Test
+    @DisplayName("기간별 카테고리 전체 판매자 판매횟수, 카테고리 = item 기준")
+    void allSellerTotalCountByPeriodAndCategory3() throws Exception{
+        //given
+        Address buyerAddress = createAddress("11ㅈ22", "봉사산로ㅈㅈ", 12345, "동호ㅈ수");
+        Seller productOwner1 = createSeller("김시관1", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner1);
+        Seller productOwner2 = createSeller("김시관2", "22222222", "11sdfw", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner2);
+
+        Buyer productBuyer = createBuyer("성호창32", "311111", "332222222", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productBuyer);
+
+        YearMonth startDate = YearMonth.now().minusMonths(7);
+        YearMonth endDate = YearMonth.now().minusMonths(5);
+
+        String sevenMonthsAgo = LocalDateTime.now().minusMonths(7).format(DateTimeFormatter.ofPattern("yyyy-MM")); //7달전
+        String sixMonthsAgo = LocalDateTime.now().minusMonths(6).format(DateTimeFormatter.ofPattern("yyyy-MM")); //6달전
+        String fiveMonthsAgo = LocalDateTime.now().minusMonths(5).format(DateTimeFormatter.ofPattern("yyyy-MM")); //5달전
+
+        // 초기 값
+        sellerOrderCountGraphInit(productOwner1,productOwner2,productBuyer);
+
+        //when
+        CategoryParamDTO categoryParam1 = new CategoryParamDTO(null, 152, null, null); //식량작물-감자
+        CategoryParamDTO categoryParam2 = new CategoryParamDTO(null, 312, null, null); //특용작물-참깨
+        CategoryParamDTO categoryParam3 = new CategoryParamDTO(null, 111, null, null); //식량작물-쌀
+        CategoryParamDTO categoryParam4 = new CategoryParamDTO(null, 112, null, null); //식량작물-찹쌀
+
+        List<SellerOrderCountPerPeriodDTO> result1 = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParam1);
+        List<SellerOrderCountPerPeriodDTO> result2 = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParam2);
+        List<SellerOrderCountPerPeriodDTO> result3 = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParam3);
+        List<SellerOrderCountPerPeriodDTO> result4 = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParam4);
+
+        //then
+        //식량작물-감자
+        assertThat(result1.size()).isEqualTo(3);
+        assertThat(result1).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result1).extracting("totalCount").containsExactly(0L,14L,10L);
+
+        //특용작물-참깨
+        assertThat(result2.size()).isEqualTo(3);
+        assertThat(result2).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result2).extracting("totalCount").containsExactly(0L,6L,3L);
+
+        //식량작물-쌀
+        assertThat(result3.size()).isEqualTo(3);
+        assertThat(result3).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result3).extracting("totalCount").containsExactly(0L,11L,11L);
+
+        ///식량작물-찹쌀
+        assertThat(result4.size()).isEqualTo(3);
+        assertThat(result4).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result4).extracting("totalCount").containsExactly(0L,0L,0L);
+    }
+
+    @Test
+    @DisplayName("기간별 카테고리 전체 판매자 판매횟수, 카테고리 = itemCategory 기준")
+    void allSellerTotalCountByPeriodAndCategory4() throws Exception{
+        //given
+        Address buyerAddress = createAddress("11ㅈ22", "봉사산로ㅈㅈ", 12345, "동호ㅈ수");
+        Seller productOwner1 = createSeller("김시관1", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner1);
+        Seller productOwner2 = createSeller("김시관2", "22222222", "11sdfw", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner2);
+
+        Buyer productBuyer = createBuyer("성호창32", "311111", "332222222", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productBuyer);
+
+        YearMonth startDate = YearMonth.now().minusMonths(7);
+        YearMonth endDate = YearMonth.now().minusMonths(5);
+
+        String sevenMonthsAgo = LocalDateTime.now().minusMonths(7).format(DateTimeFormatter.ofPattern("yyyy-MM")); //7달전
+        String sixMonthsAgo = LocalDateTime.now().minusMonths(6).format(DateTimeFormatter.ofPattern("yyyy-MM")); //6달전
+        String fiveMonthsAgo = LocalDateTime.now().minusMonths(5).format(DateTimeFormatter.ofPattern("yyyy-MM")); //5달전
+
+        // 초기 값
+        sellerOrderCountGraphInit(productOwner1,productOwner2,productBuyer);
+
+        //when
+        CategoryParamDTO categoryParam1 = new CategoryParamDTO(100, null, null, null); //식량작물
+        CategoryParamDTO categoryParam2 = new CategoryParamDTO(300, null, null, null); //특용작물
+        CategoryParamDTO categoryParam3 = new CategoryParamDTO(400, null, null, null); //과일류
+        CategoryParamDTO categoryParam4 = new CategoryParamDTO(null, null, null, null); //전체
+
+        List<SellerOrderCountPerPeriodDTO> result1 = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParam1);
+        List<SellerOrderCountPerPeriodDTO> result2 = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParam2);
+        List<SellerOrderCountPerPeriodDTO> result3 = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParam3);
+        List<SellerOrderCountPerPeriodDTO> result4 = orderProductQueryRepository.findAllSellerTotalCountPerPeriodAndCategory(startDate, endDate, categoryParam4);
+
+        //then
+        //식량작물
+        assertThat(result1.size()).isEqualTo(3);
+        assertThat(result1).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result1).extracting("totalCount").containsExactly(0L,25L,21L);
+
+        //특용작물
+        assertThat(result2.size()).isEqualTo(3);
+        assertThat(result2).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result2).extracting("totalCount").containsExactly(0L,6L,3L);
+
+        //과일류
+        assertThat(result3.size()).isEqualTo(3);
+        assertThat(result3).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result3).extracting("totalCount").containsExactly(0L,0L,0L);
+
+        // 전체
+        assertThat(result4.size()).isEqualTo(3);
+        assertThat(result4).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result4).extracting("totalCount").containsExactly(0L,31L,24L);
+    }
+
+    @Test
+    @DisplayName("기간별 카테고리 특정 판매자 판매횟수, 카테고리 = kindGrade 기준")
+    void sellerTotalCountByPeriodAndCategory1() throws Exception{
+        //given
+        Address buyerAddress = createAddress("11ㅈ22", "봉사산로ㅈㅈ", 12345, "동호ㅈ수");
+        Seller productOwner1 = createSeller("김시관1", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner1);
+        Seller productOwner2 = createSeller("김시관2", "22222222", "11sdfw", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner2);
+
+        Buyer productBuyer = createBuyer("성호창32", "311111", "332222222", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productBuyer);
+
+        YearMonth startDate = YearMonth.now().minusMonths(7);
+        YearMonth endDate = YearMonth.now().minusMonths(5);
+
+        String sevenMonthsAgo = LocalDateTime.now().minusMonths(7).format(DateTimeFormatter.ofPattern("yyyy-MM")); //7달전
+        String sixMonthsAgo = LocalDateTime.now().minusMonths(6).format(DateTimeFormatter.ofPattern("yyyy-MM")); //6달전
+        String fiveMonthsAgo = LocalDateTime.now().minusMonths(5).format(DateTimeFormatter.ofPattern("yyyy-MM")); //5달전
+
+        // 초기 값
+        sellerOrderCountGraphInit(productOwner1,productOwner2,productBuyer);
+
+        //when
+        CategoryParamDTO categoryParam1 = new CategoryParamDTO(null, null, null, 468L); //식량작물-감자-수미-상품
+        CategoryParamDTO categoryParam2 = new CategoryParamDTO(null, null, null, 469L); //식량작물-감자-수미-중품
+        CategoryParamDTO categoryParam3 = new CategoryParamDTO(null, null, null, 470L); //식량작물-감자-수미-하품
+        CategoryParamDTO categoryParam4 = new CategoryParamDTO(null, null, null, 471L); //식량작물-감자-대지마-상품
+
+        List<SellerOrderCountPerPeriodDTO> result1 = orderProductQueryRepository.findSellerTotalOrderCountPerPeriodAndCategory(startDate, endDate, categoryParam1, productOwner1.getId());
+        List<SellerOrderCountPerPeriodDTO> result2 = orderProductQueryRepository.findSellerTotalOrderCountPerPeriodAndCategory(startDate, endDate, categoryParam2, productOwner1.getId());
+        List<SellerOrderCountPerPeriodDTO> result3 = orderProductQueryRepository.findSellerTotalOrderCountPerPeriodAndCategory(startDate, endDate, categoryParam3, productOwner1.getId());
+        List<SellerOrderCountPerPeriodDTO> result4 = orderProductQueryRepository.findSellerTotalOrderCountPerPeriodAndCategory(startDate, endDate, categoryParam4, productOwner1.getId());
+
+        //then
+        //식량작물-감자-수미-상품
+        assertThat(result1.size()).isEqualTo(3);
+        assertThat(result1).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result1).extracting("totalCount").containsExactly(0L,3L,2L);
+
+        //식량작물-감자-수미-중품
+        assertThat(result2.size()).isEqualTo(3);
+        assertThat(result2).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result2).extracting("totalCount").containsExactly(0L,0L,0L);
+
+        //식량작물-감자-수미-하품
+        assertThat(result3.size()).isEqualTo(3);
+        assertThat(result3).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result3).extracting("totalCount").containsExactly(0L,4L,3L);
+
+        //식량작물-감자-대지마-상품
+        assertThat(result4.size()).isEqualTo(3);
+        assertThat(result4).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result4).extracting("totalCount").containsExactly(0L,5L,4L);
+    }
+
+    @Test
+    @DisplayName("기간별 카테고리 특정 판매자 판매횟수, 카테고리 = kind 기준")
+    void sellerTotalCountByPeriodAndCategory2() throws Exception{
+        //given
+        Address buyerAddress = createAddress("11ㅈ22", "봉사산로ㅈㅈ", 12345, "동호ㅈ수");
+        Seller productOwner1 = createSeller("김시관1", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner1);
+        Seller productOwner2 = createSeller("김시관2", "22222222", "11sdfw", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner2);
+
+        Buyer productBuyer = createBuyer("성호창32", "311111", "332222222", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productBuyer);
+
+        YearMonth startDate = YearMonth.now().minusMonths(7);
+        YearMonth endDate = YearMonth.now().minusMonths(5);
+
+        String sevenMonthsAgo = LocalDateTime.now().minusMonths(7).format(DateTimeFormatter.ofPattern("yyyy-MM")); //7달전
+        String sixMonthsAgo = LocalDateTime.now().minusMonths(6).format(DateTimeFormatter.ofPattern("yyyy-MM")); //6달전
+        String fiveMonthsAgo = LocalDateTime.now().minusMonths(5).format(DateTimeFormatter.ofPattern("yyyy-MM")); //5달전
+
+        // 초기 값
+        sellerOrderCountGraphInit(productOwner1,productOwner2,productBuyer);
+
+        //when
+        CategoryParamDTO categoryParam1 = new CategoryParamDTO(null, null, 1652L, null); //식량작물-감자-수미
+        CategoryParamDTO categoryParam2 = new CategoryParamDTO(null, null, 1655L, null); //식량작물-감자-대지마
+        CategoryParamDTO categoryParam3 = new CategoryParamDTO(null, null, 1874L, null); //특용작물-참깨-중국
+
+
+        List<SellerOrderCountPerPeriodDTO> result1 = orderProductQueryRepository.findSellerTotalOrderCountPerPeriodAndCategory(startDate, endDate, categoryParam1, productOwner1.getId());
+        List<SellerOrderCountPerPeriodDTO> result2 = orderProductQueryRepository.findSellerTotalOrderCountPerPeriodAndCategory(startDate, endDate, categoryParam2, productOwner1.getId());
+        List<SellerOrderCountPerPeriodDTO> result3 = orderProductQueryRepository.findSellerTotalOrderCountPerPeriodAndCategory(startDate, endDate, categoryParam3, productOwner1.getId());
+
+        //then
+        //식량작물-감자-수미
+        assertThat(result1.size()).isEqualTo(3);
+        assertThat(result1).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result1).extracting("totalCount").containsExactly(0L,7L,5L);
+
+        //식량작물-감자-대지마
+        assertThat(result2.size()).isEqualTo(3);
+        assertThat(result2).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result2).extracting("totalCount").containsExactly(0L,5L,4L);
+
+        //특용작물-참깨-중국
+        assertThat(result3.size()).isEqualTo(3);
+        assertThat(result3).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result3).extracting("totalCount").containsExactly(0L,0L,0L);
+    }
+
+    @Test
+    @DisplayName("기간별 카테고리 특정 판매자 판매횟수, 카테고리 = item 기준")
+    void sellerTotalCountByPeriodAndCategory3() throws Exception{
+        //given
+        Address buyerAddress = createAddress("11ㅈ22", "봉사산로ㅈㅈ", 12345, "동호ㅈ수");
+        Seller productOwner1 = createSeller("김시관1", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner1);
+        Seller productOwner2 = createSeller("김시관2", "22222222", "11sdfw", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner2);
+
+        Buyer productBuyer = createBuyer("성호창32", "311111", "332222222", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productBuyer);
+
+        YearMonth startDate = YearMonth.now().minusMonths(7);
+        YearMonth endDate = YearMonth.now().minusMonths(5);
+
+        String sevenMonthsAgo = LocalDateTime.now().minusMonths(7).format(DateTimeFormatter.ofPattern("yyyy-MM")); //7달전
+        String sixMonthsAgo = LocalDateTime.now().minusMonths(6).format(DateTimeFormatter.ofPattern("yyyy-MM")); //6달전
+        String fiveMonthsAgo = LocalDateTime.now().minusMonths(5).format(DateTimeFormatter.ofPattern("yyyy-MM")); //5달전
+
+        // 초기 값
+        sellerOrderCountGraphInit(productOwner1,productOwner2,productBuyer);
+
+        //when
+        CategoryParamDTO categoryParam1 = new CategoryParamDTO(null, 152, null, null); //식량작물-감자
+        CategoryParamDTO categoryParam2 = new CategoryParamDTO(null, 312, null, null); //특용작물-참깨
+
+        List<SellerOrderCountPerPeriodDTO> result1 = orderProductQueryRepository.findSellerTotalOrderCountPerPeriodAndCategory(startDate, endDate, categoryParam1, productOwner1.getId());
+        List<SellerOrderCountPerPeriodDTO> result2 = orderProductQueryRepository.findSellerTotalOrderCountPerPeriodAndCategory(startDate, endDate, categoryParam2, productOwner1.getId());
+
+        //then
+        //식량작물-감자
+        assertThat(result1.size()).isEqualTo(3);
+        assertThat(result1).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result1).extracting("totalCount").containsExactly(0L,12L,9L);
+
+        //특용작물-참깨
+        assertThat(result2.size()).isEqualTo(3);
+        assertThat(result2).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result2).extracting("totalCount").containsExactly(0L,2L,1L);
+    }
+
+    @Test
+    @DisplayName("기간별 카테고리 특정 판매자 판매횟수, 카테고리 = itemCategory 기준")
+    void sellerTotalCountByPeriodAndCategory4() throws Exception{
+        //given
+        Address buyerAddress = createAddress("11ㅈ22", "봉사산로ㅈㅈ", 12345, "동호ㅈ수");
+        Seller productOwner1 = createSeller("김시관1", "111", "11", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner1);
+        Seller productOwner2 = createSeller("김시관2", "22222222", "11sdfw", "19990212", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        em.persist(productOwner2);
+
+        Buyer productBuyer = createBuyer("성호창32", "311111", "332222222", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productBuyer);
+
+        YearMonth startDate = YearMonth.now().minusMonths(7);
+        YearMonth endDate = YearMonth.now().minusMonths(5);
+
+        String sevenMonthsAgo = LocalDateTime.now().minusMonths(7).format(DateTimeFormatter.ofPattern("yyyy-MM")); //7달전
+        String sixMonthsAgo = LocalDateTime.now().minusMonths(6).format(DateTimeFormatter.ofPattern("yyyy-MM")); //6달전
+        String fiveMonthsAgo = LocalDateTime.now().minusMonths(5).format(DateTimeFormatter.ofPattern("yyyy-MM")); //5달전
+
+        // 초기 값
+        sellerOrderCountGraphInit(productOwner1,productOwner2,productBuyer);
+
+        //when
+        CategoryParamDTO categoryParam1 = new CategoryParamDTO(100, null, null, null); //식량작물
+        CategoryParamDTO categoryParam2 = new CategoryParamDTO(300, null, null, null); //특용작물
+        CategoryParamDTO categoryParam3 = new CategoryParamDTO(null, null, null, null); //전체
+
+        List<SellerOrderCountPerPeriodDTO> result1 = orderProductQueryRepository.findSellerTotalOrderCountPerPeriodAndCategory(startDate, endDate, categoryParam1, productOwner1.getId());
+        List<SellerOrderCountPerPeriodDTO> result2 = orderProductQueryRepository.findSellerTotalOrderCountPerPeriodAndCategory(startDate, endDate, categoryParam2, productOwner1.getId());
+        List<SellerOrderCountPerPeriodDTO> result3 = orderProductQueryRepository.findSellerTotalOrderCountPerPeriodAndCategory(startDate, endDate, categoryParam3, productOwner1.getId());
+
+        //then
+        //식량작물
+        assertThat(result1.size()).isEqualTo(3);
+        assertThat(result1).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result1).extracting("totalCount").containsExactly(0L,22L,11L);
+
+        //특용작물
+        assertThat(result2.size()).isEqualTo(3);
+        assertThat(result2).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result2).extracting("totalCount").containsExactly(0L,2L,1L);
+
+        // 전체
+        assertThat(result3.size()).isEqualTo(3);
+        assertThat(result3).extracting("date").containsExactly(sevenMonthsAgo,sixMonthsAgo,fiveMonthsAgo);
+        assertThat(result3).extracting("totalCount").containsExactly(0L,24L,12L);
+    }
+
     private void sellerTotalPriceGraphInit(Seller productOwner1, Seller productOwner2, Buyer productBuyer) {
         Address orderAddress = createAddress("1111", "봉사산로", 12345, "동호수");
 
@@ -751,6 +1178,55 @@ class OrderProductQueryRepositoryTest {
         }
     }
 
+    private void orderProductForOrderCountInit(int count, Product product,LocalDateTime localDateTime,Buyer buyer) {
+        Address orderAddress = createAddress("1111", "봉사산로", 12345, "동호수");
+        OrderProductParamDTO orderProductParam = new OrderProductParamDTO(1, product.getId());
+        List<OrderProductParamDTO> orderParamList = addOrderProductParamDTO(orderProductParam);
+
+        for (int i = 0; i < count; i++) { // count 번 주문
+            Long orderId = orderService.order(buyer.getId(), orderParamList, orderAddress);
+            Order findOrder = orderRepository.findById(orderId).orElseThrow(() -> new NoSuchElementException("주문 내역이 존재하지 않습니다."));
+            findOrder.changeCreatedDate(localDateTime);
+        }
+    }
+    private void sellerOrderCountGraphInit(Seller productOwner1, Seller productOwner2, Buyer productBuyer) {
+
+        Product product1 = getProduct("식량작물-감자-수미-상-1", 1000, "상품입니다111", 468L, productOwner1); // 식량작물-감자-수미-상품
+        Product product2 = getProduct("식량작물-감자-수미-상-2", 1000, "상품입니다111", 468L, productOwner2); // 식량작물-감자-수미-상품
+
+        Product product3 = getProduct("식량작물-감자-수미-하", 1000, "상품입니다111", 470L, productOwner1); // 식량작물-감자-수미-하품
+        Product product4 = getProduct("식량작물-감자-대지마-상품", 1000, "상품입니다111", 471L, productOwner1); // 식량작물-감자-대지마-상품
+        Product product5 = getProduct("특용작물-참깨-백색(국산)-상품-1", 1000, "상품입니다111", 669L, productOwner1); // 특용작물-참깨-백색(국산)-상품
+        Product product6 = getProduct("특용작물-참깨-백색(국산)-상품-2", 1000, "상품입니다111", 669L, productOwner2); // 특용작물-참깨-백색(국산)-상품
+
+        Product product7 = getProduct("식량작물-쌀-일반계-상", 1000, "상품입니다111", 432L, productOwner1); // 식량작물-쌀-일반계-상품
+        Product product8 = getProduct("식량작물-쌀-일반계-상", 1000, "상품입니다111", 432L, productOwner2); // 식량작물-쌀-일반계-상품
+
+
+        orderProductForOrderCountInit(3,product1,LocalDateTime.now().minusMonths(6),productBuyer); //식량작물-감자-수미-상품, 6달전 3번, productOwner1
+        orderProductForOrderCountInit(2,product1,LocalDateTime.now().minusMonths(5),productBuyer);//식량작물-감자-수미-상품, 5달전 2번, productOwner1
+
+        orderProductForOrderCountInit(2,product2,LocalDateTime.now().minusMonths(6),productBuyer); //식량작물-감자-수미-상품, 6달전 2번, productOwner2
+        orderProductForOrderCountInit(1,product2,LocalDateTime.now().minusMonths(5),productBuyer);//식량작물-감자-수미-상품, 5달전 1번, productOwner2
+
+        orderProductForOrderCountInit(4,product3,LocalDateTime.now().minusMonths(6),productBuyer);//식량작물-감자-수미-하품, 6달전 4번, productOwner1
+        orderProductForOrderCountInit(3,product3,LocalDateTime.now().minusMonths(5),productBuyer);//식량작물-감자-수미-하품, 5달전 3번, productOwner1
+
+        orderProductForOrderCountInit(5,product4,LocalDateTime.now().minusMonths(6),productBuyer);//식량작물-감자-대지마-상품, 6달전 5번, productOwner1
+        orderProductForOrderCountInit(4,product4,LocalDateTime.now().minusMonths(5),productBuyer);//식량작물-감자-대지마-상품, 5달전 4번, productOwner1
+
+        orderProductForOrderCountInit(2,product5,LocalDateTime.now().minusMonths(6),productBuyer);//특용작물-참깨-백색(국산)-상품, 6달전 2번, productOwner1
+        orderProductForOrderCountInit(1,product5,LocalDateTime.now().minusMonths(5),productBuyer);//특용작물-참깨-백색(국산)-상품, 5달전 1번, productOwner1
+
+        orderProductForOrderCountInit(4,product6,LocalDateTime.now().minusMonths(6),productBuyer);//특용작물-참깨-백색(국산)-상품, 6달전 4번, productOwner2
+        orderProductForOrderCountInit(2,product6,LocalDateTime.now().minusMonths(5),productBuyer);//특용작물-참깨-백색(국산)-상품, 5달전 2번, productOwner2
+
+        orderProductForOrderCountInit(10,product7,LocalDateTime.now().minusMonths(6),productBuyer);//식량작물-쌀-일반계-상품, 6달전 10번, productOwner1
+        orderProductForOrderCountInit(2,product7,LocalDateTime.now().minusMonths(5),productBuyer);//식량작물-쌀-일반계-상품, 5달전 2번, productOwner1
+
+        orderProductForOrderCountInit(1,product8,LocalDateTime.now().minusMonths(6),productBuyer);//식량작물-쌀-일반계-상품, 6달전 1번, productOwner2
+        orderProductForOrderCountInit(9,product8,LocalDateTime.now().minusMonths(5),productBuyer);//식량작물-쌀-일반계-상품, 5달전 9번, productOwner2
+    }
 
     private List<OrderProductParamDTO> addOrderProductParamDTO(OrderProductParamDTO... orderProductParamDTOS) {
         List<OrderProductParamDTO> orderParamList = new ArrayList<>();
@@ -803,14 +1279,4 @@ class OrderProductQueryRepositoryTest {
                 .detailAddress(detailAddress).build();
     }
 
-    private LocalDateTime startMonthOfDayLocalDateTime(YearMonth yearMonth) {
-        return LocalDateTime.of(yearMonth.getYear(), yearMonth.getMonthValue(), 1, 0, 0);
-    }
-
-    private LocalDateTime endMonthOfDayLocalDateTime(YearMonth yearMonth) {
-        // 2022년 11월 -> 2022년 11월 30일 23:59:999999
-        LocalTime maxTime = LocalTime.MAX;
-        LocalDate localDate = yearMonth.atEndOfMonth();
-        return LocalDateTime.of(localDate, maxTime);
-    }
 }
