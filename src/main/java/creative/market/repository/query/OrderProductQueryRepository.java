@@ -337,6 +337,7 @@ public class OrderProductQueryRepository {
                 .select(orderProduct.count())
                 .from(orderProduct)
                 .join(orderProduct.product, product)
+                .join(orderProduct.order, order)
                 .where(dateBetween(startDate, endDate), orderStatus(), product.user.id.eq(userId))
                 .fetchOne();
     }
