@@ -19,10 +19,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
+
+import static creative.market.util.AvailableDay.*;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +37,7 @@ public class OrderService {
     private final OrderProductRepository orderProductRepository;
     private final CartService cartService;
 
+
     @Transactional
     public Long order(Long userId, List<OrderProductParamDTO> orderProductParams, Address address) { // 상품 주문
 
@@ -44,10 +46,10 @@ public class OrderService {
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 회원입니다."));
 
         // 구매하는 상품이 장바구니에 있는 경우 장바구니에서 삭제
-        deleteOrderCartList(orderProductParams,userId);
+        deleteOrderCartList(orderProductParams, userId);
 
         // 본인이 등록한 상품을 구매하려는 경우 + 존재하지 않는 상품인 경우 예외 발생
-        checkMyProducts(orderProductParams,userId);
+        checkMyProducts(orderProductParams, userId);
 
         // orderProducts 생성
         List<OrderProduct> orderProducts = createOrderProducts(orderProductParams);
@@ -63,13 +65,13 @@ public class OrderService {
 
     private void checkMyProducts(List<OrderProductParamDTO> orderProductParams, Long userId) {
         for (OrderProductParamDTO orderProductParam : orderProductParams) {
-            checkMyProduct(orderProductParam,userId);
+            checkMyProduct(orderProductParam, userId);
         }
     }
 
-    private void checkMyProduct(OrderProductParamDTO param,Long userId) {
+    private void checkMyProduct(OrderProductParamDTO param, Long userId) {
         //존재하지 않는 상품인 경우 예외 발생
-        Product product = productRepository.findById(param.getProductId()).orElseThrow(()-> new NoSuchElementException("주문할 상품이 존재하지 않습니다."));
+        Product product = productRepository.findById(param.getProductId()).orElseThrow(() -> new NoSuchElementException("주문할 상품이 존재하지 않습니다."));
         //본인이 등록한 상품을 구매하려는 경우
         if (product.getUser().getId().equals(userId)) {
             throw new IllegalArgumentException("본인이 등록한 상품은 구매할 수 없습니다.");
@@ -95,17 +97,17 @@ public class OrderService {
         // 이미 취소된 주문을 취소하려는 경우
         alreadyCancelCheck(orderProduct);
 
-        //구매일로부터 주문 취소가 가능 날짜 확인
+        //구매일로부터 주문 취소 가능 날짜 확인
         checkValidPeriod(orderProduct);
 
         orderProduct.cancel();
     }
 
     private void checkValidPeriod(OrderProduct orderProduct) {
-        int availableDay = 3; // 3일 이내 주문 취소 가능
+
         LocalDate createdDate = orderProduct.getOrder().getCreatedDate().toLocalDate();
-        if (!LocalDate.now().isBefore(createdDate.plusDays(availableDay))) {
-            throw new IllegalStateException("주문일로부터 "+availableDay +"일 이내에 주문 취소가 가능합니다.");
+        if (!LocalDate.now().isBefore(createdDate.plusDays(ORDER_CANCEL_AVAILABLE_DAY))) {
+            throw new IllegalStateException("주문일로부터 " + ORDER_CANCEL_AVAILABLE_DAY + "일 이내에 주문 취소가 가능합니다.");
         }
     }
 
@@ -126,7 +128,6 @@ public class OrderService {
             throw new NoSuchElementException("존재하지 않는 상품입니다.");
         }
     }
-
 
 
     private Order createOrder(List<OrderProduct> orderProducts, User user, Address address) {

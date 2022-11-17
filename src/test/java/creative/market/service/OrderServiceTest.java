@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static creative.market.util.AvailableDay.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -545,7 +546,7 @@ class OrderServiceTest {
         //주문 취소(count =5 인 주문 취소)
         assertThatThrownBy(() -> orderService.orderCancel(findOrderProduct.getId(), productBuyer.getId()))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessage(("주문일로부터 3일 이내에 주문 취소가 가능합니다."));
+                .hasMessage(("주문일로부터 " + ORDER_CANCEL_AVAILABLE_DAY + "일 이내에 주문 취소가 가능합니다."));
     }
 
     private Product getProduct(String name, int price, String info, Long kindGradeId, Seller seller) {
