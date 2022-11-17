@@ -3,7 +3,6 @@ package creative.market.repository.query;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import creative.market.domain.order.OrderProduct;
 import creative.market.domain.order.OrderStatus;
 import creative.market.domain.product.ProductImageType;
 import creative.market.repository.dto.*;
@@ -260,6 +259,61 @@ public class OrderProductQueryRepository {
         return jpaResultMapper.list(query, SellerPercentileDTO.class);
 
     }
+
+    public List<SellerCountByPeriodDTO> findSellerCountOrderProductExistByPeriod(YearMonth startDate, YearMonth endDate, CategoryParamDTO categoryParamDTO) { // 기간별,카테고리별 판매 기록이 있는 판매자 개수 count
+        /*
+        select ym as date, ifnull(count,0) count
+        from(
+                select count(distinct(p.user_id)) count, date_format(o.created_date,'%Y-%m') date
+                from order_product op
+                join orders o on op.order_id = o.order_id
+                join product p on op.product_id = p.product_id
+                join user u on p.user_id = u.user_id
+                join kind_grade kg on p.kind_grade_id = kg.kind_grade_id
+                join kind k on kg.kind_id = k.kind_id
+                join item i on k.item_code = i.item_code
+                join item_category ic on i.item_category_code = ic.item_category_code
+                where op.status = 'ORDER' and '2022-05'<=date_format(o.created_date,'%Y-%m') and  date_format(o.created_date,'%Y-%m')<='2022-11'
+        group by date
+        order by null
+        ) op
+        right join year_month_data ym_tb
+        on op.date = ym_tb.ym
+        where '2022-05'<= ym_tb.ym and  ym_tb.ym <='2022-11'
+        order by ym_tb.ym;
+        */
+
+        StringBuilder sb = new StringBuilder();
+        String sql = sb
+                .append(" select ym as date, ifnull(count,0) count")
+                .append(" from(")
+                .append("   select count(distinct(p.user_id)) count, date_format(o.created_date,'%Y-%m') date")
+                .append("   from order_product op ")
+                .append("       join orders o on op.order_id = o.order_id ")
+                .append("       join product p on op.product_id = p.product_id")
+                .append("       join user u on p.user_id = u.user_id")
+                .append("       join kind_grade kg on p.kind_grade_id = kg.kind_grade_id")
+                .append("       join kind k on kg.kind_id = k.kind_id")
+                .append("       join item i on k.item_code = i.item_code")
+                .append("       join item_category ic on i.item_category_code = ic.item_category_code")
+                .append("   where op.status = 'ORDER' and :startDate <= date_format(o.created_date,'%Y-%m') and date_format(o.created_date,'%Y-%m') <= :endDate ").append(categoryDynamic(categoryParamDTO))
+                .append("   group by date")
+                .append("   order by null")
+                .append(" ) op")
+                .append(" right join year_month_data ym_tb")
+                .append(" on op.date = ym_tb.ym")
+                .append(" where :startDate <= ym_tb.ym and ym_tb.ym <= :endDate")
+                .append(" order by ym_tb.ym")
+                .toString();
+
+        Query query = em.createNativeQuery(sql)
+                .setParameter("startDate", startDate.toString())
+                .setParameter("endDate", endDate.toString());
+
+        return jpaResultMapper.list(query, SellerCountByPeriodDTO.class);
+
+    }
+
 
     private String categoryDynamic(CategoryParamDTO categoryParamDTO) {
         StringBuilder stringBuilder = new StringBuilder();
