@@ -56,6 +56,11 @@ public class ExControllerAdvice {
         return new ErrorRes(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(NotExistOrder.class)
+    public ErrorRes NotExistOrderExHandle(NotExistOrder ex) {
+        return new ErrorRes(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+    }
 
 
 }

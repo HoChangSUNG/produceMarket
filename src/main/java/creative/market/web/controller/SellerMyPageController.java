@@ -5,11 +5,9 @@ import creative.market.aop.UserType;
 import creative.market.argumentresolver.Login;
 import creative.market.repository.ProductRepository;
 import creative.market.repository.dto.CategoryParamDTO;
-import creative.market.repository.dto.SellerPercentileDTO;
-import creative.market.repository.dto.SellerPricePerPeriodDTO;
 import creative.market.repository.query.OrderProductQueryRepository;
-import creative.market.repository.user.SellerRepository;
 import creative.market.service.dto.LoginUserDTO;
+import creative.market.service.query.OrderProductQueryService;
 import creative.market.service.query.ProductQueryService;
 import creative.market.util.PagingUtils;
 import creative.market.web.dto.*;
@@ -23,8 +21,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.YearMonth;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,8 +31,7 @@ public class SellerMyPageController {
     private final ProductQueryService productQueryService;
     private final ProductRepository productRepository;
     private final OrderProductQueryRepository orderProductQueryRepository;
-    private final SellerRepository sellerRepository;
-
+    private final OrderProductQueryService orderProductQueryService;
     @GetMapping("/sale-list")
     @LoginCheck(type = UserType.SELLER)
     public PagingResultRes getSaleList(
@@ -74,68 +69,26 @@ public class SellerMyPageController {
 
     @GetMapping("/order-price-statistics")
     @LoginCheck(type = {UserType.SELLER})
-    public ResultRes getOrderPriceByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq, CategoryParamDTO categoryParamDTO, @Login LoginUserDTO loginUserDTO) {
+    public ResultRes getOrderPriceByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq, CategoryParamDTO categoryParamDTO,
+                                           @Login LoginUserDTO loginUserDTO) {
         YearMonth startDate = yearMonthPeriodReq.getStartDate();
         YearMonth endDate = yearMonthPeriodReq.getEndDate();
 
         checkRightPeriod(startDate, endDate);
 
-        List<SellerPricePerPeriodDTO> allSellerTotalPrice = orderProductQueryRepository.findAllSellerTotalPricePerPeriodAndCategory(startDate, endDate, categoryParamDTO);
-        List<SellerPricePerPeriodDTO> allSellerAvgPricePerPeriodList = convertToTotalSellerAvgPrice(allSellerTotalPrice);
-
-        List<SellerPricePerPeriodDTO> sellerTotalPricePerPeriodList = orderProductQueryRepository.findSellerTotalPricePerPeriodAndCategory(startDate, endDate, categoryParamDTO, loginUserDTO.getId());
-
-        return new ResultRes<>(convertToPriceCompareByPeriodDTO(allSellerAvgPricePerPeriodList,sellerTotalPricePerPeriodList));
+        return new ResultRes<>(orderProductQueryService.findSellerTotalPriceCompareByPeriod(startDate,endDate,categoryParamDTO,loginUserDTO.getId()));
     }
 
     @GetMapping("/order-price-percentile-statistics")
     @LoginCheck(type = {UserType.SELLER})
-    public ResultRes getOrderPricePercentileByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq, CategoryParamDTO categoryParamDTO, @Login LoginUserDTO loginUserDTO) {
+    public ResultRes getOrderPricePercentileByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq, CategoryParamDTO categoryParamDTO,
+                                                     @Login LoginUserDTO loginUserDTO) {
         YearMonth startDate = yearMonthPeriodReq.getStartDate();
         YearMonth endDate = yearMonthPeriodReq.getEndDate();
 
         checkRightPeriod(startDate, endDate);
 
-        List<SellerPercentileDTO> sellerPercentileList = orderProductQueryRepository.findSellerTotalPricePercentileByPeriodAndCategory(startDate, endDate, categoryParamDTO, loginUserDTO.getId());
-
-        return new ResultRes<>(convertToOrderPricePercentileGraphByPeriodDTO(sellerPercentileList));
-    }
-
-    private OrderPricePercentileGraphByPeriodRes convertToOrderPricePercentileGraphByPeriodDTO(List<SellerPercentileDTO> sellerPercentileList) {
-        List<String> dateList = sellerPercentileList.stream()
-                .map(SellerPercentileDTO::getDate)
-                .collect(Collectors.toList());
-        List<String> percentileList = sellerPercentileList.stream()
-                .map(SellerPercentileDTO::getPercentile)
-                .collect(Collectors.toList());
-        return new OrderPricePercentileGraphByPeriodRes(dateList,percentileList);
-    }
-
-    private PriceCompareByPeriodRes convertToPriceCompareByPeriodDTO(List<SellerPricePerPeriodDTO> allSellerAvgPriceList, List<SellerPricePerPeriodDTO> sellerPriceList) {
-        List<String> dateList = allSellerAvgPriceList.stream()
-                .map(SellerPricePerPeriodDTO::getDate)
-                .collect(Collectors.toList());
-        List<Long> avgList = allSellerAvgPriceList.stream()
-                .map(SellerPricePerPeriodDTO::getTotalPrice)
-                .collect(Collectors.toList());
-        List<Long> sellerPrices = sellerPriceList.stream()
-                .map(SellerPricePerPeriodDTO::getTotalPrice)
-                .collect(Collectors.toList());
-
-        return new PriceCompareByPeriodRes(dateList,sellerPrices,avgList);
-    }
-
-    private List<SellerPricePerPeriodDTO> convertToTotalSellerAvgPrice(List<SellerPricePerPeriodDTO> allSellerTotalPrice) {
-        Long totalCount = sellerRepository.findAllSellerCountWithExistAndDeletedSeller();
-        if (totalCount == 0) {
-            return allSellerTotalPrice.stream()
-                    .map(priceDTO -> new SellerPricePerPeriodDTO(0L, priceDTO.getDate()))
-                    .collect(Collectors.toList());
-        } else {
-            return allSellerTotalPrice.stream()
-                    .map(priceDTO -> new SellerPricePerPeriodDTO(priceDTO.getTotalPrice()/totalCount, priceDTO.getDate()))
-                    .collect(Collectors.toList());
-        }
+        return new ResultRes<>(orderProductQueryService.findSellerPercentileList(startDate,endDate,categoryParamDTO, loginUserDTO.getId()));
     }
 
     private void checkRightPeriod(YearMonth startDate, YearMonth endDate) {

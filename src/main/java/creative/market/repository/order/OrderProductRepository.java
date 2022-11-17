@@ -5,6 +5,7 @@ import com.querydsl.core.types.dsl.NumberExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import creative.market.domain.order.OrderProduct;
 import creative.market.domain.order.OrderStatus;
+
 import creative.market.repository.dto.CategoryParamDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -22,6 +23,7 @@ import static creative.market.domain.category.QKindGrade.kindGrade;
 import static creative.market.domain.order.QOrder.*;
 import static creative.market.domain.order.QOrderProduct.*;
 import static creative.market.domain.product.QProduct.product;
+import static creative.market.domain.user.QUser.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -70,6 +72,15 @@ public class OrderProductRepository {
                         dateBetween(startDate, endDate),
                         orderStatus()
                 )
+                .fetchOne();
+    }
+
+    public Long findOrderProductCountBySeller(Long userId) { // 특정 판매자가 판매한 총 판매 내역 개수
+        return queryFactory.select(orderProduct.count())
+                .from(orderProduct)
+                .join(orderProduct.product, product)
+                .join(product.user, user)
+                .where(user.id.eq(userId))
                 .fetchOne();
     }
 

@@ -13,8 +13,8 @@ public class SellerCountByPeriodDTO {
     private String date;
     private Long count;
 
-    public SellerCountByPeriodDTO(BigInteger count, String date) {
-        this.date = date;
+    public SellerCountByPeriodDTO( String date, BigInteger count) {
         this.count = count.longValue();
+        this.date = date;
     }
 }
