@@ -260,6 +260,106 @@ public class OrderProductQueryRepository {
 
     }
 
+    public List<SellerOrderCountPerPeriodDTO> findAllSellerTotalCountPerPeriodAndCategory(YearMonth startDate, YearMonth endDate, CategoryParamDTO categoryParamDTO) {//기간별 판매횟수 비교(카테고리별 전체 판매자 기간별 총 판매횟수)
+
+        /*
+        String sql = "select count(op.order_product_id) as totalCount, month_year_tb.ym as date" +
+                "from (select opp.order_product_id as order_product_id, o.created_date as created_date" +
+                "   from order_product opp" +
+                "   join orders o on opp.order_id = o.order_id " +
+                "   join product p on opp.product_id = p.product_id" +
+                "   join kind_grade kg on p.kind_grade_id = kg.kind_grade_id" +
+                "   join kind k on kg.kind_id = k.kind_id" +
+                "   join item i on k.item_code = i.item_code" +
+                "   join item_category ic on i.item_category_code = ic.item_category_code" +
+                "   where opp.status = 'ORDER'" +
+                ") op" +
+                "right outer join  year_month_data as month_year_tb " +
+                "on date_format(op.created_date,'%Y-%m') = month_year_tb.ym" +
+                "where '2022-05'<= month_year_tb.ym and  month_year_tb.ym<='2022-11'" +
+                "group by month_year_tb.ym\n" +
+                "order by month_year_tb.ym;";
+        */
+
+        StringBuilder sb = new StringBuilder();
+        String sql = sb
+                .append(" select count(op.order_product_id) as totalCount, month_year_tb.ym as date")
+                .append(" from (select opp.order_product_id as order_product_id, o.created_date as created_date")
+                .append("   from order_product opp")
+                .append("   join orders o on opp.order_id = o.order_id ")
+                .append("   join product p on opp.product_id = p.product_id")
+                .append("   join kind_grade kg on p.kind_grade_id = kg.kind_grade_id")
+                .append("   join kind k on kg.kind_id = k.kind_id")
+                .append("   join item i on k.item_code = i.item_code")
+                .append("   join item_category ic on i.item_category_code = ic.item_category_code")
+                .append("   where opp.status = 'ORDER' ").append(categoryDynamic(categoryParamDTO))
+                .append(" ) op")
+                .append(" right outer join  year_month_data as month_year_tb")
+                .append(" on date_format(op.created_date,'%Y-%m') = month_year_tb.ym")
+                .append(" where :startDate <= month_year_tb.ym and  month_year_tb.ym <= :endDate")
+                .append(" group by month_year_tb.ym")
+                .append(" order by month_year_tb.ym")
+                .toString();
+
+        Query query = em.createNativeQuery(sql)
+                .setParameter("startDate", startDate.toString())
+                .setParameter("endDate", endDate.toString());
+
+        return jpaResultMapper.list(query, SellerOrderCountPerPeriodDTO.class);
+    }
+
+    public List<SellerOrderCountPerPeriodDTO> findSellerTotalOrderCountPerPeriodAndCategory(YearMonth startDate, YearMonth endDate, CategoryParamDTO categoryParamDTO, Long userId) {//기간별 판매횟수 비교 그래프((카테고리별 특정 판매자 기간별 총 판매횟수)
+/*
+
+        String sql = "select count(op.order_product_id) as totalCount, month_year_tb.ym as date" +
+                "from (select opp.order_product_id as order_product_id, o.created_date as created_date" +
+                "   from order_product opp" +
+                "   join orders o on opp.order_id = o.order_id " +
+                "   join product p on opp.product_id = p.product_id" +
+                "   join user u on p.user_id = u.user_id" +
+                "   join kind_grade kg on p.kind_grade_id = kg.kind_grade_id" +
+                "   join kind k on kg.kind_id = k.kind_id" +
+                "   join item i on k.item_code = i.item_code" +
+                "   join item_category ic on i.item_category_code = ic.item_category_code" +
+                "   where opp.status = 'ORDER' and u.user_id =4" +
+                ") op" +
+                "right outer join  year_month_data as month_year_tb " +
+                "on date_format(op.created_date,'%Y-%m') = month_year_tb.ym" +
+                "where '2022-05'<= month_year_tb.ym and  month_year_tb.ym<='2022-11'" +
+                "group by month_year_tb.ym" +
+                "order by month_year_tb.ym;";
+*/
+
+        StringBuilder sb = new StringBuilder();
+        String sql = sb
+                .append("select count(op.order_product_id) as totalCount, month_year_tb.ym as date")
+                .append(" from (select opp.order_product_id as order_product_id, o.created_date as created_date")
+                .append("   from order_product opp")
+                .append("   join orders o on opp.order_id = o.order_id ")
+                .append("   join product p on opp.product_id = p.product_id")
+                .append("   join user u on p.user_id = u.user_id")
+                .append("   join kind_grade kg on p.kind_grade_id = kg.kind_grade_id")
+                .append("   join kind k on kg.kind_id = k.kind_id")
+                .append("   join item i on k.item_code = i.item_code")
+                .append("   join item_category ic on i.item_category_code = ic.item_category_code")
+                .append("   where opp.status = 'ORDER' and u.user_id = :userId").append(categoryDynamic(categoryParamDTO))
+                .append(" ) op")
+                .append(" right outer join  year_month_data as month_year_tb ")
+                .append(" on date_format(op.created_date,'%Y-%m') = month_year_tb.ym")
+                .append(" where :startDate <= month_year_tb.ym and month_year_tb.ym <= :endDate")
+                .append(" group by month_year_tb.ym")
+                .append(" order by month_year_tb.ym")
+                .toString();
+
+        Query query = em.createNativeQuery(sql)
+                .setParameter("startDate", startDate.toString())
+                .setParameter("endDate", endDate.toString())
+                .setParameter("userId", userId);
+
+        return jpaResultMapper.list(query, SellerOrderCountPerPeriodDTO.class);
+    }
+
+
     public List<SellerCountByPeriodDTO> findSellerCountOrderProductExistByPeriod(YearMonth startDate, YearMonth endDate, CategoryParamDTO categoryParamDTO) { // 기간별,카테고리별 판매 기록이 있는 판매자 개수 count
         /*
         select ym as date, ifnull(count,0) count
@@ -313,7 +413,6 @@ public class OrderProductQueryRepository {
         return jpaResultMapper.list(query, SellerCountByPeriodDTO.class);
 
     }
-
 
     private String categoryDynamic(CategoryParamDTO categoryParamDTO) {
         StringBuilder stringBuilder = new StringBuilder();
