@@ -7,7 +7,7 @@ import creative.market.repository.order.OrderProductRepository;
 import creative.market.repository.query.OrderProductQueryRepository;
 import creative.market.service.dto.OrderHistoryDTO;
 import creative.market.service.dto.PriceCompareByPeriodRes;
-import creative.market.web.dto.OrderPricePercentileGraphByPeriodRes;
+import creative.market.service.dto.OrderPricePercentileGraphByPeriodRes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
