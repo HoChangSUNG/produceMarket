@@ -45,6 +45,12 @@ public class ExControllerAdvice {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(IllegalStateException.class)
+    public ErrorRes illegalStateExHandle(IllegalStateException ex) {
+        return new ErrorRes(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(IllegalArgumentException.class)
     public ErrorRes illegalArgsExHandle(IllegalArgumentException ex) {
         return new ErrorRes(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
