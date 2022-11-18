@@ -74,7 +74,7 @@ public class OrderProductQueryService {
         // 월별 특정 판매자 판매횟수
         List<SellerOrderCountPerPeriodDTO> sellerTotalOrderCountPerPeriodList = orderProductQueryRepository.findSellerTotalOrderCountPerPeriodAndCategory(startDate, endDate, categoryParamDTO, sellerId);
 
-        // 판매액이 없는 경우 백분위 0으로 변경
+        // 판매횟수 없는 경우 백분위 0으로 변경
         List<SellerPercentileDTO> convertedSellerPricePercentile = convertNotExistOrderPercentile(sellerPricePercentile,sellerTotalOrderCountPerPeriodList);
 
         return convertToOrderPricePercentileGraphByPeriod(convertedSellerPricePercentile);
