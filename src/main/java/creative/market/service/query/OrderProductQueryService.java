@@ -69,9 +69,31 @@ public class OrderProductQueryService {
 
         checkOrderProductExist(sellerId); // 특정 판매자의 상품이 판매된 적이 있는지
 
+        // 월별 특정 판매자 판매액 백분위
         List<SellerPercentileDTO> sellerPricePercentile = orderProductQueryRepository.findSellerTotalPricePercentileByPeriodAndCategory(startDate, endDate, categoryParamDTO, sellerId);
-        return convertToOrderPricePercentileGraphByPeriod(sellerPricePercentile);
+        // 월별 특정 판매자 판매횟수
+        List<SellerOrderCountPerPeriodDTO> sellerTotalOrderCountPerPeriodList = orderProductQueryRepository.findSellerTotalOrderCountPerPeriodAndCategory(startDate, endDate, categoryParamDTO, sellerId);
 
+        // 판매액이 없는 경우 백분위 0으로 변경
+        List<SellerPercentileDTO> convertedSellerPricePercentile = convertNotExistOrderPercentile(sellerPricePercentile,sellerTotalOrderCountPerPeriodList);
+
+        return convertToOrderPricePercentileGraphByPeriod(convertedSellerPricePercentile);
+    }
+
+    private List<SellerPercentileDTO> convertNotExistOrderPercentile(List<SellerPercentileDTO> sellerPricePercentiles, List<SellerOrderCountPerPeriodDTO> sellerTotalOrderCountPerPeriods) {
+        List<SellerPercentileDTO> result = new ArrayList<>();
+        for (int i = 0; i < sellerPricePercentiles.size(); i++) {// 월별(2022-07, 2022-08, ...)
+            String curPercentile = sellerPricePercentiles.get(i).getPercentile();
+            Long orderCount = sellerTotalOrderCountPerPeriods.get(i).getTotalCount();
+            String date = sellerTotalOrderCountPerPeriods.get(i).getDate();
+
+            if (orderCount.equals(0L)) {
+                result.add(new SellerPercentileDTO(0D, date));
+            } else {
+                result.add(new SellerPercentileDTO(curPercentile, date));
+            }
+        }
+        return result;
     }
 
     public OrderCountCompareByPeriodRes findSellerTotalOrderCountCompareByPeriod(YearMonth startDate, YearMonth endDate, CategoryParamDTO categoryParamDTO, Long sellerId) { // 기간별 판매횟수 비교 그래프

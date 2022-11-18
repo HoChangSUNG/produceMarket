@@ -16,4 +16,9 @@ public class SellerPercentileDTO {
         this.date = date;
         this.percentile = String.format("%.2f", percentile);
     }
+
+    public SellerPercentileDTO(String percentile,String date) {
+        this.date = date;
+        this.percentile = percentile;
+    }
 }
