@@ -1,12 +1,15 @@
 package creative.market.repository;
 
 import creative.market.domain.Address;
+import creative.market.domain.Review;
 import creative.market.domain.category.KindGrade;
 import creative.market.domain.order.Order;
 import creative.market.domain.product.Product;
 import creative.market.domain.product.ProductImage;
 import creative.market.domain.product.ProductImageType;
+import creative.market.domain.user.Buyer;
 import creative.market.domain.user.Seller;
+import creative.market.domain.user.User;
 import creative.market.repository.category.KindGradeRepository;
 import creative.market.repository.dto.ProductSearchConditionReq;
 import creative.market.repository.order.OrderRepository;
@@ -53,6 +56,9 @@ class ProductRepositoryTest {
     @Autowired
     OrderRepository orderRepository;
 
+    @Autowired
+    ReviewRepository reviewRepository;
+
     @BeforeEach
     void before() throws Exception {
         Address address = createAddress("1", "1", 12, "234");
@@ -82,6 +88,10 @@ class ProductRepositoryTest {
         List<ProductImage> ordinalImgList4 = createOrdinalImgList(Arrays.asList(new ImageDTO("ordinal2", "/ordinal2.jpg")));
         Product product4 = createProduct("배추-봄-상품", 50000, "배추 맛있어요3", seller, kindGrade4, sigImg4, ordinalImgList4);
         em.persist(product4);
+
+        em.flush();
+        em.clear();
+        log.info("===================영속성 컨텍스트 clear======================");
     }
 
     private Address createAddress(String jibun, String raod, int zipcode, String detailAddress) {
@@ -409,7 +419,206 @@ class ProductRepositoryTest {
 
         //then
         assertThat(findProductIds.size()).isEqualTo(2);
-        assertThat(findProductIds).containsExactly(product1.getId(), product2.getId()); //2 3번 product 순
+        assertThat(findProductIds).containsExactly(product2.getId(), product1.getId()); //2 1번 product 순
+    }
+
+    @Test
+    @DisplayName("전체 카테고리에서 리뷰 평점 평균 기준 내림차순 정렬한 productId, 리뷰가 하나도 존재하지 않는 경우")
+    void reviewAvgDesc1() throws Exception {
+        //given
+        int limit = 2;
+        int offset = 0;
+        LocalDateTime endDate = LocalDateTime.now(); // 지금
+        LocalDateTime startDate = endDate.minusMonths(12); //1년 전
+
+        //when
+        List<Long> result = productRepository.findProductIdByReviewCountDesc(offset, limit, startDate, endDate);
+
+        //then
+        // 1년전 ~ 현재
+        assertThat(result.size()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("전체 카테고리에서 리뷰 평점 평균 내림차순 productId")
+    void reviewAvgDesc2() throws Exception {
+        //given
+        int limit = 5;
+        int offset = 0;
+
+        //when
+        List<Product> findProducts = productRepository.findAll();
+
+        Product product1 = findProducts.get(0);
+        Product product2 = findProducts.get(1);
+        Product product3 = findProducts.get(2);
+        Product product4 = findProducts.get(3);
+
+        Address buyerAddress = createAddress("1111", "봉사산로3", 11111, "3동4호");
+        Buyer productBuyer = createBuyer("성호창3", "133234", "133234", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productBuyer);
+
+        //product1 별점 저장
+        saveReview(2F, "내용", productBuyer, product1);
+        saveReview(1F, "내용", productBuyer, product1);
+        saveReview(2F, "내용", productBuyer, product1);
+
+        //product2 별점 저장
+        saveReview(1F, "내용", productBuyer, product2);
+        saveReview(1F, "내용", productBuyer, product2);
+        saveReview(1F, "내용", productBuyer, product2);
+
+        //product3 별점 저장
+        saveReview(4F, "내용", productBuyer, product3);
+        saveReview(4F, "내용", productBuyer, product3);
+        saveReview(4F, "내용", productBuyer, product3);
+
+        //product4 별점 저장
+        saveReview(5F, "내용", productBuyer, product4, LocalDateTime.now().minusMonths(2)); // 2달전 별점
+        saveReview(5F, "내용", productBuyer, product4, LocalDateTime.now().minusMonths(2)); // 2달전 별점
+        saveReview(5F, "내용", productBuyer, product4, LocalDateTime.now().minusMonths(2)); // 2달전 별점
+
+        LocalDateTime endDate = LocalDateTime.now(); // 지금
+        LocalDateTime startDate = endDate.minusMonths(1); // 한달전
+
+        List<Long> result = productRepository.findProductIdByReviewCountDesc(offset, limit, startDate, endDate);
+
+        //then
+        // 1달전 ~ 현재
+        assertThat(result.size()).isEqualTo(3);
+        assertThat(result).containsExactly(product3.getId(), product1.getId(), product2.getId());
+
+    }
+
+    @Test
+    @DisplayName("전체 카테고리에서 리뷰 평점 평균 내림차순 productId, 리뷰 평점 평균이 동일할 경우 리뷰 개수 내림차순 기준으로 정렬")
+    void reviewAvgDesc3() throws Exception {
+        //given
+        int limit = 5;
+        int offset = 0;
+
+        //when
+        List<Product> findProducts = productRepository.findAll();
+
+        Product product1 = findProducts.get(0);
+        Product product2 = findProducts.get(1);
+        Product product3 = findProducts.get(2);
+        Product product4 = findProducts.get(3);
+
+        Address buyerAddress = createAddress("1111", "봉사산로3", 11111, "3동4호");
+        Buyer productBuyer = createBuyer("성호창3", "133234", "133234", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productBuyer);
+
+        //product1 별점 저장
+        saveReview(2F, "내용", productBuyer, product1);
+        saveReview(2F, "내용", productBuyer, product1);
+        saveReview(2F, "내용", productBuyer, product1);
+        saveReview(2F, "내용", productBuyer, product1);
+
+        //product2 별점 저장
+        saveReview(2F, "내용", productBuyer, product2);
+        saveReview(2F, "내용", productBuyer, product2);
+        saveReview(2F, "내용", productBuyer, product2);
+
+        //product3 별점 저장
+        saveReview(4F, "내용", productBuyer, product3);
+        saveReview(4F, "내용", productBuyer, product3);
+        saveReview(4F, "내용", productBuyer, product3);
+
+        //product4 별점 저장
+        saveReview(5F, "내용", productBuyer, product4, LocalDateTime.now().minusMonths(2)); // 2달전 별점
+        saveReview(5F, "내용", productBuyer, product4, LocalDateTime.now().minusMonths(2)); // 2달전 별점
+        saveReview(5F, "내용", productBuyer, product4, LocalDateTime.now().minusMonths(2)); // 2달전 별점
+
+        LocalDateTime endDate = LocalDateTime.now(); // 지금
+        LocalDateTime startDate = endDate.minusMonths(1); // 한달전
+
+        List<Long> result = productRepository.findProductIdByReviewCountDesc(offset, limit, startDate, endDate);
+
+        //then
+        // 1달전 ~ 현재
+        assertThat(result.size()).isEqualTo(3);
+        // 리뷰 개수가 product1이 product2보다 많음
+        assertThat(result).containsExactly(product3.getId(), product1.getId(), product2.getId());
+
+    }
+
+    @Test
+    @DisplayName("전체 카테고리에서 리뷰 평점 평균 내림차순 productId, 리뷰 평점 평균 + 리뷰 개수가 동일한 경우 등록 날짜 내림차순")
+    void reviewAvgDesc4() throws Exception {
+        //given
+        int limit = 5;
+        int offset = 0;
+
+        //when
+        List<Product> findProducts = productRepository.findAll();
+
+        Product product1 = findProducts.get(0);
+        Product product2 = findProducts.get(1);
+        Product product3 = findProducts.get(2);
+        Product product4 = findProducts.get(3);
+
+        Address buyerAddress = createAddress("1111", "봉사산로3", 11111, "3동4호");
+        Buyer productBuyer = createBuyer("성호창3", "133234", "133234", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress);
+        em.persist(productBuyer);
+
+        //product1 별점 저장
+        saveReview(2F, "내용", productBuyer, product1);
+        saveReview(2F, "내용", productBuyer, product1);
+        saveReview(2F, "내용", productBuyer, product1);
+        saveReview(2F, "내용", productBuyer, product1);
+
+        //product2 별점 저장
+        saveReview(2F, "내용", productBuyer, product2);
+        saveReview(2F, "내용", productBuyer, product2);
+        saveReview(2F, "내용", productBuyer, product2);
+        saveReview(2F, "내용", productBuyer, product2);
+
+        //product3 별점 저장
+        saveReview(4F, "내용", productBuyer, product3);
+        saveReview(4F, "내용", productBuyer, product3);
+        saveReview(4F, "내용", productBuyer, product3);
+
+        //product4 별점 저장
+        saveReview(5F, "내용", productBuyer, product4, LocalDateTime.now().minusMonths(2)); // 2달전 별점
+        saveReview(5F, "내용", productBuyer, product4, LocalDateTime.now().minusMonths(2)); // 2달전 별점
+        saveReview(5F, "내용", productBuyer, product4, LocalDateTime.now().minusMonths(2)); // 2달전 별점
+
+        LocalDateTime endDate = LocalDateTime.now(); // 지금
+        LocalDateTime startDate = endDate.minusMonths(3); // 3달전
+
+        List<Long> result = productRepository.findProductIdByReviewCountDesc(offset, limit, startDate, endDate);
+
+        //then
+        // 3달전 ~ 현재
+        assertThat(result.size()).isEqualTo(4);
+        // product2가 product1보다 최근에 저장됨
+        assertThat(result).containsExactly(product4.getId(), product3.getId(), product2.getId(), product1.getId());
+
+    }
+
+    public void saveReview(Float rate, String content, User user, Product product, LocalDateTime createdDate) {
+        Review review = Review.builder()
+                .user(user)
+                .product(product)
+                .content(content)
+                .rate(rate)
+                .build();
+
+        reviewRepository.save(review);
+        reviewRepository.findById(review.getId()).orElseThrow(() -> new NoSuchElementException("리뷰가 존재하지 않습니다."))
+                .changeCreatedDate(createdDate);
+    }
+
+    public void saveReview(Float rate, String content, User user, Product product) {
+        Review review = Review.builder()
+                .user(user)
+                .product(product)
+                .content(content)
+                .rate(rate)
+                .build();
+
+        reviewRepository.save(review);
     }
 
     private void changeOrderDate(Long orderId, LocalDateTime changeDate) {
@@ -425,5 +634,15 @@ class ProductRepositoryTest {
 
     private KindGrade createKindGrade(Long kindGradeId) {
         return kindGradeRepository.findById(kindGradeId).orElseThrow(() -> new IllegalArgumentException("잘못된 카테고리입니다"));
+    }
+
+    private Buyer createBuyer(String name, String loginId, String pw, String birth, String email, String phoneNumber, Address address) {
+        return Buyer.builder().name(name)
+                .loginId(loginId)
+                .password(pw)
+                .birth(birth)
+                .email(email)
+                .phoneNumber(phoneNumber)
+                .address(address).build();
     }
 }
