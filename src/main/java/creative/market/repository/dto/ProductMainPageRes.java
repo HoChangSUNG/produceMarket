@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ProductSigSrcAndIdRes {
+public class ProductMainPageRes {
 
     private String imgSigSrc;
     private Long productId;
@@ -18,7 +18,7 @@ public class ProductSigSrcAndIdRes {
     private String retailUnit;
 
     @QueryProjection
-    public ProductSigSrcAndIdRes(String imgSigSrc, Long productId, String productName, Integer price, String retailUnit) {
+    public ProductMainPageRes(String imgSigSrc, Long productId, String productName, Integer price, String retailUnit) {
         this.imgSigSrc = imgSigSrc;
         this.productId = productId;
         this.productName = productName;
@@ -26,7 +26,7 @@ public class ProductSigSrcAndIdRes {
         this.retailUnit = retailUnit;
     }
 
-    public ProductSigSrcAndIdRes(Product product) {
+    public ProductMainPageRes(Product product) {
         this.imgSigSrc = product.getSignatureProductImage().getPath();
         this.productId = product.getId();
         this.productName = product.getName();

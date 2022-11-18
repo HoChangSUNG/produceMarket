@@ -6,7 +6,7 @@ import creative.market.domain.user.Buyer;
 import creative.market.domain.user.Seller;
 import creative.market.repository.ProductRepository;
 import creative.market.repository.category.KindGradeRepository;
-import creative.market.repository.dto.ProductSigSrcAndIdRes;
+import creative.market.repository.dto.ProductMainPageRes;
 import creative.market.service.ProductService;
 import creative.market.service.dto.RegisterProductDTO;
 import creative.market.service.dto.UploadFileDTO;
@@ -105,7 +105,7 @@ class ProductQueryRepositoryTest {
         int limit = 4;
         int offset = 0;
         //when
-        List<ProductSigSrcAndIdRes> result = productQueryRepository.findProductSigImgAndIdByLatestCreatedDate(offset,limit);
+        List<ProductMainPageRes> result = productQueryRepository.findProductMainPageByLatestCreatedDate(offset,limit);
 
         //then
         List<Long> productIds = productRepository.findProductListOrderByCreatedDateDesc(limit).stream()

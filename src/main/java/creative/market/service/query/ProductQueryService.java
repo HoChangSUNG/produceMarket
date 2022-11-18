@@ -3,23 +3,15 @@ package creative.market.service.query;
 import creative.market.domain.category.KindGrade;
 import creative.market.domain.product.Product;
 import creative.market.repository.ProductRepository;
-import creative.market.repository.dto.ProductSearchConditionReq;
-import creative.market.repository.dto.ProductSigSrcAndIdRes;
-import creative.market.repository.dto.ProductUpdateFormRes;
+import creative.market.repository.dto.*;
 import creative.market.service.dto.ProductDetailRes;
 import creative.market.service.dto.ProductShortInfoRes;
 import creative.market.service.dto.SaleListRes;
-import creative.market.util.PagingUtils;
 import creative.market.util.WholesaleAndRetailUtils;
-import creative.market.repository.dto.LatestRetailAndWholesaleDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.validation.Valid;
-import javax.validation.constraints.Min;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -64,9 +56,15 @@ public class ProductQueryService {
         return new ProductUpdateFormRes(product);
     }
 
-    public List<ProductSigSrcAndIdRes> productSigSrcAndIdByOrderCount(int offset, int limit, LocalDateTime startDate, LocalDateTime endDate) { // // 메인 페이지 전체 상품 판매횟수순
+    public List<ProductMainPageRes> productMainPageByOrderCount(int offset, int limit, LocalDateTime startDate, LocalDateTime endDate) { // 메인 페이지 전체 상품 판매횟수순
         return productRepository.findProductIdByOrderCountDesc(offset, limit, startDate, endDate).stream()
-                .map(productId -> new ProductSigSrcAndIdRes(findProductById(productId)))
+                .map(productId -> new ProductMainPageRes(findProductById(productId)))
+                .collect(Collectors.toList());
+    }
+
+    public List<ProductMainPageShortRes> productMainPageByReviewAvgRate(int offset, int limit, LocalDateTime startDate, LocalDateTime endDate) { //메인 페이지 별점 평균순
+        return productRepository.findProductIdByReviewCountDesc(offset, limit, startDate, endDate).stream()
+                .map(productId ->new ProductMainPageShortRes(findProductById(productId)))
                 .collect(Collectors.toList());
     }
 

@@ -3,8 +3,8 @@ package creative.market.repository.query;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import creative.market.domain.product.*;
-import creative.market.repository.dto.ProductSigSrcAndIdRes;
-import creative.market.repository.dto.QProductSigSrcAndIdRes;
+import creative.market.repository.dto.ProductMainPageRes;
+import creative.market.repository.dto.QProductMainPageRes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -21,8 +21,8 @@ public class ProductQueryRepository {
 
     private final JPAQueryFactory queryFactory;
 
-    public List<ProductSigSrcAndIdRes> findProductSigImgAndIdByLatestCreatedDate(int offset, int limit) { // 메인 페이지 전체 상품 최근 등록 순
-        return queryFactory.select(new QProductSigSrcAndIdRes(productImage.path, product.id, product.name, product.price, kind.retailsaleUnit))
+    public List<ProductMainPageRes> findProductMainPageByLatestCreatedDate(int offset, int limit) { // 메인 페이지 전체 상품 최근 등록 순
+        return queryFactory.select(new QProductMainPageRes(productImage.path, product.id, product.name, product.price, kind.retailsaleUnit))
                 .from(productImage)
                 .join(productImage.product, product)
                 .join(product.kindGrade, kindGrade)

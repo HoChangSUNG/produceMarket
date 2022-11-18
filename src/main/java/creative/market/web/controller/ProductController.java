@@ -138,27 +138,44 @@ public class ProductController {
         return new ResultRes(new PricePercentPieGraphPerCategoryRes(priceTopRankPercentRes, percentAndPriceRes));
     }
 
-
     @GetMapping("/main-page/latest")
-    public ResultRes maiPageLatestByAllCategory() { //메인 페이지 시간순 조회
+    public ResultRes mainPageLatestByAllCategory() { // 메인 페이지 시간순 조회
 
         int limit = 4;
         int offset = 0;
-        return new ResultRes(productQueryRepository.findProductSigImgAndIdByLatestCreatedDate(offset, limit));
+        return new ResultRes(productQueryRepository.findProductMainPageByLatestCreatedDate(offset, limit));
     }
 
     @GetMapping("/main-page/order-count")
     public ResultRes mainPageOrderCntByAllCategory() { // 메인 페이지 판매 횟수순 조회
         int limit = 4;
         int offset = 0;
+
         LocalDateTime endDate = LocalDateTime.now();
-        LocalDateTime startDate = endDate.minusMonths(1) // 한달 전
+        LocalDateTime startDate = minusMonths(endDate, 1); // 1달전
+
+        log.info("startDate={}, endDate={}", startDate, endDate);
+        return new ResultRes(productQueryService.productMainPageByOrderCount(offset, limit, startDate, endDate));
+    }
+
+    @GetMapping("/main-page/review-rate-avg")
+    public ResultRes mainPageReviewRateAvgByAllCategory() { // 메인 페이지 별점 평균 순 조회
+        int limit = 5;
+        int offset = 0;
+
+        LocalDateTime endDate = LocalDateTime.now();
+        LocalDateTime startDate = minusMonths(endDate, 1); // 1달전
+
+        log.info("startDate={}, endDate={}", startDate, endDate);
+        return new ResultRes(productQueryService.productMainPageByReviewAvgRate(offset, limit, startDate, endDate));
+    }
+
+    private LocalDateTime minusMonths(LocalDateTime standardLocalDateTime, int months) { // n달전 LocalDateTime
+        return standardLocalDateTime.minusMonths(months)
                 .withHour(0)
                 .withMinute(0)
                 .withSecond(0)
                 .withNano(0);
-        log.info("startDate={}, endDate={}", startDate, endDate);
-        return new ResultRes(productQueryService.productSigSrcAndIdByOrderCount(offset, limit, startDate, endDate));
     }
 
     private List<PercentAndPriceRes> convertToPricePercentDTOS(List<SellerAndTotalPricePerCategoryDTO> params, Long totalPriceSum, Long productId) {

@@ -6,7 +6,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import creative.market.domain.order.OrderStatus;
 import creative.market.domain.product.Product;
 import creative.market.domain.product.ProductStatus;
-import creative.market.domain.product.QProductImage;
 import creative.market.repository.dto.ProductSearchConditionReq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -18,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static creative.market.domain.QReview.*;
 import static creative.market.domain.category.QGrade.*;
 import static creative.market.domain.category.QGradeCriteria.*;
 import static creative.market.domain.category.QItem.*;
@@ -27,7 +27,6 @@ import static creative.market.domain.category.QKindGrade.*;
 import static creative.market.domain.order.QOrder.order;
 import static creative.market.domain.order.QOrderProduct.*;
 import static creative.market.domain.product.QProduct.*;
-import static creative.market.domain.product.QProductImage.*;
 import static creative.market.domain.user.QUser.*;
 
 @Repository
@@ -50,7 +49,7 @@ public class ProductRepository {
 
     public List<Product> findProductListOrderByCreatedDateDesc(int limit) {
         return queryFactory.selectFrom(product)
-                .orderBy(product.createdDate.desc(),product.name.asc())
+                .orderBy(product.createdDate.desc(), product.name.asc())
                 .limit(limit)
                 .fetch();
     }
@@ -136,7 +135,7 @@ public class ProductRepository {
                         .join(kindGrade.kind, kind).fetchJoin()
                         .join(kind.item, item).fetchJoin()
                         .join(item.itemCategory, itemCategory)
-                        .where(product.id.eq(productId),productExistCheck())
+                        .where(product.id.eq(productId), productExistCheck())
                         .fetchOne()
         );
     }
@@ -150,14 +149,31 @@ public class ProductRepository {
     }
 
     public List<Long> findProductIdByOrderCountDesc(int offset, int limit, LocalDateTime startDate, LocalDateTime endDate) {
-        // 전체 카테고리에서 판매횟수 내림차순 정렬, 조건에 맞는 productId 리스트 리턴
+        // 전체 카테고리에서 판매횟수 내림차순 정렬 + 상품 등록 날짜 내림차순 정렬 ->  조건에 맞는 productId 리스트 리턴
         return queryFactory.select(product.id)
                 .from(orderProduct)
                 .join(orderProduct.product, product)
                 .join(orderProduct.order, order)
-                .where(dateBetween(startDate, endDate),productExistCheck(),orderStatus())
+                .where(orderCreatedDateBetween(startDate, endDate),
+                        productExistCheck(),
+                        orderStatus())
                 .groupBy(product)
-                .orderBy(orderProduct.count().desc(), product.createdDate.asc())
+                .orderBy(orderProduct.count().desc(), product.createdDate.desc())
+                .limit(limit)
+                .offset(offset)
+                .fetch();
+    }
+
+    public List<Long> findProductIdByReviewCountDesc(int offset, int limit, LocalDateTime startDate, LocalDateTime endDate) {
+        // 전체 카테고리에서 별점 평균 내림차순 정렬 + 리뷰 개수 내림차순 정렬 + 상품 등록 날짜 내림차순 정렬 같으면 조건에 맞는 productId 리스트 리턴
+        return queryFactory.select(product.id)
+                .from(review)
+                .join(review.product, product)
+                .where(
+                        reviewCreatedDateBetween(startDate, endDate),
+                        productExistCheck())
+                .groupBy(product.id)
+                .orderBy(review.rate.avg().desc(), review.count().desc(), product.createdDate.desc())
                 .limit(limit)
                 .offset(offset)
                 .fetch();
@@ -184,8 +200,12 @@ public class ProductRepository {
                 .fetchOne();
     }
 
-    private BooleanExpression dateBetween(LocalDateTime startDate, LocalDateTime endDate) {
+    private BooleanExpression orderCreatedDateBetween(LocalDateTime startDate, LocalDateTime endDate) {
         return startDate != null && endDate != null ? order.createdDate.between(startDate, endDate) : null;
+    }
+
+    private BooleanExpression reviewCreatedDateBetween(LocalDateTime startDate, LocalDateTime endDate) {
+        return startDate != null && endDate != null ? review.createdDate.between(startDate, endDate) : null;
     }
 
     private OrderSpecifier<?> orderCondition(String orderBy) {
