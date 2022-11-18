@@ -52,6 +52,7 @@ public class ProductController {
     private final ProductService productService;
     private final ProductQueryService productQueryService;
 
+    private final static int MAIN_PAGE_LIMIT = 4;
     @GetMapping
     public PagingResultRes getProductList(@Valid ProductSearchConditionReq searchCondition,
                                           @RequestParam(defaultValue = "10") @Min(1) int pageSize,
@@ -141,33 +142,30 @@ public class ProductController {
     @GetMapping("/main-page/latest")
     public ResultRes mainPageLatestByAllCategory() { // 메인 페이지 시간순 조회
 
-        int limit = 4;
         int offset = 0;
-        return new ResultRes(productQueryRepository.findProductMainPageByLatestCreatedDate(offset, limit));
+        return new ResultRes(productQueryRepository.findProductMainPageByLatestCreatedDate(offset, MAIN_PAGE_LIMIT));
     }
 
     @GetMapping("/main-page/order-count")
     public ResultRes mainPageOrderCntByAllCategory() { // 메인 페이지 판매 횟수순 조회
-        int limit = 4;
-        int offset = 0;
 
+        int offset = 0;
         LocalDateTime endDate = LocalDateTime.now();
         LocalDateTime startDate = minusMonths(endDate, 1); // 1달전
 
         log.info("startDate={}, endDate={}", startDate, endDate);
-        return new ResultRes(productQueryService.productMainPageByOrderCount(offset, limit, startDate, endDate));
+        return new ResultRes(productQueryService.productMainPageByOrderCount(offset, MAIN_PAGE_LIMIT, startDate, endDate));
     }
 
     @GetMapping("/main-page/review-rate-avg")
     public ResultRes mainPageReviewRateAvgByAllCategory() { // 메인 페이지 별점 평균 순 조회
-        int limit = 5;
-        int offset = 0;
 
+        int offset = 0;
         LocalDateTime endDate = LocalDateTime.now();
         LocalDateTime startDate = minusMonths(endDate, 1); // 1달전
 
         log.info("startDate={}, endDate={}", startDate, endDate);
-        return new ResultRes(productQueryService.productMainPageByReviewAvgRate(offset, limit, startDate, endDate));
+        return new ResultRes(productQueryService.productMainPageByReviewAvgRate(offset, MAIN_PAGE_LIMIT, startDate, endDate));
     }
 
     private LocalDateTime minusMonths(LocalDateTime standardLocalDateTime, int months) { // n달전 LocalDateTime
