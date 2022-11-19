@@ -12,7 +12,8 @@ spring:
   profiles:
     include:
       - db
-
+  messages:
+    basename: errors
 
   servlet:
     multipart:  # 파일 용량 제한

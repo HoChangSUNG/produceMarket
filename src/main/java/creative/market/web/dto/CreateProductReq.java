@@ -17,17 +17,17 @@ import java.util.List;
 @AllArgsConstructor
 public class CreateProductReq {
 
-    @NotNull(message = "카테고리를 선택해주세요")
+    @NotNull
     private Long kindGradeId;
 
-    @NotBlank(message = "상품 이름을 입력해주세요")
+    @NotBlank
     private String name;
 
-    @NotNull(message = "가격을 입력해주세요")
+    @NotNull
     @Min(1)
     private Integer price;
 
-    @NotBlank(message = "내용을 입력해주세요")
+    @NotBlank
     private String info;
 
     private List<MultipartFile> img;

@@ -209,7 +209,7 @@ public class ProductRepository {
     }
 
     private OrderSpecifier<?> orderCondition(String orderBy) {
-        if (orderBy.equals("latest") || !StringUtils.hasText(orderBy)) { // 최신순
+        if (!StringUtils.hasText(orderBy) || orderBy.equals("latest")) { // 최신순
             return product.createdDate.desc();
         } else if (orderBy.equals("price")) {//가격순
             return product.price.desc();

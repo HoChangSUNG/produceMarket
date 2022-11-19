@@ -12,7 +12,6 @@ spring:
     include:
       - testDb
 
-
 logging:
   level:
     org.hibernate.SQL: debug

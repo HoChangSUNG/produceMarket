@@ -1,34 +1,37 @@
 package creative.market.exception;
 
+import creative.market.util.ValidatorMessageUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class ExControllerAdvice {
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ErrorRes methodArgumentExHandle(MethodArgumentNotValidException ex) {
-        return new ErrorRes(HttpStatus.BAD_REQUEST.value(), ex.getBindingResult().getAllErrors().get(0).getDefaultMessage());
-    }
+    private final ValidatorMessageUtils validatorMessageUtils;
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(BindException.class)
     public ErrorRes BindException(BindException ex) {
-        return new ErrorRes(HttpStatus.BAD_REQUEST.value(), ex.getBindingResult().getAllErrors().get(0).getDefaultMessage());
+        BindingResult bindingResult = ex.getBindingResult();
+        log.error("error{}",bindingResult.toString());
+        return new ErrorRes(HttpStatus.BAD_REQUEST.value(), validatorMessageUtils.getValidationMessage(bindingResult));
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(FileSaveException.class)
-    public ErrorRes FileSaveException(FileSaveException ex) { // 파일 저장 오류
+    public ErrorRes FileSaveException(FileSaveException ex) { // 파일 저장 오
         return new ErrorRes(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 
