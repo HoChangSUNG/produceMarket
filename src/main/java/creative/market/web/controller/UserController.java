@@ -99,10 +99,10 @@ public class UserController {
 
     @DeleteMapping
     @LoginCheck(type = {UserType.BUYER,UserType.SELLER})
-    public ResultRes delete(@RequestBody PasswordReq password, @Login LoginUserDTO loginUserDTO) {
-        log.info("deletedPw={}",password.getPassword());
-        userService.delete(loginUserDTO.getId(), password.getPassword(), loginUserDTO.getUserType());
+    public ResultRes delete(@RequestBody PasswordReq password, @Login LoginUserDTO loginUserDTO,HttpServletRequest request) {
 
+        userService.delete(loginUserDTO.getId(), password.getPassword(), loginUserDTO.getUserType());
+        SessionUtils.expire(request);
         return new ResultRes(new MessageRes("회원탈퇴 성공"));
     }
 
