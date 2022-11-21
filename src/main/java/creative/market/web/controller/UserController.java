@@ -15,6 +15,7 @@ import creative.market.service.dto.UserInfoRes;
 import creative.market.util.SessionUtils;
 import creative.market.web.dto.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +24,7 @@ import javax.validation.Valid;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user")
+@Slf4j
 public class UserController {
 
     private final UserService userService;
@@ -97,8 +99,9 @@ public class UserController {
 
     @DeleteMapping
     @LoginCheck(type = {UserType.BUYER,UserType.SELLER})
-    public ResultRes delete(@RequestBody String password, @Login LoginUserDTO loginUserDTO) {
-        userService.delete(loginUserDTO.getId(), password, loginUserDTO.getUserType());
+    public ResultRes delete(@RequestBody PasswordReq password, @Login LoginUserDTO loginUserDTO) {
+        log.info("deletedPw={}",password.getPassword());
+        userService.delete(loginUserDTO.getId(), password.getPassword(), loginUserDTO.getUserType());
 
         return new ResultRes(new MessageRes("회원탈퇴 성공"));
     }
