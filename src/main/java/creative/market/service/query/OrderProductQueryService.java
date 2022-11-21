@@ -5,24 +5,25 @@ import creative.market.exception.NotExistOrder;
 import creative.market.repository.dto.*;
 import creative.market.repository.order.OrderProductRepository;
 import creative.market.repository.query.OrderProductQueryRepository;
-import creative.market.service.dto.OrderCountCompareByPeriodRes;
-import creative.market.service.dto.OrderHistoryDTO;
-import creative.market.service.dto.PriceCompareByPeriodRes;
-import creative.market.service.dto.OrderPricePercentileGraphByPeriodRes;
+import creative.market.service.dto.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
+@Slf4j
 public class OrderProductQueryService {
 
     private final OrderProductQueryRepository orderProductQueryRepository;
@@ -30,26 +31,56 @@ public class OrderProductQueryService {
 
     public List<OrderHistoryDTO> findBuyerOrderPerPeriod(LocalDateTime startDate, LocalDateTime endDate, Long userId, int offset, int pageSize) {
         List<BuyerOrderPerPeriodDTO> list = orderProductQueryRepository.findBuyerOrderPerPeriod(startDate, endDate, userId, offset, pageSize);
-        Map<Long, List<BuyerOrderPerPeriodDTO>> collect = list.stream()
-                .collect(Collectors.groupingBy(BuyerOrderPerPeriodDTO::getOrderId));
+        DateFormat f = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+
+        log.info("list size = {}", list.size());
+
+        List<Map<Long, List<BuyerOrderPerPeriodDTO>>> collect = list.stream()
+                .collect(Collectors.groupingBy(BuyerOrderPerPeriodDTO::getOrderId))
+                .entrySet().stream().sorted((o1, o2) -> {
+                    Date d1 = null;
+                    Date d2 = null;
+                    try {
+                        d1 = f.parse(o1.getValue().get(0).getCreatedDate());
+                        d2 = f.parse(o2.getValue().get(0).getCreatedDate());
+                    } catch (ParseException e) {
+                    }
+                    return -d1.compareTo(d2);
+                }).map(entry -> {
+                    Map<Long, List<BuyerOrderPerPeriodDTO>> map = new HashMap();
+                    map.put(entry.getKey(), entry.getValue());
+                    return map;
+                })
+                .collect(Collectors.toList());
 
         List<OrderHistoryDTO> result = new ArrayList<>();
 
-        for (Long key : collect.keySet()) {
-            List<BuyerOrderPerPeriodDTO> dtos = collect.get(key);
-            int sum = dtos.stream()
-                    .filter(dto -> dto.getStatus().equals(OrderStatus.ORDER.toString()))
-                    .mapToInt(v -> v.getCount() * v.getPrice())
-                    .sum();
+        for(Map map : collect) {
+            for (Object o : map.keySet()) {
+                List<BuyerOrderPerPeriodDTO> dtos = (List<BuyerOrderPerPeriodDTO>) map.get(o);
+                Long key = (Long) o;
+                int sum = dtos.stream()
+                        .filter(dto -> dto.getStatus().equals(OrderStatus.ORDER.toString()))
+                        .mapToInt(v -> v.getCount() * v.getPrice())
+                        .sum();
 
-            int cnt = (int) dtos.stream()
-                    .filter(dto -> dto.getStatus().equals(OrderStatus.ORDER.toString()))
-                    .count();
+                int cnt = (int) dtos.stream()
+                        .filter(dto -> dto.getStatus().equals(OrderStatus.ORDER.toString()))
+                        .count();
 
-            result.add(new OrderHistoryDTO(key, cnt, sum, dtos.get(0).getCreatedDate(), dtos));
+                result.add(new OrderHistoryDTO(key, cnt, sum, dtos.get(0).getCreatedDate(), dtos));
+            }
         }
 
         return result;
+    }
+
+    public TrustScoreGraphByPeriodRes findSellerTrustScoreByPeriod(YearMonth startDate, YearMonth endDate, Long sellerId) {
+        return convertToTrustScoreGraphByPeriod(orderProductQueryRepository.findSellerTrustScoreByPeriod(startDate, endDate, sellerId));
+    }
+
+    public TrustScorePercentileGraphByPeriodRes findSellerTrustScorePercentileByPeriod(YearMonth startDate, YearMonth endDate, Long sellerId) {
+        return convertToTrustScorePercentileGraphByPeriod(orderProductQueryRepository.findSellerTrustScorePercentileByPeriod(startDate, endDate, sellerId));
     }
 
     public PriceCompareByPeriodRes findSellerTotalPriceCompareByPeriod(YearMonth startDate, YearMonth endDate, CategoryParamDTO categoryParamDTO, Long sellerId) { // 기간별 판매액 비교 그래프
@@ -157,6 +188,26 @@ public class OrderProductQueryService {
                 .map(SellerPercentileDTO::getPercentile)
                 .collect(Collectors.toList());
         return new OrderPricePercentileGraphByPeriodRes(dateList, percentileList);
+    }
+
+    private TrustScoreGraphByPeriodRes convertToTrustScoreGraphByPeriod(List<SellerTrustScoreByPeriodDTO> trustScoreList) {
+        List<String> dateList = trustScoreList.stream()
+                .map(SellerTrustScoreByPeriodDTO::getDate)
+                .collect(Collectors.toList());
+        List<String> scoreList = trustScoreList.stream()
+                .map(SellerTrustScoreByPeriodDTO::getTrustScore)
+                .collect(Collectors.toList());
+        return new TrustScoreGraphByPeriodRes(dateList, scoreList);
+    }
+
+    private TrustScorePercentileGraphByPeriodRes convertToTrustScorePercentileGraphByPeriod(List<SellerTrustScorePercentileByPeriodDTO> percentileList) {
+        List<String> dateList = percentileList.stream()
+                .map(SellerTrustScorePercentileByPeriodDTO::getDate)
+                .collect(Collectors.toList());
+        List<String> percentileScoreList = percentileList.stream()
+                .map(SellerTrustScorePercentileByPeriodDTO::getPercentile)
+                .collect(Collectors.toList());
+        return new TrustScorePercentileGraphByPeriodRes(dateList, percentileScoreList);
     }
 
 

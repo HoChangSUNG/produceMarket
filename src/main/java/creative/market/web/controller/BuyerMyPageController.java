@@ -7,6 +7,7 @@ import creative.market.argumentresolver.Login;
 import creative.market.repository.dto.BuyerTotalPricePerPeriodDTO;
 import creative.market.repository.query.OrderProductQueryRepository;
 import creative.market.service.dto.LoginUserDTO;
+import creative.market.service.dto.OrderHistoryDTO;
 import creative.market.service.query.OrderProductQueryService;
 import creative.market.util.PagingUtils;
 import creative.market.web.dto.*;
@@ -36,12 +37,10 @@ public class BuyerMyPageController {
 
     @GetMapping("/order-history")
     @LoginCheck(type = {UserType.BUYER, UserType.SELLER})
-    public PagingResultRes getOrderHistoryByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq,
+    public PagingResultPriceRes getOrderHistoryByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq,
                                                    @RequestParam(defaultValue = "10") @Min(1) int pageSize,
                                                    @RequestParam(defaultValue = "1") @Min(1) int pageNum,
                                                    @Login LoginUserDTO loginUserDTO) {
-
-        checkRightPeriod(yearMonthPeriodReq.getStartDate(), yearMonthPeriodReq.getEndDate());
 
         int offset = PagingUtils.getOffset(pageNum, pageSize);
 
@@ -49,8 +48,12 @@ public class BuyerMyPageController {
         LocalDateTime endDate = endMonthOfDayLocalDateTime(yearMonthPeriodReq.getEndDate()); // 종료 날짜
 
         int total = orderProductQueryRepository.findBuyerOrderPerPeriodTotalCount(startDate, endDate, loginUserDTO.getId()).intValue();
+        List<OrderHistoryDTO> result = orderProductQueryService.findBuyerOrderPerPeriod(startDate, endDate, loginUserDTO.getId(), offset, pageSize);
+        int totalPrice = result.stream()
+                .mapToInt(v -> v.getTotalPrice())
+                .sum();
 
-        return new PagingResultRes(orderProductQueryService.findBuyerOrderPerPeriod(startDate, endDate, loginUserDTO.getId(), offset, pageSize), pageNum, total);
+        return new PagingResultPriceRes(result, totalPrice, pageNum, total);
     }
 
     @GetMapping("/order-price-statistics")

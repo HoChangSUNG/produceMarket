@@ -55,13 +55,16 @@ public class Product extends CreatedDateAndStatus {
         this.info = info;
         this.kindGrade = kindGrade;
         this.user = user;
+        if(user != null) {
+            user.getProducts().add(this);
+        }
+
         if (ordinalProductImages != null) {
             ordinalProductImages.forEach(productImage -> productImage.changeProduct(this));
         }
         if (signatureProductImage != null) {
             signatureProductImage.changeProduct(this);
         }
-
     }
 
     public ProductImage getSignatureProductImage() { // 대표사진 가져오기

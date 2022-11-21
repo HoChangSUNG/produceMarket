@@ -1,14 +1,17 @@
 package creative.market.repository.user;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import creative.market.domain.user.Buyer;
 import creative.market.domain.user.QBuyer;
+import creative.market.domain.user.UserStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
 import java.util.Optional;
 
+import static creative.market.domain.user.QAdmin.admin;
 import static creative.market.domain.user.QBuyer.*;
 import static creative.market.domain.user.QUser.user;
 
@@ -29,7 +32,7 @@ public class BuyerRepository {
         return Optional.ofNullable(
                 queryFactory
                         .selectFrom(buyer)
-                        .where(buyer.loginId.eq(loginId).and(buyer.password.eq(password)))
+                        .where(loginIdEq(loginId), passwordEq(password), buyerExistCheck())
                         .fetchOne());
     }
 
@@ -37,12 +40,16 @@ public class BuyerRepository {
         return Optional.ofNullable(
                 queryFactory
                         .selectFrom(buyer)
-                        .where(buyer.loginId.eq(loginId))
+                        .where(loginIdEq(loginId), buyerExistCheck())
                         .fetchOne());
     }
 
     public Optional<Buyer> findById(Long id) {
-        return Optional.ofNullable(em.find(Buyer.class, id));
+        return Optional.ofNullable(queryFactory
+                .selectFrom(buyer)
+                .where(buyerExistCheck(), buyerEq(id))
+                .fetchOne()
+        );
     }
 
     public void updateType(Long id) {
@@ -52,5 +59,21 @@ public class BuyerRepository {
 
         em.flush();
         em.clear();
+    }
+
+    private BooleanExpression buyerExistCheck() {
+        return buyer.status.eq(UserStatus.EXIST);
+    }
+
+    private BooleanExpression loginIdEq(String loginId) {
+        return loginId != null ? buyer.loginId.eq(loginId) : null;
+    }
+
+    private BooleanExpression passwordEq(String password) {
+        return password != null ? buyer.password.eq(password) : null;
+    }
+
+    private BooleanExpression buyerEq(Long buyerId) {
+        return buyerId != null ? buyer.id.eq(buyerId) : null;
     }
 }

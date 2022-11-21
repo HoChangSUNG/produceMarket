@@ -2,26 +2,19 @@ package creative.market.service;
 
 import creative.market.aop.UserType;
 import creative.market.domain.Address;
-import creative.market.domain.user.Admin;
-import creative.market.domain.user.Buyer;
-import creative.market.domain.user.Seller;
-import creative.market.domain.user.User;
+import creative.market.domain.product.ProductStatus;
+import creative.market.domain.user.*;
 import creative.market.exception.DuplicateException;
 import creative.market.exception.LoginAuthenticationException;
 import creative.market.repository.user.AdminRepository;
 import creative.market.repository.user.BuyerRepository;
 import creative.market.repository.user.SellerRepository;
 import creative.market.repository.user.UserRepository;
-import creative.market.service.dto.LoginRes;
-import creative.market.service.dto.LoginUserDTO;
-import creative.market.service.dto.UserInfoRes;
-import creative.market.util.SessionUtils;
 import creative.market.web.dto.CreateAndChangeUserReq;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -90,8 +83,23 @@ public class UserService {
     }
 
     @Transactional
-    public void delete(Long id) {
-        userRepository.delete(id);
+    public Long delete(Long id, String password, UserType userType) {
+        User findUser = userRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("회원이 존재하지 않습니다."));
+
+        if(!findUser.getPassword().equals(password)) {
+            throw new LoginAuthenticationException("비밀번호가 일치하지 않습니다.");
+        }
+
+        findUser.changeStatus(UserStatus.DELETED);
+
+        if(userType.equals(UserType.SELLER)) {
+            findUser.getProducts().stream()
+                    .filter(p -> p.getStatus().equals(ProductStatus.EXIST))
+                    .forEach(p -> p.changeStatus(ProductStatus.DELETED));
+        }
+
+        return findUser.getId();
     }
 
     public Buyer getBuyer(Long id) {

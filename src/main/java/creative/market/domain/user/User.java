@@ -1,9 +1,12 @@
 package creative.market.domain.user;
 
 import creative.market.domain.Address;
+import creative.market.domain.product.Product;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -28,6 +31,12 @@ public abstract class User {
 
     private String phoneNumber;
 
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
+
+    @OneToMany(mappedBy = "user")
+    private List<Product> products = new ArrayList<>();
+
     public User(String name, String loginId, String password, String birth, String email, String phoneNumber) {
         this.name = name;
         this.loginId = loginId;
@@ -44,5 +53,14 @@ public abstract class User {
         this.birth = birth;
         this.email = email;
         this.phoneNumber = phoneNumber;
+    }
+
+    @PrePersist
+    private void prePersist() {
+        status = UserStatus.EXIST;
+    }
+
+    public void changeStatus(UserStatus status) {
+        this.status = status;
     }
 }

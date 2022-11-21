@@ -188,7 +188,7 @@ public class ProductRepository {
                 .where(productExistCheck(), product.user.id.eq(userId))
                 .offset(offset)
                 .limit(limit)
-                .orderBy(product.createdDate.asc())
+                .orderBy(product.createdDate.desc())
                 .fetch();
     }
 

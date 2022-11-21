@@ -95,6 +95,14 @@ public class UserController {
         return new ResultRes(new MessageRes("회원정보 수정 성공"));
     }
 
+    @DeleteMapping
+    @LoginCheck(type = {UserType.BUYER,UserType.SELLER})
+    public ResultRes delete(@RequestBody String password, @Login LoginUserDTO loginUserDTO) {
+        userService.delete(loginUserDTO.getId(), password, loginUserDTO.getUserType());
+
+        return new ResultRes(new MessageRes("회원탈퇴 성공"));
+    }
+
     private Buyer createBuyer(CreateAndChangeUserReq req) {
         Buyer buyer = Buyer.builder()
                 .name(req.getName())
