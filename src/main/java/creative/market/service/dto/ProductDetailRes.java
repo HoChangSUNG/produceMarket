@@ -23,13 +23,13 @@ public class ProductDetailRes {
     private String retailUnit;
     private String sellerName;
     private String sellerRank;
-    private int sellerPercent;
+    private String sellerPercent;
     private List<String> ordinalImgSrc;
     private String signatureImgSrc;
     private int productAvgPrice;
     private LatestRetailAndWholesaleDTO latestMarketPrice;
 
-    public ProductDetailRes(Product product, String sellerRank, int sellerPercent,int productAvgPrice, LatestRetailAndWholesaleDTO latestMarketPrice) {
+    public ProductDetailRes(Product product, String sellerRank, String sellerPercent,int productAvgPrice, LatestRetailAndWholesaleDTO latestMarketPrice) {
         this.productId = product.getId();
         this.kindGradeId = product.getKindGrade().getId();
         this.productName = product.getName();

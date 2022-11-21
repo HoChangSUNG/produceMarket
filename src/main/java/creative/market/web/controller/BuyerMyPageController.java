@@ -11,12 +11,11 @@ import creative.market.service.dto.OrderHistoryDTO;
 import creative.market.service.query.OrderProductQueryService;
 import creative.market.util.PagingUtils;
 import creative.market.web.dto.*;
+import creative.market.web.validation.YearMonthPeriodReqValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
@@ -34,7 +33,12 @@ public class BuyerMyPageController {
 
     private final OrderProductQueryService orderProductQueryService;
     private final OrderProductQueryRepository orderProductQueryRepository;
+    private final YearMonthPeriodReqValidator yearMonthPeriodValidator;
 
+    @InitBinder(value = "yearMonthPeriodReq")
+    public void init(WebDataBinder dataBinder){
+        dataBinder.addValidators(yearMonthPeriodValidator);
+    }
     @GetMapping("/order-history")
     @LoginCheck(type = {UserType.BUYER, UserType.SELLER})
     public PagingResultPriceRes getOrderHistoryByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq,

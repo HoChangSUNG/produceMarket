@@ -11,8 +11,10 @@ import creative.market.service.query.OrderProductQueryService;
 import creative.market.service.query.ProductQueryService;
 import creative.market.util.PagingUtils;
 import creative.market.web.dto.*;
+import creative.market.web.validation.YearMonthPeriodReqValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -32,6 +34,11 @@ public class SellerMyPageController {
     private final ProductRepository productRepository;
     private final OrderProductQueryRepository orderProductQueryRepository;
     private final OrderProductQueryService orderProductQueryService;
+    private final YearMonthPeriodReqValidator yearMonthPeriodValidator;
+    @InitBinder(value = "yearMonthPeriodReq")
+    public void init(WebDataBinder dataBinder){
+        dataBinder.addValidators(yearMonthPeriodValidator);
+    }
 
     @GetMapping("/sale-list")
     @LoginCheck(type = UserType.SELLER)
@@ -55,8 +62,6 @@ public class SellerMyPageController {
             @RequestParam(defaultValue = "10") @Min(1) int pageSize,
             @RequestParam(defaultValue = "1") @Min(1) int pageNum,
             @Login LoginUserDTO loginUserDTO) {
-
-        checkRightPeriod(yearMonthPeriodReq.getStartDate(), yearMonthPeriodReq.getEndDate());
 
         LocalDateTime startDate = startMonthOfDayLocalDateTime(yearMonthPeriodReq.getStartDate()); // 시작 날짜
         LocalDateTime endDate = endMonthOfDayLocalDateTime(yearMonthPeriodReq.getEndDate()); // 종료 날짜
@@ -99,8 +104,6 @@ public class SellerMyPageController {
         YearMonth startDate = yearMonthPeriodReq.getStartDate();
         YearMonth endDate = yearMonthPeriodReq.getEndDate();
 
-        checkRightPeriod(startDate, endDate);
-
         return new ResultRes<>(orderProductQueryService.findSellerTotalPriceCompareByPeriod(startDate,endDate,categoryParamDTO,loginUserDTO.getId()));
     }
 
@@ -110,8 +113,6 @@ public class SellerMyPageController {
                                                      @Login LoginUserDTO loginUserDTO) { // 기간별 해당 판매자 판매액 백분위 그래프
         YearMonth startDate = yearMonthPeriodReq.getStartDate();
         YearMonth endDate = yearMonthPeriodReq.getEndDate();
-
-        checkRightPeriod(startDate, endDate);
 
         return new ResultRes<>(orderProductQueryService.findSellerPercentileList(startDate,endDate,categoryParamDTO, loginUserDTO.getId()));
     }
@@ -123,20 +124,7 @@ public class SellerMyPageController {
         YearMonth startDate = yearMonthPeriodReq.getStartDate();
         YearMonth endDate = yearMonthPeriodReq.getEndDate();
 
-        checkRightPeriod(startDate, endDate);
-
         return new ResultRes<>(orderProductQueryService.findSellerTotalOrderCountCompareByPeriod(startDate,endDate,categoryParamDTO,loginUserDTO.getId()));
-    }
-
-    private void checkRightPeriod(YearMonth startDate, YearMonth endDate) {
-        if (!isRightPeriod(startDate, endDate)) {
-            throw new IllegalArgumentException("기간이 올바르지 않습니다");
-        }
-    }
-
-    private boolean isRightPeriod(YearMonth startDate, YearMonth endDate) {
-        // 날짜 기간이 올바른지(시작날짜가 종료날짜보다 같거나빠른지, 종료날짜가 현재 날짜보다 같거나 빠른지)
-        return startDate.compareTo(endDate) <= 0 && endDate.compareTo(YearMonth.now()) <= 0;
     }
 
     private LocalDateTime startMonthOfDayLocalDateTime(YearMonth yearMonth) { // MonthYear -> 시작 LocalDateTime 으로 변경

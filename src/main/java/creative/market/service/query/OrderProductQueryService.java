@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -86,6 +85,8 @@ public class OrderProductQueryService {
     public PriceCompareByPeriodRes findSellerTotalPriceCompareByPeriod(YearMonth startDate, YearMonth endDate, CategoryParamDTO categoryParamDTO, Long sellerId) { // 기간별 판매액 비교 그래프
 
         checkOrderProductExist(sellerId); // 특정 판매자의 상품이 판매된 적이 있는지
+
+
 
         //전체 판매자
         List<SellerPricePerPeriodDTO> allSellerTotalPrice = orderProductQueryRepository.findAllSellerTotalPricePerPeriodAndCategory(startDate, endDate, categoryParamDTO);
@@ -170,7 +171,7 @@ public class OrderProductQueryService {
             Long sellerCount = countByPeriod.get(i).getCount(); // 월별 판매자 수
             String date = countByPeriod.get(i).getDate(); // 년월  (2020-01)
             Long totalPrice = allSellerTotalPrice.get(i).getTotalPrice(); // 월별 카테고리별 총 판매액
-
+            log.info("date={}, 판매자 총 수={}, 전체 총 판매자 판매액={}",date,sellerCount,totalPrice);
             if (sellerCount == 0) {
                 sellerPricePerPeriodDTOS.add(new SellerPricePerPeriodDTO(0L, date));
             } else {

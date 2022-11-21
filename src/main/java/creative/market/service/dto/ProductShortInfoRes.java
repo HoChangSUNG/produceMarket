@@ -18,10 +18,10 @@ public class ProductShortInfoRes {
     private String createdDate;
     private String sellerName;
     private String sellerRank;
-    private int sellerPercent;
+    private String sellerPercent;
     private String signatureImgSrc;
 
-    public ProductShortInfoRes(Product product, String rank, int percent) {
+    public ProductShortInfoRes(Product product, String rank, String percent) {
         productId = product.getId();
         productName = product.getName();
         price = product.getPrice();
