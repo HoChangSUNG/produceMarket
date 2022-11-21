@@ -1,9 +1,11 @@
 package creative.market.repository.user;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import creative.market.domain.user.QUser;
 import creative.market.domain.user.Seller;
 import creative.market.domain.user.User;
+import creative.market.domain.user.UserStatus;
 import creative.market.util.SessionUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -21,13 +23,18 @@ public class UserRepository {
     private final JPAQueryFactory queryFactory;
 
     public Optional<User> findById(Long id) {
-        User user = em.find(User.class, id);
-        return Optional.ofNullable(user);
+        return Optional.ofNullable(queryFactory
+                .selectFrom(user)
+                .where(userExistCheck(), userEq(id))
+                .fetchOne());
     }
 
-    public void delete(Long id) {
-        User findUser = em.find(User.class, id);
-        em.remove(findUser);
+    private BooleanExpression userExistCheck() {
+        return user.status.eq(UserStatus.EXIST);
+    }
+
+    private BooleanExpression userEq(Long userId) {
+        return userId != null ? user.id.eq(userId) : null;
     }
 
 }

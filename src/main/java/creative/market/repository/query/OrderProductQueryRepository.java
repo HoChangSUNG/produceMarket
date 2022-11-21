@@ -414,6 +414,209 @@ public class OrderProductQueryRepository {
 
     }
 
+    public List<SellerTrustScoreByPeriodDTO> findSellerTrustScoreByPeriod(YearMonth startDate, YearMonth endDate, Long userId) {
+
+        String sql =
+                "  select ((85 * (1-(1 - op.percent_ranking))) + op.rate + op.date_score) as trust_score, ym as date\n" +
+                "   from(\n" +
+                "                select ym_seller.user_id,ifNull(count(op.user_id),0) count, ym, ifNull(op.rate,0) as rate,\n" +
+                "                PERCENT_RANK() OVER (partition by ym ORDER BY ifNull(count(op.user_id),0) asc) AS percent_ranking, \n" +
+                "                @diff \\:= timestampdiff(MONTH, date_format(ym_seller.change_date, '%Y-%m-%d'), date_format(STR_TO_DATE(ym,'%Y-%m'), '%Y-%m-01')),\n" +
+                "       CASE\n" +
+                "      when(@diff >= 24) then 10\n" +
+                "                        when(@diff >= 20 and @diff < 24) then 9\n" +
+                "                        when(@diff >= 16 and @diff < 20) then 8\n" +
+                "                        when(@diff >= 12 and @diff < 16) then 7\n" +
+                "                        when(@diff >= 10 and @diff < 12) then 6\n" +
+                "                        when(@diff >= 8 and @diff < 10) then 5\n" +
+                "                        when(@diff >= 6 and @diff < 8) then 4\n" +
+                "                        when(@diff >= 4 and @diff < 6) then 3\n" +
+                "                        when(@diff >= 2 and @diff < 4) then 2\n" +
+                "                        when(@diff >= 1 and @diff < 2) then 1\n" +
+                "                        else 0\n" +
+                "                        end as date_score\n" +
+                "                from (\n" +
+                "                ( select op.user_id as user_id, op.date, op.change_date, rv.rate \n" +
+                "                from (\n" +
+                "                        (select p.user_id as user_id, u.change_date, date_format(o.created_date,'%Y-%m')as date\n" +
+                "                        from order_product op\n" +
+                "                        join orders o on op.order_id = o.order_id\n" +
+                "                        join product p on op.product_id = p.product_id\n" +
+                "                        join user u on p.user_id = u.user_id\n" +
+                "                        where op.status = 'ORDER'\n" +
+                "         ) op \n" +
+                "                        join\n" +
+                "                        ( select rv.rate as rate, us.user_id as user_id, rv.date as date\n" +
+                "      from(\n" +
+                "      (select avg(r.rate) as rate, p.user_id as user_id, date_format(r.created_date, '%Y-%m') as date \n" +
+                "                        from order_product op\n" +
+                "      join product p on op.product_id = p.product_id\n" +
+                "      join review r on p.product_id = r.product_id\n" +
+                "                        group by p.user_id, date_format(r.created_date, '%Y-%m')) rv\n" +
+                "                        right join \n" +
+                "                        (\n" +
+                "       select user_id\n" +
+                "                            from user\n" +
+                "                            where user.dtype='Seller'\n" +
+                "                        ) us\n" +
+                "                        on rv.user_id = us.user_id)) rv\n" +
+                "      on op.user_id = rv.user_id\n" +
+                "    ))) op\n" +
+                "                right join\n" +
+                "                (\n" +
+                "                      select ym, user_id, change_date from year_month_data\n" +
+                "                      cross join user\n" +
+                "                      where user.dtype='Seller' and :startDate <= ym and ym <= :endDate\n" +
+                "                ) ym_seller\n" +
+                "                on op.user_id=ym_seller.user_id and op.date = ym_seller.ym\n" +
+                "                group by ym_seller.user_id, ym) op\n" +
+                "                where op.user_id = :userId\n" +
+                "    order by date;";
+
+        Query query = em.createNativeQuery(sql)
+                .setParameter("startDate", startDate.toString())
+                .setParameter("endDate", endDate.toString())
+                .setParameter("userId", userId);
+
+        return jpaResultMapper.list(query, SellerTrustScoreByPeriodDTO.class);
+    }
+
+    public List<SellerTrustScorePercentileByPeriodDTO> findSellerTrustScorePercentileByPeriod(YearMonth startDate, YearMonth endDate, Long userId) {
+
+        String sql =
+                "select op.percent_ranking*100 AS percentile, op.date as date\n" +
+                        "from (\n" +
+                        "  select op.user_id, PERCENT_RANK() OVER (partition by ym ORDER BY ifNull((85 * (1-(1 - op.percent_ranking))) + op.rate + op.date_score,0) asc) AS percent_ranking,\n" +
+                        "      ((85 * (1-(1 - op.percent_ranking))) + op.rate + op.date_score) as trust_score, ym as date\n" +
+                        "   from(\n" +
+                        "                select ym_seller.user_id,ifNull(count(op.user_id),0) count, ym, ifNull(op.rate,0) as rate,\n" +
+                        "                PERCENT_RANK() OVER (partition by ym ORDER BY ifNull(count(op.user_id),0) asc) AS percent_ranking, \n" +
+                        "                @diff \\:= timestampdiff(MONTH, date_format(ym_seller.change_date, '%Y-%m-%d'), date_format(STR_TO_DATE(ym,'%Y-%m'), '%Y-%m-01')),\n" +
+                        "       CASE\n" +
+                        "      when(@diff >= 24) then 10\n" +
+                        "                        when(@diff >= 20 and @diff < 24) then 9\n" +
+                        "                        when(@diff >= 16 and @diff < 20) then 8\n" +
+                        "                        when(@diff >= 12 and @diff < 16) then 7\n" +
+                        "                        when(@diff >= 10 and @diff < 12) then 6\n" +
+                        "                        when(@diff >= 8 and @diff < 10) then 5\n" +
+                        "                        when(@diff >= 6 and @diff < 8) then 4\n" +
+                        "                        when(@diff >= 4 and @diff < 6) then 3\n" +
+                        "                        when(@diff >= 2 and @diff < 4) then 2\n" +
+                        "                        when(@diff >= 1 and @diff < 2) then 1\n" +
+                        "                        else 0\n" +
+                        "                        end as date_score\n" +
+                        "                from (\n" +
+                        "                ( select op.user_id as user_id, op.date, op.change_date, rv.rate \n" +
+                        "                from (\n" +
+                        "                        (select p.user_id as user_id, u.change_date, date_format(o.created_date,'%Y-%m')as date\n" +
+                        "                        from order_product op\n" +
+                        "                        join orders o on op.order_id = o.order_id\n" +
+                        "                        join product p on op.product_id = p.product_id\n" +
+                        "                        join user u on p.user_id = u.user_id\n" +
+                        "                        where op.status = 'ORDER'\n" +
+                        "         ) op \n" +
+                        "                        join\n" +
+                        "                        ( select rv.rate as rate, us.user_id as user_id, rv.date as date\n" +
+                        "      from(\n" +
+                        "      (select avg(r.rate) as rate, p.user_id as  user_id, date_format(r.created_date, '%Y-%m') as date \n" +
+                        "                        from order_product op\n" +
+                        "      join product p on op.product_id = p.product_id\n" +
+                        "      join review r on p.product_id = r.product_id\n" +
+                        "                        group by p.user_id, date_format(r.created_date, '%Y-%m')) rv\n" +
+                        "                        right join \n" +
+                        "                        (\n" +
+                        "       select user_id\n" +
+                        "                            from user\n" +
+                        "                            where user.dtype='Seller'\n" +
+                        "                        ) us\n" +
+                        "                        on rv.user_id = us.user_id)) rv\n" +
+                        "      on op.user_id = rv.user_id\n" +
+                        "    ))) op\n" +
+                        "                right join\n" +
+                        "                (\n" +
+                        "                      select ym, user_id, change_date from year_month_data\n" +
+                        "                      cross join user\n" +
+                        "                      where user.dtype='Seller' and :startDate <= ym and ym <= :endDate\n" +
+                        "                ) ym_seller\n" +
+                        "                on op.user_id=ym_seller.user_id and op.date = ym_seller.ym\n" +
+                        "                group by ym_seller.user_id, ym) op\n" +
+                        "    order by date\n" +
+                        "                ) op\n" +
+                        "                where op.user_id = :userId";
+
+        Query query = em.createNativeQuery(sql)
+                .setParameter("startDate", startDate.toString())
+                .setParameter("endDate", endDate.toString())
+                .setParameter("userId", userId);
+
+        return jpaResultMapper.list(query, SellerTrustScorePercentileByPeriodDTO.class);
+    }
+
+    public String findSellerTrustScore(Long userId) {
+
+        String sql =
+                "  select ((85 * (1-(1 - op.percent_ranking))) + op.rate + op.date_score) as trust_score\n" +
+                        "   from(\n" +
+                        "                select ym_seller.user_id,ifNull(count(op.user_id),0) count, ym, ifNull(op.rate,0) as rate,\n" +
+                        "                PERCENT_RANK() OVER (partition by ym ORDER BY ifNull(count(op.user_id),0) asc) AS percent_ranking, \n" +
+                        "                @diff \\:= timestampdiff(MONTH, date_format(ym_seller.change_date, '%Y-%m-%d'), date_format(STR_TO_DATE(ym,'%Y-%m'), '%Y-%m-01')),\n" +
+                        "       CASE\n" +
+                        "      when(@diff >= 24) then 10\n" +
+                        "                        when(@diff >= 20 and @diff < 24) then 9\n" +
+                        "                        when(@diff >= 16 and @diff < 20) then 8\n" +
+                        "                        when(@diff >= 12 and @diff < 16) then 7\n" +
+                        "                        when(@diff >= 10 and @diff < 12) then 6\n" +
+                        "                        when(@diff >= 8 and @diff < 10) then 5\n" +
+                        "                        when(@diff >= 6 and @diff < 8) then 4\n" +
+                        "                        when(@diff >= 4 and @diff < 6) then 3\n" +
+                        "                        when(@diff >= 2 and @diff < 4) then 2\n" +
+                        "                        when(@diff >= 1 and @diff < 2) then 1\n" +
+                        "                        else 0\n" +
+                        "                        end as date_score\n" +
+                        "                from (\n" +
+                        "                ( select op.user_id as user_id, op.date, op.change_date, rv.rate \n" +
+                        "                from (\n" +
+                        "                        (select p.user_id as user_id, u.change_date, date_format(o.created_date,'%Y-%m')as date\n" +
+                        "                        from order_product op\n" +
+                        "                        join orders o on op.order_id = o.order_id\n" +
+                        "                        join product p on op.product_id = p.product_id\n" +
+                        "                        join user u on p.user_id = u.user_id\n" +
+                        "                        where op.status = 'ORDER'\n" +
+                        "         ) op \n" +
+                        "                        join\n" +
+                        "                        ( select rv.rate as rate, us.user_id as user_id, rv.date as date\n" +
+                        "      from(\n" +
+                        "      (select avg(r.rate) as rate, p.user_id as user_id, date_format(r.created_date, '%Y-%m') as date \n" +
+                        "                        from order_product op\n" +
+                        "      join product p on op.product_id = p.product_id\n" +
+                        "      join review r on p.product_id = r.product_id\n" +
+                        "                        group by p.user_id, date_format(r.created_date, '%Y-%m')) rv\n" +
+                        "                        right join \n" +
+                        "                        (\n" +
+                        "       select user_id\n" +
+                        "                            from user\n" +
+                        "                            where user.dtype='Seller'\n" +
+                        "                        ) us\n" +
+                        "                        on rv.user_id = us.user_id)) rv\n" +
+                        "      on op.user_id = rv.user_id\n" +
+                        "     ))) op\n" +
+                        "                right join\n" +
+                        "                (\n" +
+                        "                      select ym, user_id, change_date from year_month_data\n" +
+                        "                      cross join user\n" +
+                        "                      where user.dtype='Seller' and :startDate <= ym and ym <= :endDate\n" +
+                        "                ) ym_seller\n" +
+                        "                on op.user_id=ym_seller.user_id and op.date = ym_seller.ym\n" +
+                        "                group by ym_seller.user_id, ym) op\n" +
+                        "                where op.user_id =:userId";
+
+        return String.format("%.2f", (Double) em.createNativeQuery(sql)
+                .setParameter("startDate", YearMonth.now().toString())
+                .setParameter("endDate", YearMonth.now().toString())
+                .setParameter("userId", userId)
+                .getSingleResult());
+    }
+
     private String categoryDynamic(CategoryParamDTO categoryParamDTO) {
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -452,7 +655,6 @@ public class OrderProductQueryRepository {
                 .join(orderProduct.product, product)
                 .join(product.productImages, productImage)
                 .where(dateBetween(startDate, endDate), userEq(userId), productImageType())
-                .orderBy(order.createdDate.asc())
                 .offset(offset)
                 .limit(pageSize)
                 .fetch();
@@ -479,7 +681,7 @@ public class OrderProductQueryRepository {
                 .join(order.user, user)
                 .join(product.productImages, productImage)
                 .where(dateBetween(startDate, endDate), orderStatus(), product.user.id.eq(userId), productImageType())
-                .orderBy(order.createdDate.asc())
+                .orderBy(order.createdDate.desc())
                 .offset(offset)
                 .limit(limit)
                 .fetch();

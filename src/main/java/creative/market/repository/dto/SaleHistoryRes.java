@@ -43,7 +43,7 @@ public class SaleHistoryRes {
         this.count = count;
         this.price = price;
         this.productName = productName;
-        this.createdDate = createdDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        this.createdDate = createdDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
         this.jibun = jibun;
         this.road = road;
         this.detailAddress = detailAddress;

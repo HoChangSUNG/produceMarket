@@ -32,6 +32,7 @@ public class SellerMyPageController {
     private final ProductRepository productRepository;
     private final OrderProductQueryRepository orderProductQueryRepository;
     private final OrderProductQueryService orderProductQueryService;
+
     @GetMapping("/sale-list")
     @LoginCheck(type = UserType.SELLER)
     public PagingResultRes getSaleList(
@@ -65,6 +66,30 @@ public class SellerMyPageController {
         int totalPageNum = PagingUtils.getTotalPageNum(total, pageSize);
 
         return new PagingResultRes(orderProductQueryRepository.findSaleHistoryPerPeriod(startDate, endDate, loginUserDTO.getId(), offset, pageSize), pageNum, totalPageNum);
+    }
+
+    @GetMapping("trust-score")
+    @LoginCheck(type = UserType.SELLER)
+    public ResultRes getTrustScore(@Login LoginUserDTO loginUserDTO) {
+        return new ResultRes(orderProductQueryRepository.findSellerTrustScore(loginUserDTO.getId()));
+    }
+
+    @GetMapping("/trust-score-statistics")
+    @LoginCheck(type = UserType.SELLER)
+    public ResultRes getTrustScoreByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq, @Login LoginUserDTO loginUserDTO) { // 기간별 신뢰점수 그래프
+        YearMonth startDate = yearMonthPeriodReq.getStartDate();
+        YearMonth endDate = yearMonthPeriodReq.getEndDate();
+
+        return new ResultRes(orderProductQueryService.findSellerTrustScoreByPeriod(startDate, endDate, loginUserDTO.getId()));
+    }
+
+    @GetMapping("/trust-score-percentile-statistics")
+    @LoginCheck(type = UserType.SELLER)
+    public ResultRes getTrustScorePercentileByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq, @Login LoginUserDTO loginUserDTO) { //기간별 신뢰점수 백분위 그래프
+        YearMonth startDate = yearMonthPeriodReq.getStartDate();
+        YearMonth endDate = yearMonthPeriodReq.getEndDate();
+
+        return new ResultRes(orderProductQueryService.findSellerTrustScorePercentileByPeriod(startDate, endDate, loginUserDTO.getId()));
     }
 
     @GetMapping("/order-price-statistics")
