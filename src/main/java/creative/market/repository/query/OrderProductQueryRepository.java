@@ -417,22 +417,21 @@ public class OrderProductQueryRepository {
     public List<SellerTrustScoreByPeriodDTO> findSellerTrustScoreByPeriod(YearMonth startDate, YearMonth endDate, Long userId) {
 
         String sql =
-                "  select ((85 * (1-(1 - op.percent_ranking))) + op.rate + op.date_score) as trust_score, ym as date\n" +
+                "  select ifNull((log10(count)*16.666 + op.rate*6 + op.date_score),0) as trust_score, ym as date\n" +
                 "   from(\n" +
                 "                select ym_seller.user_id,ifNull(count(op.user_id),0) count, ym, ifNull(op.rate,0) as rate,\n" +
-                "                PERCENT_RANK() OVER (partition by ym ORDER BY ifNull(count(op.user_id),0) asc) AS percent_ranking, \n" +
                 "                @diff \\:= timestampdiff(MONTH, date_format(ym_seller.change_date, '%Y-%m-%d'), date_format(STR_TO_DATE(ym,'%Y-%m'), '%Y-%m-01')),\n" +
                 "       CASE\n" +
-                "      when(@diff >= 24) then 10\n" +
-                "                        when(@diff >= 20 and @diff < 24) then 9\n" +
-                "                        when(@diff >= 16 and @diff < 20) then 8\n" +
-                "                        when(@diff >= 12 and @diff < 16) then 7\n" +
-                "                        when(@diff >= 10 and @diff < 12) then 6\n" +
-                "                        when(@diff >= 8 and @diff < 10) then 5\n" +
-                "                        when(@diff >= 6 and @diff < 8) then 4\n" +
-                "                        when(@diff >= 4 and @diff < 6) then 3\n" +
-                "                        when(@diff >= 2 and @diff < 4) then 2\n" +
-                "                        when(@diff >= 1 and @diff < 2) then 1\n" +
+                "      when(@diff >= 24) then 20\n" +
+                "                        when(@diff >= 20 and @diff < 24) then 18\n" +
+                "                        when(@diff >= 16 and @diff < 20) then 16\n" +
+                "                        when(@diff >= 12 and @diff < 16) then 14\n" +
+                "                        when(@diff >= 10 and @diff < 12) then 12\n" +
+                "                        when(@diff >= 8 and @diff < 10) then 10\n" +
+                "                        when(@diff >= 6 and @diff < 8) then 8\n" +
+                "                        when(@diff >= 4 and @diff < 6) then 6\n" +
+                "                        when(@diff >= 2 and @diff < 4) then 4\n" +
+                "                        when(@diff >= 1 and @diff < 2) then 2\n" +
                 "                        else 0\n" +
                 "                        end as date_score\n" +
                 "                from (\n" +
@@ -486,23 +485,22 @@ public class OrderProductQueryRepository {
         String sql =
                 "select op.percent_ranking*100 AS percentile, op.date as date\n" +
                         "from (\n" +
-                        "  select op.user_id, PERCENT_RANK() OVER (partition by ym ORDER BY ifNull((85 * (1-(1 - op.percent_ranking))) + op.rate + op.date_score,0) asc) AS percent_ranking,\n" +
-                        "      ((85 * (1-(1 - op.percent_ranking))) + op.rate + op.date_score) as trust_score, ym as date\n" +
+                        "  select op.user_id, PERCENT_RANK() OVER (partition by ym ORDER BY ifNull(log10(count)*16.666 + op.rate*6 + op.date_score,0) asc) AS percent_ranking,\n" +
+                        "      ym as date\n" +
                         "   from(\n" +
                         "                select ym_seller.user_id,ifNull(count(op.user_id),0) count, ym, ifNull(op.rate,0) as rate,\n" +
-                        "                PERCENT_RANK() OVER (partition by ym ORDER BY ifNull(count(op.user_id),0) asc) AS percent_ranking, \n" +
                         "                @diff \\:= timestampdiff(MONTH, date_format(ym_seller.change_date, '%Y-%m-%d'), date_format(STR_TO_DATE(ym,'%Y-%m'), '%Y-%m-01')),\n" +
                         "       CASE\n" +
-                        "      when(@diff >= 24) then 10\n" +
-                        "                        when(@diff >= 20 and @diff < 24) then 9\n" +
-                        "                        when(@diff >= 16 and @diff < 20) then 8\n" +
-                        "                        when(@diff >= 12 and @diff < 16) then 7\n" +
-                        "                        when(@diff >= 10 and @diff < 12) then 6\n" +
-                        "                        when(@diff >= 8 and @diff < 10) then 5\n" +
-                        "                        when(@diff >= 6 and @diff < 8) then 4\n" +
-                        "                        when(@diff >= 4 and @diff < 6) then 3\n" +
-                        "                        when(@diff >= 2 and @diff < 4) then 2\n" +
-                        "                        when(@diff >= 1 and @diff < 2) then 1\n" +
+                        "      when(@diff >= 24) then 20\n" +
+                        "                        when(@diff >= 20 and @diff < 24) then 18\n" +
+                        "                        when(@diff >= 16 and @diff < 20) then 16\n" +
+                        "                        when(@diff >= 12 and @diff < 16) then 14\n" +
+                        "                        when(@diff >= 10 and @diff < 12) then 12\n" +
+                        "                        when(@diff >= 8 and @diff < 10) then 10\n" +
+                        "                        when(@diff >= 6 and @diff < 8) then 8\n" +
+                        "                        when(@diff >= 4 and @diff < 6) then 6\n" +
+                        "                        when(@diff >= 2 and @diff < 4) then 4\n" +
+                        "                        when(@diff >= 1 and @diff < 2) then 2\n" +
                         "                        else 0\n" +
                         "                        end as date_score\n" +
                         "                from (\n" +
@@ -555,22 +553,21 @@ public class OrderProductQueryRepository {
     public String findSellerTrustScore(Long userId) {
 
         String sql =
-                "  select ((85 * (1-(1 - op.percent_ranking))) + op.rate + op.date_score) as trust_score\n" +
+                "  select ifNull((log10(count)*16.666 + op.rate*6 + op.date_score),0) as trust_score\n" +
                         "   from(\n" +
                         "                select ym_seller.user_id,ifNull(count(op.user_id),0) count, ym, ifNull(op.rate,0) as rate,\n" +
-                        "                PERCENT_RANK() OVER (partition by ym ORDER BY ifNull(count(op.user_id),0) asc) AS percent_ranking, \n" +
                         "                @diff \\:= timestampdiff(MONTH, date_format(ym_seller.change_date, '%Y-%m-%d'), date_format(STR_TO_DATE(ym,'%Y-%m'), '%Y-%m-01')),\n" +
                         "       CASE\n" +
-                        "      when(@diff >= 24) then 10\n" +
-                        "                        when(@diff >= 20 and @diff < 24) then 9\n" +
-                        "                        when(@diff >= 16 and @diff < 20) then 8\n" +
-                        "                        when(@diff >= 12 and @diff < 16) then 7\n" +
-                        "                        when(@diff >= 10 and @diff < 12) then 6\n" +
-                        "                        when(@diff >= 8 and @diff < 10) then 5\n" +
-                        "                        when(@diff >= 6 and @diff < 8) then 4\n" +
-                        "                        when(@diff >= 4 and @diff < 6) then 3\n" +
-                        "                        when(@diff >= 2 and @diff < 4) then 2\n" +
-                        "                        when(@diff >= 1 and @diff < 2) then 1\n" +
+                        "      when(@diff >= 24) then 20\n" +
+                        "                        when(@diff >= 20 and @diff < 24) then 18\n" +
+                        "                        when(@diff >= 16 and @diff < 20) then 16\n" +
+                        "                        when(@diff >= 12 and @diff < 16) then 14\n" +
+                        "                        when(@diff >= 10 and @diff < 12) then 12\n" +
+                        "                        when(@diff >= 8 and @diff < 10) then 10\n" +
+                        "                        when(@diff >= 6 and @diff < 8) then 8\n" +
+                        "                        when(@diff >= 4 and @diff < 6) then 6\n" +
+                        "                        when(@diff >= 2 and @diff < 4) then 4\n" +
+                        "                        when(@diff >= 1 and @diff < 2) then 2\n" +
                         "                        else 0\n" +
                         "                        end as date_score\n" +
                         "                from (\n" +
