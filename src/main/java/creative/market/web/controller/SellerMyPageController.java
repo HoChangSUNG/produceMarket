@@ -57,7 +57,7 @@ public class SellerMyPageController {
 
     @GetMapping("/sale-history")
     @LoginCheck(type = UserType.SELLER)
-    public PagingResultRes getSaleHistory(
+    public PagingResultPriceRes getSaleHistory(
             @Valid YearMonthPeriodReq yearMonthPeriodReq,
             @RequestParam(defaultValue = "10") @Min(1) int pageSize,
             @RequestParam(defaultValue = "1") @Min(1) int pageNum,
@@ -69,8 +69,9 @@ public class SellerMyPageController {
         Long total = orderProductQueryRepository.findSaleHistoryPerPeriodCount(startDate, endDate, loginUserDTO.getId());
         int offset = PagingUtils.getOffset(pageNum, pageSize);
         int totalPageNum = PagingUtils.getTotalPageNum(total, pageSize);
+        Long totalPrice = orderProductQueryRepository.findSaleHistoryTotalPricePerPeriod(startDate, endDate, loginUserDTO.getId());
 
-        return new PagingResultRes(orderProductQueryRepository.findSaleHistoryPerPeriod(startDate, endDate, loginUserDTO.getId(), offset, pageSize), pageNum, totalPageNum);
+        return new PagingResultPriceRes(orderProductQueryRepository.findSaleHistoryPerPeriod(startDate, endDate, loginUserDTO.getId(), offset, pageSize), totalPrice, pageNum, totalPageNum);
     }
 
     @GetMapping("trust-score")

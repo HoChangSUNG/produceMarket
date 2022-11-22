@@ -53,9 +53,7 @@ public class BuyerMyPageController {
 
         int total = orderProductQueryRepository.findBuyerOrderPerPeriodTotalCount(startDate, endDate, loginUserDTO.getId()).intValue();
         List<OrderHistoryDTO> result = orderProductQueryService.findBuyerOrderPerPeriod(startDate, endDate, loginUserDTO.getId(), offset, pageSize);
-        int totalPrice = result.stream()
-                .mapToInt(v -> v.getTotalPrice())
-                .sum();
+        Long totalPrice = orderProductQueryRepository.findBuyerOrderTotalPricePerPeriod(startDate, endDate, loginUserDTO.getId());
 
         return new PagingResultPriceRes(result, totalPrice, pageNum, total);
     }
