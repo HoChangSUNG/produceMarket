@@ -18,6 +18,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-       registry.addMapping("/**").allowedOrigins("http://localhost:3000","https://bkkang1.github.io:443");
+       registry.addMapping("/**").allowedOrigins("http://localhost:3000","https://bkkang1.github.io:443","https://bkkang1.github.io");
     }
 }
