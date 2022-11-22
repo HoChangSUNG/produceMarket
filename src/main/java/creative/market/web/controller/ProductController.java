@@ -53,6 +53,7 @@ public class ProductController {
     private final ProductQueryService productQueryService;
 
     private final static int MAIN_PAGE_LIMIT = 4;
+
     @GetMapping
     public PagingResultRes getProductList(@Valid ProductSearchConditionReq searchCondition,
                                           @RequestParam(defaultValue = "10") @Min(1) int pageSize,
@@ -93,6 +94,7 @@ public class ProductController {
             productService.register(registerProductDTO);
             return new ResultRes(new MessageRes("상품 등록 성공"));
         } catch (IOException e) {
+            log.error("file save error={}", e);
             throw new FileSaveException("파일 저장에 실패했습니다. 다시 시도해주세요");
         }
 
