@@ -53,7 +53,7 @@ public class BuyerRepository {
     }
 
     public void updateType(Long id) {
-        em.createNativeQuery("update User b set b.dtype = 'Seller' where b.user_id = :id")
+        em.createNativeQuery("update user b set b.dtype = 'Seller' where b.user_id = :id")
                 .setParameter("id", id)
                 .executeUpdate();
 
