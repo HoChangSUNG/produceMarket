@@ -106,21 +106,15 @@ public class ProductQueryService {
 
     private String trustScoreToRank(double trustScore) {
         String rank = null;
-        switch ((int) Math.ceil(trustScore / 10)) {
-            case 10:
-                rank = "A";
-                break;
-            case 9:
-                rank = "B";
-                break;
-            case 8:
-                rank = "C";
-                break;
-            default:
-                rank = "D";
-                break;
+        if (trustScore >= 80) {
+            rank="A";
+        } else if (trustScore >= 70) {
+            rank="B";
+        } else if (trustScore >= 50) {
+            rank = "C";
+        } else {
+            rank = "D";
         }
         return rank;
-
     }
 }
