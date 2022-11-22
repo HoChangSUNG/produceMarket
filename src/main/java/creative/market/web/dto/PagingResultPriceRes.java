@@ -8,7 +8,7 @@ import lombok.Data;
 public class PagingResultPriceRes<T> {
 
     private T result;
-    private int totalPrice;
+    private Long totalPrice;
     private int curPageNum;
     private int totalNum;
 }

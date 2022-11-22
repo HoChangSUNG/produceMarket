@@ -660,6 +660,16 @@ public class OrderProductQueryRepository {
                 .fetch();
     }
 
+    public Long findBuyerOrderTotalPricePerPeriod(LocalDateTime startDate, LocalDateTime endDate, Long userId) {
+        return queryFactory
+                .select(getTotalPrice().coalesce(0L))
+                .from(orderProduct)
+                .join(orderProduct.order, order)
+                .join(order.user, user)
+                .where(dateBetween(startDate, endDate), userEq(userId), orderStatus())
+                .fetchOne();
+    }
+
     public Long findBuyerOrderPerPeriodTotalCount(LocalDateTime startDate, LocalDateTime endDate, Long userId) {
         return queryFactory
                 .select(order.countDistinct())
@@ -696,6 +706,17 @@ public class OrderProductQueryRepository {
                 .where(dateBetween(startDate, endDate), orderStatus(), product.user.id.eq(userId))
                 .fetchOne();
     }
+
+    public Long findSaleHistoryTotalPricePerPeriod(LocalDateTime startDate, LocalDateTime endDate, Long userId) {
+        return queryFactory
+                .select(getTotalPrice().coalesce(0L))
+                .from(orderProduct)
+                .join(orderProduct.product, product)
+                .join(orderProduct.order, order)
+                .where(dateBetween(startDate, endDate), orderStatus(), product.user.id.eq(userId))
+                .fetchOne();
+    }
+
 
     private NumberExpression<Long> getTotalPrice() {// orderProduct.count * orderProduct.price
         return orderProduct.price.multiply(orderProduct.count).sum().longValue();
