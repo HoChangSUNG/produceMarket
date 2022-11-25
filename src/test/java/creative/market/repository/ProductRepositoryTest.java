@@ -190,9 +190,8 @@ class ProductRepositoryTest {
 
         //then
         assertThat(result.size()).isEqualTo(3);
-        assertThat(result).extracting("name").containsExactly("쌀-일반계-중품", "쌀-백미-등급없음", "쌀-일반계-상품");
-        assertThat(result).extracting("price").containsExactly(20000, 13000, 10000); // 가격 순
-
+        assertThat(result).extracting("name").containsExactly("쌀-일반계-상품", "쌀-백미-등급없음", "쌀-일반계-중품");
+        assertThat(result).extracting("price").containsExactly(10000, 13000, 20000); // 가격 순
     }
 
     @Test
@@ -233,12 +232,12 @@ class ProductRepositoryTest {
 
         //then
         assertThat(result1.size()).isEqualTo(4);
-        assertThat(result1).extracting("name").containsExactly("배추-봄-상품", "쌀-일반계-중품", "쌀-백미-등급없음", "쌀-일반계-상품");// 모든 상품 가격순
-        assertThat(result1).extracting("price").containsExactly(50000, 20000, 13000, 10000);
+        assertThat(result1).extracting("name").containsExactly("쌀-일반계-상품",  "쌀-백미-등급없음", "쌀-일반계-중품", "배추-봄-상품");// 모든 상품 가격 낮은 순
+        assertThat(result1).extracting("price").containsExactly(10000, 13000, 20000, 50000);
 
         assertThat(result2.size()).isEqualTo(4);
-        assertThat(result2).extracting("name").containsExactly("배추-봄-상품", "쌀-일반계-중품", "쌀-백미-등급없음", "쌀-일반계-상품");// 모든 상품 가격순
-        assertThat(result2).extracting("price").containsExactly(50000, 20000, 13000, 10000);
+        assertThat(result2).extracting("name").containsExactly("쌀-일반계-상품", "쌀-백미-등급없음", "쌀-일반계-중품", "배추-봄-상품");// 모든 상품 가격 낮은 순
+        assertThat(result2).extracting("price").containsExactly(10000, 13000, 20000, 50000);
     }
 
     @Test
