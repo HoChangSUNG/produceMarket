@@ -211,8 +211,8 @@ public class ProductRepository {
     private OrderSpecifier<?> orderCondition(String orderBy) {
         if (!StringUtils.hasText(orderBy) || orderBy.equals("latest")) { // 최신순
             return product.createdDate.desc();
-        } else if (orderBy.equals("price")) {//가격순
-            return product.price.desc();
+        } else if (orderBy.equals("price")) {//가격 낮은 순
+            return product.price.asc();
         } else {
             return product.id.asc();
         }
