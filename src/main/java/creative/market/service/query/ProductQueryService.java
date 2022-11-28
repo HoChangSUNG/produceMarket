@@ -107,13 +107,13 @@ public class ProductQueryService {
     private String trustScoreToRank(double trustScore) {
         String rank = null;
         if (trustScore >= 80) {
-            rank="A";
+            rank="A+";
         } else if (trustScore >= 70) {
-            rank="B";
+            rank="A-";
         } else if (trustScore >= 50) {
-            rank = "C";
+            rank = "B";
         } else {
-            rank = "D";
+            rank = "C";
         }
         return rank;
     }
