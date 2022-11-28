@@ -1,5 +1,6 @@
 package creative.market.service.dto;
 
+import creative.market.domain.category.KindGrade;
 import creative.market.domain.product.Product;
 import creative.market.domain.product.ProductImage;
 import creative.market.repository.dto.LatestRetailAndWholesaleDTO;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 public class ProductDetailRes {
 
     private Long productId;
+    private String category;
     private Long kindGradeId;
     private String productName;
     private int price;
@@ -46,5 +48,13 @@ public class ProductDetailRes {
         this.signatureImgSrc = product.getSignatureProductImage().getPath();
         this.productAvgPrice = productAvgPrice;
         this.latestMarketPrice = latestMarketPrice;
+
+        KindGrade kindGrade = product.getKindGrade();
+        String gradeName = kindGrade.getGrade().getGradeName();
+        String kindName = kindGrade.getKind().getName();
+        String itemName = kindGrade.getKind().getItem().getName();
+        String itemCategoryName = kindGrade.getKind().getItem().getItemCategory().getName();
+        this.category = itemCategoryName + " / " + itemName + " / " + kindName + " / " + gradeName;
+
     }
 }
