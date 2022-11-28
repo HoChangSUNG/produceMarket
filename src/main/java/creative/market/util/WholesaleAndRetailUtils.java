@@ -59,13 +59,13 @@ public class WholesaleAndRetailUtils {
 
     //최근 도매가 조회
     public LatestConvertPriceDTO latestWholeSalesPrice(int itemCategoryCode, int itemCode, int kindCode, int gradeId) {
-        JSONObject wholeSaleObject = priceJsonObject(WHOLE_SALES_CODE, LocalDate.now().minusDays(20), LocalDate.now(), itemCategoryCode, itemCode, kindCode, gradeId);
+        JSONObject wholeSaleObject = priceJsonObject(WHOLE_SALES_CODE, LocalDate.now().minusDays(7), LocalDate.now(), itemCategoryCode, itemCode, kindCode, gradeId);
         return convertToLatestPriceDTO(wholeSaleObject);
     }
 
     //최근 소매가 조회
     public LatestConvertPriceDTO latestRetailPrice(int itemCategoryCode, int itemCode, int kindCode, int gradeId) {
-        JSONObject retailObject = priceJsonObject(RETAIL_CODE, LocalDate.now().minusDays(10), LocalDate.now(), itemCategoryCode, itemCode, kindCode, gradeId);
+        JSONObject retailObject = priceJsonObject(RETAIL_CODE, LocalDate.now().minusDays(7), LocalDate.now(), itemCategoryCode, itemCode, kindCode, gradeId);
         return convertToLatestPriceDTO(retailObject);
     }
 
