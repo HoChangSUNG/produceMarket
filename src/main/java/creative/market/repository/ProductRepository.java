@@ -102,7 +102,6 @@ public class ProductRepository {
                 queryFactory.selectFrom(product)
                         .join(product.kindGrade, kindGrade).fetchJoin()
                         .join(kindGrade.kind, kind).fetchJoin()
-                        .join(kindGrade.kind).fetchJoin()
                         .join(product.user, user).fetchJoin()
                         .where(product.id.eq(productId),
                                 productExistCheck())
