@@ -3,6 +3,7 @@ package creative.market;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import creative.market.domain.Address;
+import creative.market.domain.Review;
 import creative.market.domain.order.Order;
 import creative.market.domain.product.Product;
 import creative.market.domain.user.Seller;
@@ -11,6 +12,7 @@ import creative.market.repository.order.OrderRepository;
 import creative.market.repository.user.SellerRepository;
 import creative.market.service.OrderService;
 import creative.market.service.ProductService;
+import creative.market.service.ReviewService;
 import creative.market.service.dto.LoginUserDTO;
 import creative.market.service.dto.OrderProductParamDTO;
 import creative.market.service.dto.RegisterProductDTO;
@@ -50,6 +52,7 @@ public class InitDb {
     private final ProductRepository productRepository;
     private final OrderService orderService;
     private final OrderRepository orderRepository;
+    private final ReviewService reviewService;
 
     @Transactional
     @EventListener(ApplicationReadyEvent.class)
@@ -58,6 +61,19 @@ public class InitDb {
         //initProducts(productList);
 
         //initOrders();
+        //initReviews();
+    }
+
+    public void initReviews() {
+        List<Product> products = productRepository.findAll();
+
+        for (Product product : products) {
+            Review review = Review.builder()
+                    .rate(4.5f)
+                    .content("맛있어요!")
+                    .build();
+            reviewService.save(review, product.getId(), 56L);
+        }
     }
 
     public void initProducts(String[] productList) throws IOException {
