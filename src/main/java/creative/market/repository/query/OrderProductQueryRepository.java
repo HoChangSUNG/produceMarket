@@ -625,6 +625,7 @@ public class OrderProductQueryRepository {
                 .where(dateBetween(startDate, endDate), userEq(userId), productImageType())
                 .offset(offset)
                 .limit(pageSize)
+                .orderBy(order.createdDate.desc())
                 .fetch();
     }
 
