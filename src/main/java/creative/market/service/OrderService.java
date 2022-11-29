@@ -44,7 +44,7 @@ public class OrderService {
         // 구매 개수를 상품당 11개로 제한
         for (OrderProductParamDTO orderProductParam : orderProductParams) {
             if (orderProductParam.getCount()>11) {
-                throw new IllegalArgumentException("상품 구매는 10개까지만 가능합니다.");
+                throw new IllegalArgumentException("상품 구매는 11개까지만 가능합니다.");
             }
         }
 
