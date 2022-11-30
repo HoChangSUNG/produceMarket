@@ -30,6 +30,7 @@ public class CreateProductReq {
     @NotBlank
     private String info;
 
+    @NotNull
     private List<MultipartFile> img;
 
     @NotNull

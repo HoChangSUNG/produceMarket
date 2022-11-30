@@ -42,11 +42,11 @@ public class OrderService {
     public Long order(Long userId, List<OrderProductParamDTO> orderProductParams, Address address) { // 상품 주문
 
         // 구매 개수를 상품당 11개로 제한
-        for (OrderProductParamDTO orderProductParam : orderProductParams) {
-            if (orderProductParam.getCount()>11) {
-                throw new IllegalArgumentException("상품 구매는 11개까지만 가능합니다.");
-            }
-        }
+        orderProductParams.stream()
+                .filter(orderProductParam -> orderProductParam.getCount() > 11 || orderProductParam.getCount() < 1)
+                .forEach(orderProductParam -> {
+            throw new IllegalArgumentException("상품 구매는 1개 이상 11개이하만 가능합니다.");
+        });
 
         // 구매하는 user 정보 가져오기
         User user = userRepository.findById(userId)

@@ -26,9 +26,11 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.CollectionUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.swing.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.io.IOException;
@@ -55,9 +57,10 @@ public class ProductController {
     private final static int MAIN_PAGE_LIMIT = 4;
 
     @GetMapping
-    public PagingResultRes getProductList(@Valid ProductSearchConditionReq searchCondition,
-                                          @RequestParam(defaultValue = "10") @Min(1) int pageSize,
-                                          @RequestParam(defaultValue = "1") @Min(1) int pageNum) {// 상품 리스트 조회
+    public PagingResultRes getProductList(ProductSearchConditionReq searchCondition,
+                                          @RequestParam(defaultValue = "10") Integer pageSize,
+                                          @RequestParam(defaultValue = "1") Integer pageNum) {// 상품 리스트 조회
+        log.info("pageNum={},limit={}", pageNum, pageSize);
 
         Long total = productRepository.findProductByConditionTotalCount(searchCondition);
         int offset = PagingUtils.getOffset(pageNum, pageSize);

@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -31,43 +32,50 @@ public class ExControllerAdvice {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(FileSaveException.class)
-    public ErrorRes FileSaveException(FileSaveException ex) { // 파일 저장 오
+    public ErrorRes FileSaveException(FileSaveException ex) { // 파일 저장 오류
+        log.error("error{}",ex);
         return new ErrorRes(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(LoginAuthenticationException.class)
     public ErrorRes loginAuthExHandle(LoginAuthenticationException ex) {
+        log.error("error{}",ex);
         return new ErrorRes(HttpStatus.UNAUTHORIZED.value(), ex.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(NoSuchElementException.class)
     public ErrorRes noSuchExHandle(NoSuchElementException ex) {
+        log.error("error{}",ex);
         return new ErrorRes(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(IllegalStateException.class)
     public ErrorRes illegalStateExHandle(IllegalStateException ex) {
+        log.error("error{}",ex);
         return new ErrorRes(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(IllegalArgumentException.class)
     public ErrorRes illegalArgsExHandle(IllegalArgumentException ex) {
+        log.error("error{}",ex);
         return new ErrorRes(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(DuplicateException.class)
     public ErrorRes duplicateExHandle(DuplicateException ex) {
+        log.error("error{}",ex);
         return new ErrorRes(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(NotExistOrder.class)
     public ErrorRes NotExistOrderExHandle(NotExistOrder ex) {
+        log.error("error{}",ex);
         return new ErrorRes(HttpStatus.BAD_REQUEST.value(), ex.getMessage());
     }
 

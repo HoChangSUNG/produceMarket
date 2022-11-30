@@ -28,7 +28,7 @@ public class ProductQueryService {
     private final WholesaleAndRetailUtils wholesaleAndRetailUtils;
     private final OrderProductQueryRepository orderProductQueryRepository;
 
-    public List<ProductShortInfoRes> productShortInfoList(ProductSearchConditionReq condition, int offset, int limit) {
+    public List<ProductShortInfoRes> productShortInfoList(ProductSearchConditionReq condition, int offset, int limit ) {
 
         List<Product> findProducts = productRepository.findProductByCondition(condition, offset, limit);
         YearMonth startDate = YearMonth.now();
