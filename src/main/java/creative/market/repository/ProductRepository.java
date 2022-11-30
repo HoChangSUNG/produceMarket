@@ -4,6 +4,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import creative.market.domain.order.OrderStatus;
+import creative.market.domain.order.QOrderProduct;
 import creative.market.domain.product.Product;
 import creative.market.domain.product.ProductStatus;
 import creative.market.repository.dto.ProductSearchConditionReq;
@@ -14,6 +15,8 @@ import org.springframework.util.StringUtils;
 import javax.persistence.EntityManager;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,7 +65,9 @@ public class ProductRepository {
     }
 
     public List<Product> findProductByCondition(ProductSearchConditionReq condition, int offset, int limit) { // 조건에 따라 상품 리스트 조회
-        return queryFactory.selectFrom(product)
+        return queryFactory.select(product)
+                .from(orderProduct)
+                .rightJoin(orderProduct.product, product)
                 .join(product.kindGrade, kindGrade)
                 .join(kindGrade.kind, kind)
                 .join(kind.item, item)
@@ -74,7 +79,8 @@ public class ProductRepository {
                         kindEq(condition.getKindId()),
                         kindGradeEq(condition.getKindGradeId()),
                         productExistCheck())
-                .orderBy(orderCondition(condition.getOrderBy()))
+                .orderBy(orderConditions(condition.getOrderBy()))
+                .groupBy(product)
                 .offset(offset)
                 .limit(limit)
                 .fetch();
@@ -207,14 +213,29 @@ public class ProductRepository {
         return startDate != null && endDate != null ? review.createdDate.between(startDate, endDate) : null;
     }
 
-    private OrderSpecifier<?> orderCondition(String orderBy) {
+    private OrderSpecifier[] orderConditions(String orderBy) {
+        List<OrderSpecifier> orderByList = new ArrayList<>();
+
         if (!StringUtils.hasText(orderBy) || orderBy.equals("latest")) { // 최신순
-            return product.createdDate.desc();
+            orderByList.add(product.createdDate.desc());
+            orderByList.add(product.name.asc());
         } else if (orderBy.equals("price")) {//가격 낮은 순
-            return product.price.asc();
+            orderByList.add(product.price.asc());
+            orderByList.add(product.createdDate.desc());
+        } else if (orderBy.equals("order-count")) { //판매 횟수 순
+            orderByList.add(orderProduct.count().desc());
+            orderByList.add(product.price.asc());
+            orderByList.add(product.createdDate.desc());
+        } else if (orderBy.equals("total-order-price")) { // 판매 금액 순
+            orderByList.add(orderProduct.count.multiply(orderProduct.price).sum().coalesce(0).desc());
+            orderByList.add(product.price.asc());
+            orderByList.add(product.createdDate.desc());
         } else {
-            return product.id.asc();
+            orderByList.add(product.id.asc());
         }
+
+        return orderByList.toArray(OrderSpecifier[]::new);
+
     }
 
     private BooleanExpression kindGradeEq(Long kindGradeId) {

@@ -42,8 +42,8 @@ public class BuyerMyPageController {
     @GetMapping("/order-history")
     @LoginCheck(type = {UserType.BUYER, UserType.SELLER})
     public PagingResultPriceRes getOrderHistoryByPeriod(@Valid YearMonthPeriodReq yearMonthPeriodReq,
-                                                   @RequestParam(defaultValue = "10") @Min(1) int pageSize,
-                                                   @RequestParam(defaultValue = "1") @Min(1) int pageNum,
+                                                   @RequestParam(defaultValue = "10") int pageSize,
+                                                   @RequestParam(defaultValue = "1") int pageNum,
                                                    @Login LoginUserDTO loginUserDTO) {
 
         int offset = PagingUtils.getOffset(pageNum, pageSize);

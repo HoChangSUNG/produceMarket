@@ -192,10 +192,63 @@ class OrderServiceTest {
         assertThat(cartList).extracting(cart -> cart.getProduct().getId()).contains(orderProductParam3.getProductId());
         assertThat(cartList).extracting(cart -> cart.getProduct().getId()).doesNotContain(orderProductParam2.getProductId());
     }
+    @Test
+    @DisplayName("상품 주문 실패, 주문 개수가 올바르지 않을 때")
+    void orderFail1() throws Exception {
+        //given
+        Address buyerAddress = createAddress("1111", "봉사산로3", 11111, "3동4호");
+        Seller productOwner1 = createSeller("성호창q", "123433", "3123334", "19990112", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
+        Seller productOwner2 = createSeller("성호창w", "133234", "2123334", "19991212", "sd45fwf@mae.com", "010-3644-3333", createAddress("1111", "봉사산로2", 12315, "2동2호"), "상호명2");
+        Seller productBuyer = createSeller("성호창3", "133234", "133234", "19990512", "sdfw67f@mae.com", "010-3774-5555", buyerAddress, "상호명3");
+        em.persist(productOwner1);
+        em.persist(productOwner2);
+        em.persist(productBuyer);
+
+        Address orderAddress = createAddress("1111", "봉사산로", 12345, "동호수");
+
+        Product product1 = getProduct("상품", 12000, "상품입니다", 432L, productOwner1);
+        Product product2 = getProduct("상품2", 8000, "상품입니다2", 433L, productOwner2);
+
+        OrderProductParamDTO orderProductParam1 = new OrderProductParamDTO(-1, product1.getId());
+        OrderProductParamDTO orderProductParam2 = new OrderProductParamDTO(-2, product2.getId());
+        List<OrderProductParamDTO> orderParamList1 = new ArrayList<>();
+        orderParamList1.add(orderProductParam1);
+        orderParamList1.add(orderProductParam2);
+
+        OrderProductParamDTO orderProductParam3 = new OrderProductParamDTO(0, product1.getId());
+        OrderProductParamDTO orderProductParam4 = new OrderProductParamDTO(4, product2.getId());
+        List<OrderProductParamDTO> orderParamList2 = new ArrayList<>();
+        orderParamList2.add(orderProductParam3);
+        orderParamList2.add(orderProductParam4);
+
+        OrderProductParamDTO orderProductParam5 = new OrderProductParamDTO(1, product1.getId());
+        OrderProductParamDTO orderProductParam6 = new OrderProductParamDTO(12, product2.getId());
+        List<OrderProductParamDTO> orderParamList3 = new ArrayList<>();
+        orderParamList3.add(orderProductParam5);
+        orderParamList3.add(orderProductParam6);
+
+        //when
+
+        //then
+        //상품 주문 개수가 음수
+        assertThatThrownBy(() -> orderService.order(productBuyer.getId(), orderParamList1, orderAddress))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("상품 구매는 1개 이상 11개이하만 가능합니다.");
+        //상품 주문 개수가 0
+        assertThatThrownBy(() -> orderService.order(productBuyer.getId(), orderParamList2, orderAddress))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("상품 구매는 1개 이상 11개이하만 가능합니다.");
+
+        //상품 주문 개수가 max(11) 이상
+        assertThatThrownBy(() -> orderService.order(productBuyer.getId(), orderParamList3, orderAddress))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("상품 구매는 1개 이상 11개이하만 가능합니다.");
+
+    }
 
     @Test
     @DisplayName("상품 주문 실패, 존재하지 않는 user가 주문한 경우")
-    void orderFail1() throws Exception {
+    void orderFail2() throws Exception {
         //given
         Address buyerAddress = createAddress("1111", "봉사산로3", 11111, "3동4호");
         Seller productOwner1 = createSeller("성호창q", "123433", "3123334", "19990112", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
@@ -231,7 +284,7 @@ class OrderServiceTest {
 
     @Test
     @DisplayName("상품 주문 실패, 존재하지 않는 상품을 주문 신청한 경우")
-    void orderFail2() throws Exception {
+    void orderFail3() throws Exception {
         //given
         Address buyerAddress = createAddress("1111", "봉사산로3", 11111, "3동4호");
         Seller productOwner1 = createSeller("성호창q", "123433", "3123334", "19990112", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
@@ -267,7 +320,7 @@ class OrderServiceTest {
 
     @Test
     @DisplayName("상품 주문 실패, 자신이 등록한 상품을 구매한 경우")
-    void orderFail3() throws Exception {
+    void orderFail4() throws Exception {
         //given
         Seller productOwner1 = createSeller("성호창q", "123433", "3123334", "19990112", "sd12fwf@mae.com", "010-3544-4444", createAddress("1111", "봉사산로", 12345, "1동1호"), "상호명1");
         Seller productOwner2 = createSeller("성호창w", "133234", "2123334", "19991212", "sd45fwf@mae.com", "010-3644-3333", createAddress("1111", "봉사산로2", 12315, "2동2호"), "상호명2");

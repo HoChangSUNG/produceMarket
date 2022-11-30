@@ -43,8 +43,8 @@ public class SellerMyPageController {
     @GetMapping("/sale-list")
     @LoginCheck(type = UserType.SELLER)
     public PagingResultRes getSaleList(
-            @RequestParam(defaultValue = "10") @Min(1) int pageSize,
-            @RequestParam(defaultValue = "1") @Min(1) int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "1") int pageNum,
             @Login LoginUserDTO loginUserDTO) {
 
         Long total = productRepository.findByUserIdCount(loginUserDTO.getId());
@@ -59,8 +59,8 @@ public class SellerMyPageController {
     @LoginCheck(type = UserType.SELLER)
     public PagingResultPriceRes getSaleHistory(
             @Valid YearMonthPeriodReq yearMonthPeriodReq,
-            @RequestParam(defaultValue = "10") @Min(1) int pageSize,
-            @RequestParam(defaultValue = "1") @Min(1) int pageNum,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "1") int pageNum,
             @Login LoginUserDTO loginUserDTO) {
 
         LocalDateTime startDate = startMonthOfDayLocalDateTime(yearMonthPeriodReq.getStartDate()); // 시작 날짜
