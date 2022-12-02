@@ -127,7 +127,12 @@ public class ProductController {
         CategoryParamDTO categoryParamDTO = new CategoryParamDTO(null, null, null, product.getKindGrade().getId());
 
         LocalDateTime endDate = LocalDateTime.now();
-        LocalDateTime startDate = LocalDateTime.of(endDate.getYear(), endDate.getMonth(), 1, 0, 0); // 이번달 1일부터
+        LocalDateTime startDate = endDate.minusMonths(1)
+                .withHour(0)
+                .withMinute(0)
+                .withSecond(0)
+                .withNano(0); // 오늘 날짜로부터 한달 전
+
         int rankCount = 5; // 원형 그래프에서 보여줄 top rank 개수
 
         //기간별 카테고리 총 판매액
