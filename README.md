@@ -115,3 +115,5 @@
 
 ## erd
 [ erd ](https://www.notion.so/ERD-cded40cf05b34231bca524e3e36f76e8)
+![image](https://user-images.githubusercontent.com/76422685/222908160-04ffeef7-cf61-4d43-af4a-5ca987747acf.png)
+
