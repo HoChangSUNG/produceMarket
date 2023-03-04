@@ -7,6 +7,46 @@
 프로젝트 기간
 2022.08.20 ~ 2022.11.28
 
+[ 팀 노션 바로가기 ](https://attractive-fascinator-2d6.notion.site/6d1d38c2eff54186b27d36376957e585)
+
+## 팀원
+<table>
+
+  <tr>
+    <td align="center" vertical-align='middle'><strong>강대현</strong></td>
+    <td align="center" vertical-align='middle'><strong>강병관</strong></td>
+    <td align="center" vertical-align='middle'><strong>김현민</strong></td>
+    <td align="center" vertical-align='middle'><strong>성호창</strong></td>
+  </tr>
+  <tr>
+    <td align="center"><b>Frontend</b></td>
+    <td align="center"><b>Frontend</b></td>
+    <td align="center"><b>Backend</b></td>
+    <td align="center"><b>Backend, 팀장 </b></td>
+  </tr>
+    <tr>
+      <td align="center"><a href="https://github.com/Mythenmatz1128" target='_blank'>github</a></td>
+      <td align="center"><a href="https://github.com/BKKang1" target='_blank'>github</a></td>
+      <td align="center"><a href="https://github.com/gusals00" target='_blank'>github</a></td>
+      <td align="center"><a href="https://github.com/HoChangSUNG" target='_blank'>github</a></td>
+  </tr>
+</table>
+
+## 사용 기술
+#### ✨Frontend Tech Stack
+<div align='left'>
+  React, html, CSS, redux, axios 
+
+</div>
+
+#### ✨Backend Tech Stack
+<div align='left'>
+  Spring Boot, Spring, Java, MySQL, JPA, QueryDsl
+
+
+</div>
+
+
 ## 기능
 <details>
 <summary>회원관리</summary>
@@ -114,6 +154,9 @@
 </details>
 
 ## erd
-[ erd ](https://www.notion.so/ERD-cded40cf05b34231bca524e3e36f76e8)
+[ erd 바로가기 ](https://www.notion.so/ERD-cded40cf05b34231bca524e3e36f76e8)
 ![image](https://user-images.githubusercontent.com/76422685/222908160-04ffeef7-cf61-4d43-af4a-5ca987747acf.png)
 
+
+## API
+[ API 문서 바로가기 ](https://www.notion.so/74022ea105714214a44d8e2703bb4717?v=dfe1e0114903416caa1154b8653a4d19)
